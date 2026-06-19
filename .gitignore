@@ -30,3 +30,4 @@ prisma/migrations/dev
 .DS_Store
 .vscode
 .idea
+tsconfig.tsbuildinfo
