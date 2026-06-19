@@ -14,7 +14,7 @@ if (env.apiKey && env.projectId && env.messagingSenderId && env.appId) {
     if (!notification) return;
     self.registration.showNotification(notification.title || "MEÝDAN", {
       body: notification.body || "",
-      icon: "/icons/icon-192.png",
+      icon: "/icons/icon.svg",
       data,
     });
   });

@@ -40,7 +40,9 @@ export default async function ProfilePage({
     <>
       <StatusBar />
       <div className="px-6 pt-4 flex justify-between items-center">
-        <div className="font-display font-extrabold text-[22px]">Профиль</div>
+        <div className="font-display font-extrabold text-[22px]">
+          {t("profile.title")}
+        </div>
         <LocaleToggle />
       </div>
 
@@ -62,12 +64,12 @@ export default async function ProfilePage({
       </div>
 
       <div className="px-6 pt-8 grid grid-cols-3 gap-3">
-        <Stat label="Игр" value={stats.gamesPlayed.toString()} />
+        <Stat label={t("profile.stats_played")} value={stats.gamesPlayed.toString()} />
         <Stat
-          label="Посещение"
+          label={t("profile.stats_attendance")}
           value={stats.attendanceRate === null ? "—" : `${stats.attendanceRate}%`}
         />
-        <Stat label="Записан" value={stats.totalJoined.toString()} />
+        <Stat label={t("profile.stats_joined")} value={stats.totalJoined.toString()} />
       </div>
 
       <div className="px-6 pt-8 flex flex-col gap-3">
@@ -75,10 +77,10 @@ export default async function ProfilePage({
           href={`/${locale}/profile/edit`}
           className="h-12 rounded-xl bg-white/5 border border-white/8 flex items-center justify-between px-4 text-text font-sans font-semibold text-[15px]"
         >
-          <span>Редактировать профиль</span>
+          <span>{t("profile.edit")}</span>
           <span>›</span>
         </Link>
-        <LogoutButton locale={locale} />
+        <LogoutButton locale={locale} logoutLabel={t("auth.logout")} />
       </div>
     </>
   );

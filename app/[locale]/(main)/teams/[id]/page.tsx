@@ -127,6 +127,7 @@ export default async function TeamDetailPage({
                 <RemoveMemberButton
                   teamId={team.id}
                   memberUserId={m.user.id}
+                  memberName={m.user.name}
                   locale={locale}
                 />
               )}

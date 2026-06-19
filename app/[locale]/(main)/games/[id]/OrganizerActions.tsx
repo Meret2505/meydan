@@ -1,8 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { cancelGame } from "@/app/actions/games";
 
 export function OrganizerActions({
@@ -16,6 +17,7 @@ export function OrganizerActions({
   isPast: boolean;
   isCompleted: boolean;
 }) {
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   if (isCompleted) {
@@ -38,16 +40,25 @@ export function OrganizerActions({
   }
 
   return (
-    <button
-      type="button"
-      disabled={isPending}
-      onClick={() => {
-        if (!confirm("Отменить игру? Игроки получат уведомление.")) return;
-        startTransition(() => cancelGame(gameId, locale));
-      }}
-      className="w-full h-[58px] rounded-lg border border-danger/40 text-danger font-display font-bold text-[15px] disabled:opacity-50"
-    >
-      Отменить игру
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full h-[58px] rounded-lg border border-danger/40 text-danger font-display font-bold text-[15px]"
+      >
+        Отменить игру
+      </button>
+      <ConfirmDialog
+        open={open}
+        title="Отменить игру?"
+        description="Все участники получат уведомление. Действие нельзя отменить."
+        confirmLabel="Да, отменить"
+        cancelLabel="Назад"
+        destructive
+        isPending={isPending}
+        onCancel={() => setOpen(false)}
+        onConfirm={() => startTransition(() => cancelGame(gameId, locale))}
+      />
+    </>
   );
 }

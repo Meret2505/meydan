@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
@@ -27,6 +27,7 @@ export default async function NotificationsPage({
   params: { locale: string };
 }) {
   unstable_setRequestLocale(locale);
+  const t = await getTranslations();
   const session = await auth();
   const userId = session!.user.id;
 
@@ -41,14 +42,16 @@ export default async function NotificationsPage({
       <StatusBar />
       <div className="px-6 pt-4 flex items-center gap-4">
         <BackButton href={`/${locale}/games`} />
-        <div className="font-display font-extrabold text-[22px]">Уведомления</div>
+        <div className="font-display font-extrabold text-[22px]">
+          {t("notifications.title")}
+        </div>
       </div>
 
       {items.length === 0 ? (
         <EmptyState
           icon={<span className="text-2xl">🔔</span>}
-          title="Пока тихо"
-          description="Когда тебя позовут в игру — увидишь здесь."
+          title={t("empty.no_notifications_title")}
+          description={t("empty.no_notifications_sub")}
         />
       ) : (
         <div className="px-6 pt-4 pb-8 flex flex-col gap-2">
