@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;}
+    body{margin:0;}
+    .scr{scrollbar-width:none;}
+    .scr::-webkit-scrollbar{display:none;}
+    .mey-in:focus{outline:none;border-color:#1FD16B !important;}
+  </style>
+</helmet>
+
+<div style="{{ pageStyle }}">
+
+  <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+  <div style="text-align:center;margin-bottom:30px;">
+    <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#1a8f4c;">Meýdan · кликабельный прототип</div>
+    <h1 style="font-family:'Archivo',sans-serif;font-weight:800;font-size:24px;letter-spacing:-.02em;color:#1a1d1b;margin:7px 0 4px;">Полный поток нового игрока</h1>
+    <p style="font-size:14px;line-height:1.5;color:#5c615e;margin:0;">Вход → онбординг → лента игр → запись на игру → профиль. Нажимайте кнопки внутри телефона.</p>
+  </div>
+  </sc-if>
+
+  <!-- DEVICE -->
+  <div ref="{{ deviceRef }}" style="width:390px;height:844px;border-radius:46px;background:#0B0E0D;overflow:hidden;box-shadow:0 30px 70px -22px rgba(0,0,0,.5);position:relative;display:flex;flex-direction:column;color:#F2F5F3;border:6px solid #050706;">
+
+    <!-- ====== LOGIN ====== -->
+    <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="position:absolute;left:50%;top:-130px;transform:translateX(-50%);width:540px;height:540px;border-radius:50%;background:radial-gradient(circle,rgba(31,209,107,.2),rgba(31,209,107,0) 65%);pointer-events:none;"></div>
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.018) 0px,rgba(255,255,255,.018) 1px,transparent 1px,transparent 80px);pointer-events:none;"></div>
+
+        <div style="position:relative;display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;">
+          <span>21:30</span>
+          <span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span>
+        </div>
+
+        <div style="position:relative;display:flex;justify-content:flex-end;padding:14px 26px 0;">
+          <div style="display:flex;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:3px;font-family:'Archivo',sans-serif;font-weight:700;font-size:12px;">
+            <span onClick="{{ setRu }}" style="padding:6px 13px;border-radius:999px;background:{{ ruBg }};color:{{ ruColor }};cursor:pointer;">RU</span>
+            <span onClick="{{ setTm }}" style="padding:6px 13px;border-radius:999px;background:{{ tmBg }};color:{{ tmColor }};cursor:pointer;">TM</span>
+          </div>
+        </div>
+
+        <div style="position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 36px;text-align:center;">
+          <div style="width:86px;height:86px;border-radius:26px;background:linear-gradient(145deg,#1FD16B,#14a955);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 34px -10px rgba(31,209,107,.55);">
+            <div style="width:34px;height:34px;border-radius:50%;background:#06210F;position:relative;">
+              <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;border:3px solid #1FD16B;border-radius:50%;"></div>
+            </div>
+          </div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:900;font-size:44px;letter-spacing:-.02em;margin-top:24px;">MEÝDAN</div>
+          <div style="font-size:15.5px;line-height:1.5;color:#9aa39d;margin-top:10px;max-width:240px;">Найди открытую игру рядом. Приходи и играй.</div>
+        </div>
+
+        <div style="position:relative;padding:0 28px 42px;display:flex;flex-direction:column;gap:13px;">
+          <button onClick="{{ toName }}" style="display:flex;align-items:center;justify-content:center;gap:12px;height:58px;border-radius:16px;border:none;background:#F2F5F3;color:#0B0E0D;font-family:'Manrope',sans-serif;font-weight:700;font-size:16.5px;cursor:pointer;">
+            <span style="width:24px;height:24px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:900;font-size:15px;color:#4285F4;border:1px solid #e3e6e3;">G</span>
+            Войти через Google
+          </button>
+          <button onClick="{{ toPhone }}" style="display:flex;align-items:center;justify-content:center;gap:10px;height:58px;border-radius:16px;background:transparent;border:1.5px solid rgba(255,255,255,.16);color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:600;font-size:16px;cursor:pointer;">Войти по номеру телефона</button>
+          <div style="text-align:center;font-size:12px;line-height:1.5;color:#5f665f;margin-top:8px;padding:0 16px;">Продолжая, вы принимаете условия использования и политику конфиденциальности</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== PHONE LOGIN ====== -->
+    <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;">
+          <span>21:30</span>
+          <span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span>
+        </div>
+        <div style="padding:18px 24px 0;">
+          <div onClick="{{ backLogin }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span>
+          </div>
+        </div>
+        <div style="padding:30px 28px 0;">
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:29px;letter-spacing:-.02em;">Вход по номеру</div>
+          <div style="font-size:15px;color:#9aa39d;margin-top:9px;">Без SMS — просто номер и пароль.</div>
+        </div>
+        <div style="padding:30px 28px 0;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#8A938E;margin-bottom:8px;">Номер телефона</div>
+            <div style="display:flex;align-items:center;gap:10px;height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;">
+              <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;color:#C7CEC9;">+993</span>
+              <div style="width:1px;height:22px;background:rgba(255,255,255,.12);"></div>
+              <input class="mey-in" placeholder="65 12 34 56" style="flex:1;background:transparent;border:none;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:600;font-size:16px;" />
+            </div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#8A938E;margin-bottom:8px;">Пароль</div>
+            <input class="mey-in" type="password" placeholder="••••••••" style="width:100%;height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:600;font-size:16px;" />
+          </div>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="padding:0 28px 42px;">
+          <button onClick="{{ toName }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Войти</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== ONB 1 — NAME ====== -->
+    <sc-if value="{{ isName }}" hint-placeholder-val="{{ true }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 24px 0;">
+          <div onClick="{{ backLogin }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="flex:1;display:flex;gap:6px;"><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div></div>
+          <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;color:#8A938E;">1/5</span>
+        </div>
+        <div style="padding:34px 28px 0;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;">Как тебя зовут?</div><div style="font-size:15px;color:#9aa39d;margin-top:9px;">Имя из Google можно изменить.</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;padding:36px 28px 0;">
+          <div style="position:relative;width:104px;height:104px;border-radius:50%;background:linear-gradient(140deg,#1FD16B,#14a955);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:38px;color:#06210F;">МК
+            <div style="position:absolute;right:-2px;bottom:-2px;width:34px;height:34px;border-radius:50%;background:#13181A;border:2px solid #0B0E0D;display:flex;align-items:center;justify-content:center;color:#C7CEC9;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l1.5-2h9L18 8h3v11H3z"></path><circle cx="12" cy="13" r="3.5"></circle></svg></div>
+          </div>
+        </div>
+        <div style="padding:28px 28px 0;"><input class="mey-in" value="Мерген Какабаев" style="width:100%;height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:700;font-size:17px;text-align:center;" /></div>
+        <div style="flex:1;"></div>
+        <div style="padding:0 28px 42px;"><button onClick="{{ toOnbPhone }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Далее</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== ONB 2 — PHONE ====== -->
+    <sc-if value="{{ isOnbPhone }}" hint-placeholder-val="{{ true }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 24px 0;">
+          <div onClick="{{ backName }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="flex:1;display:flex;gap:6px;"><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div></div>
+          <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;color:#8A938E;">2/5</span>
+        </div>
+        <div style="padding:34px 28px 0;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;">Твой номер</div><div style="font-size:15px;line-height:1.5;color:#9aa39d;margin-top:9px;">Чтобы тебя могли позвать в игру. Номер не виден другим — только по кнопке «показать контакт».</div></div>
+        <div style="padding:32px 28px 0;">
+          <div style="display:flex;align-items:center;gap:10px;height:58px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;">
+            <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;color:#C7CEC9;">+993</span>
+            <div style="width:1px;height:24px;background:rgba(255,255,255,.12);"></div>
+            <input class="mey-in" placeholder="65 12 34 56" style="flex:1;background:transparent;border:none;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:600;font-size:17px;" />
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:14px;color:#6e756f;font-size:12.5px;"><span style="width:18px;height:18px;border-radius:5px;background:rgba(31,209,107,.15);display:flex;align-items:center;justify-content:center;color:#1FD16B;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 018 0v3"></path></svg></span>Приватно. SMS-подтверждение не требуется.</div>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="padding:0 28px 42px;"><button onClick="{{ toPosition }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Далее</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== ONB 3 — POSITION ====== -->
+    <sc-if value="{{ isPosition }}" hint-placeholder-val="{{ true }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 24px 0;">
+          <div onClick="{{ backOnbPhone }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="flex:1;display:flex;gap:6px;"><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div></div>
+          <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;color:#8A938E;">3/5</span>
+        </div>
+        <div style="padding:34px 28px 0;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;">Твоя позиция</div><div style="font-size:15px;color:#9aa39d;margin-top:9px;">На какой позиции ты обычно играешь?</div></div>
+        <div style="padding:26px 28px 0;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <sc-for list="{{ positions }}" as="p" hint-placeholder-count="4">
+            <div onClick="{{ p.onClick }}" style="border-radius:20px;padding:20px 16px;border:1.5px solid {{ p.border }};background:{{ p.bg }};display:flex;flex-direction:column;gap:14px;min-height:130px;cursor:pointer;">
+              <div style="width:46px;height:46px;border-radius:14px;background:{{ p.chipBg }};border:1.5px solid {{ p.chipBorder }};display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;color:{{ p.chipText }};">{{ p.abbr }}</div>
+              <div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:17px;color:#F2F5F3;">{{ p.label }}</div><div style="font-size:13px;color:#8A938E;margin-top:3px;">{{ p.sub }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="padding:0 28px 42px;"><button onClick="{{ toDistrict }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Далее</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== ONB 4 — DISTRICT ====== -->
+    <sc-if value="{{ isDistrict }}" hint-placeholder-val="{{ true }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 24px 0;">
+          <div onClick="{{ backPosition }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="flex:1;display:flex;gap:6px;"><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);"></div></div>
+          <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;color:#8A938E;">4/5</span>
+        </div>
+        <div style="padding:34px 28px 0;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;">Твой район</div><div style="font-size:15px;color:#9aa39d;margin-top:9px;">Покажем игры рядом с тобой.</div></div>
+        <div class="scr" style="flex:1;overflow:auto;padding:24px 28px 0;display:flex;flex-direction:column;gap:11px;">
+          <sc-for list="{{ districts }}" as="d" hint-placeholder-count="6">
+            <div onClick="{{ d.onClick }}" style="display:flex;align-items:center;gap:13px;height:58px;border-radius:15px;background:{{ d.bg }};border:1.5px solid {{ d.border }};padding:0 16px;cursor:pointer;">
+              <span style="width:9px;height:9px;border-radius:50%;background:{{ d.dot }};"></span>
+              <span style="flex:1;font-family:'Manrope',sans-serif;font-weight:600;font-size:16px;color:#F2F5F3;">{{ d.label }}</span>
+              <sc-if value="{{ d.check }}" hint-placeholder-val="{{ false }}"><span style="color:#1FD16B;font-weight:800;font-size:17px;">✓</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:14px 28px 42px;"><button onClick="{{ toAge }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Далее</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== ONB 5 — AGE ====== -->
+    <sc-if value="{{ isAge }}" hint-placeholder-val="{{ true }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:16px;padding:18px 24px 0;">
+          <div onClick="{{ backDistrict }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="flex:1;display:flex;gap:6px;"><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div><div style="flex:1;height:4px;border-radius:2px;background:#1FD16B;"></div></div>
+          <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;color:#8A938E;">5/5</span>
+        </div>
+        <div style="padding:34px 28px 0;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;">Возраст</div><div style="font-size:15px;color:#9aa39d;margin-top:9px;">Опционально — поможет подобрать ровесников.</div></div>
+        <div style="padding:30px 28px 0;display:grid;grid-template-columns:1fr 1fr;gap:13px;">
+          <sc-for list="{{ ages }}" as="a" hint-placeholder-count="4">
+            <div onClick="{{ a.onClick }}" style="height:64px;border-radius:16px;background:{{ a.bg }};border:1.5px solid {{ a.border }};display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;color:{{ a.color }};cursor:pointer;">{{ a.label }}</div>
+          </sc-for>
+        </div>
+        <div style="flex:1;"></div>
+        <div style="padding:0 28px 42px;display:flex;flex-direction:column;gap:11px;">
+          <button onClick="{{ toFeed }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Готово — к играм</button>
+          <button onClick="{{ toFeed }}" style="width:100%;height:46px;border-radius:14px;border:none;background:transparent;color:#8A938E;font-family:'Manrope',sans-serif;font-weight:600;font-size:15px;cursor:pointer;">Пропустить</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== FEED ====== -->
+    <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="padding:17px 22px 0;flex:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+            <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:25px;letter-spacing:-.01em;">Игры рядом</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="display:flex;align-items:center;gap:5px;color:#9aa39d;font-size:13px;font-weight:600;"><span style="width:7px;height:7px;border-radius:50%;background:#1FD16B;display:inline-block;"></span>Берзенги</div>
+              <div onClick="{{ toNotif }}" style="position:relative;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#C7CEC9;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.5 21a2 2 0 01-3 0"></path></svg>
+                <span style="position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:#1FD16B;border:1.5px solid #0B0E0D;"></span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;background:rgba(255,255,255,.05);border-radius:14px;padding:4px;margin-top:16px;">
+            <div onClick="{{ setFeedOpen }}" style="flex:1;text-align:center;padding:10px 0;border-radius:10px;background:{{ openTabBg }};font-family:'Archivo',sans-serif;font-weight:700;font-size:14px;color:{{ openTabColor }};box-shadow:{{ openTabShadow }};cursor:pointer;">Открытые игры</div>
+            <div onClick="{{ setFeedMine }}" style="flex:1;text-align:center;padding:10px 0;border-radius:10px;background:{{ mineTabBg }};font-weight:700;font-size:14px;color:{{ mineTabColor }};box-shadow:{{ mineTabShadow }};cursor:pointer;">Мои игры</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <div style="display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:rgba(31,209,107,.13);border:1px solid rgba(31,209,107,.32);font-weight:700;font-size:13px;color:#5BE39A;">Сегодня</div>
+            <div style="padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-weight:600;font-size:13px;color:#C7CEC9;">5×5</div>
+            <div style="padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-weight:600;font-size:13px;color:#C7CEC9;">Нужен вратарь</div>
+          </div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:16px 22px 96px;display:flex;flex-direction:column;gap:14px;">
+          <sc-if value="{{ feedOpen }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ stOffline }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 36px;gap:16px;">
+              <div style="width:76px;height:76px;border-radius:50%;background:rgba(224,85,106,.1);border:1px solid rgba(224,85,106,.25);display:flex;align-items:center;justify-content:center;color:#E0556A;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M8.5 16.4a5 5 0 017 0M5 12.5a10 10 0 015-2.6M2 8.8A15 15 0 0110 6M22 8.8a15 15 0 00-5.6-2.5"></path><path d="M12 20h.01"></path></svg></div>
+              <div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;">Нет соединения</div><div style="font-size:14px;line-height:1.5;color:#8A938E;margin-top:8px;">Показаны сохранённые игры. Проверь интернет и потяни, чтобы обновить.</div></div>
+              <button onClick="{{ retryNet }}" style="height:46px;padding:0 22px;border-radius:13px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;">Повторить</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ stLoading }}" hint-placeholder-val="{{ false }}">
+            <sc-for list="{{ skeletons }}" as="k" hint-placeholder-count="3">
+              <div style="border-radius:22px;background:#13181A;border:1px solid rgba(255,255,255,.06);padding:16px;">
+                <div style="display:flex;justify-content:space-between;"><div style="width:120px;height:18px;border-radius:6px;background:rgba(255,255,255,.07);"></div><div style="width:48px;height:22px;border-radius:999px;background:rgba(255,255,255,.05);"></div></div>
+                <div style="width:170px;height:13px;border-radius:5px;background:rgba(255,255,255,.05);margin-top:11px;"></div>
+                <div style="height:7px;border-radius:4px;background:rgba(255,255,255,.05);margin-top:16px;"></div>
+                <div style="display:flex;gap:8px;margin-top:15px;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);"></div><div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.05);"></div><div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.04);"></div></div>
+              </div>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:56px 36px;gap:18px;">
+              <div style="width:84px;height:84px;border-radius:24px;background:#13181A;border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:#5BE39A;"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7l4.2 3.1-1.6 5h-5.2L7.8 10z"></path></svg></div>
+              <div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:20px;">Рядом пока нет игр</div><div style="font-size:14.5px;line-height:1.5;color:#8A938E;margin-top:8px;max-width:240px;">Создай первую — и позови игроков из своего района.</div></div>
+              <button onClick="{{ toCreate }}" style="height:50px;padding:0 24px;border-radius:14px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;cursor:pointer;">Создать игру</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ stFull }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ games }}" as="g" hint-placeholder-count="3">
+            <div onClick="{{ g.onClick }}" style="border-radius:22px;background:#13181A;border:1px solid rgba(255,255,255,.06);padding:16px 16px 15px;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;">{{ g.time }}</span><span style="font-size:13px;color:#8A938E;font-weight:600;">{{ g.day }}</span></div>
+                  <div style="font-size:14px;color:#C7CEC9;margin-top:5px;font-weight:600;">{{ g.venue }} · {{ g.district }}</div>
+                </div>
+                <span style="padding:6px 11px;border-radius:999px;background:{{ g.badgeBg }};color:{{ g.badgeColor }};font-family:'Archivo',sans-serif;font-weight:800;font-size:11.5px;">{{ g.format }}</span>
+              </div>
+              <sc-if value="{{ g.needShow }}" hint-placeholder-val="{{ false }}">
+                <div style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;padding:5px 10px;border-radius:8px;background:rgba(242,181,60,.12);border:1px solid rgba(242,181,60,.25);font-size:12px;font-weight:700;color:#F2B53C;">⚠ {{ g.need }}</div>
+              </sc-if>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:13px;">
+                <div style="flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;"><div style="height:100%;width:{{ g.fillPct }};background:{{ g.fillColor }};border-radius:4px;"></div></div>
+                <span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;color:{{ g.spotsColor }};white-space:nowrap;">{{ g.spotsLabel }}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;">
+                <div style="display:flex;align-items:center;">
+                  <sc-for list="{{ g.avatars }}" as="a" hint-placeholder-count="3"><div style="width:28px;height:28px;border-radius:50%;background:{{ a.bg }};border:2px solid #13181A;margin-left:-8px;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;color:#06210F;">{{ a.t }}</div></sc-for>
+                  <span style="font-size:13px;color:#8A938E;margin-left:8px;font-weight:600;">{{ g.joinedLabel }}</span>
+                </div>
+                <span style="font-size:13px;color:#9aa39d;font-weight:600;">{{ g.price }}</span>
+              </div>
+            </div>
+          </sc-for>
+          </sc-if>
+          </sc-if>
+          <sc-if value="{{ feedMine }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ createDone }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(31,209,107,.12);border:1px solid rgba(31,209,107,.3);margin-bottom:2px;"><span style="color:#1FD16B;font-weight:900;">✓</span><span style="font-size:13.5px;font-weight:700;color:#5BE39A;">Игра создана и опубликована в ленте.</span></div>
+            </sc-if>
+            <sc-if value="{{ resultSaved }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(31,209,107,.12);border:1px solid rgba(31,209,107,.3);margin-bottom:2px;"><span style="color:#1FD16B;font-weight:900;">✓</span><span style="font-size:13.5px;font-weight:700;color:#5BE39A;">Результат сохранён. Статистика обновлена.</span></div>
+            </sc-if>
+            <!-- upcoming organized game -->
+            <div style="border-radius:22px;background:#13181A;border:1px solid rgba(31,209,107,.22);padding:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;">21:30</span><span style="font-size:13px;color:#8A938E;font-weight:600;">Сегодня</span></div><div style="font-size:14px;color:#C7CEC9;margin-top:5px;font-weight:600;">Поле «Олимп» · Берзенги</div></div>
+                <span style="padding:6px 11px;border-radius:999px;background:rgba(31,209,107,.14);color:#5BE39A;font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;">ВАША ИГРА</span>
+              </div>
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;padding:5px 10px;border-radius:8px;background:rgba(242,181,60,.12);border:1px solid rgba(242,181,60,.25);font-size:12px;font-weight:700;color:#F2B53C;">⚠ нужен вратарь</div>
+              <button onClick="{{ toSearch }}" style="width:100%;height:46px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:transparent;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:700;font-size:14px;cursor:pointer;margin-top:13px;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>Найти игрока на позицию</button>
+            </div>
+            <!-- past organized game -->
+            <div style="border-radius:22px;background:#13181A;border:1px solid rgba(255,255,255,.06);padding:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;">21:00</span><span style="font-size:13px;color:#8A938E;font-weight:600;">Вчера</span></div><div style="font-size:14px;color:#C7CEC9;margin-top:5px;font-weight:600;">Манеж «Ahal Arena» · Анев</div></div>
+                <span style="padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.07);color:#C7CEC9;font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;">ЗАВЕРШЕНА</span>
+              </div>
+              <div style="font-size:13px;color:#8A938E;margin-top:11px;font-weight:600;">Результат ещё не внесён — начислите статистику игрокам.</div>
+              <button onClick="{{ toResult }}" style="width:100%;height:46px;border-radius:13px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:14px;cursor:pointer;margin-top:13px;">Внести результат</button>
+            </div>
+          </sc-if>
+        </div>
+        <div onClick="{{ toCreate }}" style="position:absolute;right:22px;bottom:104px;width:58px;height:58px;border-radius:20px;background:#1FD16B;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px -8px rgba(31,209,107,.6);cursor:pointer;">
+          <span style="position:relative;width:24px;height:24px;display:block;"><span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:20px;height:3px;background:#06210F;border-radius:2px;"></span><span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:20px;background:#06210F;border-radius:2px;"></span></span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== DETAIL ====== -->
+    <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="position:relative;height:208px;flex:none;background:linear-gradient(160deg,#1c7a45,#0f5530);overflow:hidden;">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 52px);"></div>
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:96px;height:96px;border:2px solid rgba(255,255,255,.35);border-radius:50%;"></div>
+          <div style="position:absolute;left:0;right:0;top:50%;height:2px;background:rgba(255,255,255,.35);"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,14,13,.35),rgba(11,14,13,0) 35%,rgba(11,14,13,.9));"></div>
+          <div style="position:absolute;top:17px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+          <div onClick="{{ backFeed }}" style="position:absolute;top:54px;left:22px;width:40px;height:40px;border-radius:12px;background:rgba(11,14,13,.5);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="position:absolute;left:24px;bottom:18px;right:24px;"><span style="padding:5px 10px;border-radius:999px;background:rgba(31,209,107,.92);color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;">5×5 · ОТКРЫТАЯ ИГРА</span><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.01em;margin-top:10px;">Поле «Олимп», корт 2</div></div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:18px 24px 150px;">
+          <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:12px;background:rgba(31,209,107,.13);border:1px solid rgba(31,209,107,.32);border-radius:16px;padding:13px 15px;margin-bottom:16px;">
+              <div style="width:34px;height:34px;border-radius:50%;background:#1FD16B;display:flex;align-items:center;justify-content:center;color:#06210F;font-weight:900;font-size:17px;flex:none;">✓</div>
+              <div style="font-size:13.5px;line-height:1.4;color:#C9F0D8;">Вы в игре! Сегодня 21:30, поле «Олимп». Соберитесь к началу.</div>
+            </div>
+          </sc-if>
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:13px 14px;"><div style="font-size:12px;color:#8A938E;font-weight:600;">Когда</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin-top:4px;">Сегодня · 21:30</div></div>
+            <div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:13px 14px;"><div style="font-size:12px;color:#8A938E;font-weight:600;">Цена</div><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin-top:4px;">25 ман / чел</div></div>
+          </div>
+          <div style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:16px;margin-top:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;">Состав</span><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:14px;color:#5BE39A;">{{ rosterCount }} / 10</span></div>
+            <div style="height:7px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:12px;overflow:hidden;"><div style="height:100%;width:{{ rosterPct }};background:#1FD16B;border-radius:4px;"></div></div>
+            <div style="display:flex;align-items:center;margin-top:14px;">
+              <sc-for list="{{ roster }}" as="r" hint-placeholder-count="6"><div style="width:34px;height:34px;border-radius:50%;background:{{ r.bg }};border:2px solid #13181A;margin-left:-8px;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:12px;color:{{ r.color }};">{{ r.t }}</div></sc-for>
+              <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}"><div style="width:34px;height:34px;border-radius:50%;background:#1FD16B;border:2px solid #13181A;margin-left:-8px;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:12px;color:#06210F;">Ты</div></sc-if>
+              <div style="width:34px;height:34px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.2);margin-left:-8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#8A938E;font-weight:700;background:#0B0E0D;">{{ openSlots }}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:rgba(242,181,60,.1);border:1px solid rgba(242,181,60,.28);border-radius:16px;padding:13px 15px;margin-top:14px;">
+            <div style="width:34px;height:34px;border-radius:11px;background:rgba(242,181,60,.18);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:900;font-size:14px;color:#F2B53C;flex:none;">ВРТ</div>
+            <div style="font-size:13.5px;line-height:1.4;color:#E8D6AE;">Нужен <b style="color:#F2B53C;">вратарь</b>. Команде не хватает именно этой позиции.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:16px;">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(140deg,#1FD16B,#14a955);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;color:#06210F;">МК</div>
+            <div style="flex:1;"><div style="font-weight:700;font-size:14.5px;">Мерген Какабаев</div><div style="font-size:12.5px;color:#8A938E;font-weight:600;margin-top:2px;">Организатор · явка 96% · 42 игры</div></div>
+            <div style="display:flex;align-items:center;gap:4px;color:#F2B53C;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;">★ 4.9</div>
+          </div>
+          <button onClick="{{ toSearch }}" style="width:100%;height:50px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:700;font-size:14.5px;cursor:pointer;margin-top:16px;display:flex;align-items:center;justify-content:center;gap:9px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>Найти вратаря на эту игру</button>
+          <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ openContact }}" style="width:100%;height:52px;border-radius:15px;border:1.5px solid rgba(255,255,255,.16);background:transparent;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:9px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 005 5l1.5-2 4 1.5v3a2 2 0 01-2 2A14 14 0 013 6a2 2 0 012-2z"></path></svg>Показать контакт организатора</button>
+          </sc-if>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);">
+          <sc-if value="{{ notJoined }}" hint-placeholder-val="{{ true }}"><button onClick="{{ join }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Записаться · занять место</button></sc-if>
+          <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}"><button onClick="{{ cancelJoin }}" style="width:100%;height:58px;border-radius:16px;background:#1A201E;color:#5BE39A;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;border:1px solid rgba(31,209,107,.3);">✓ Вы в игре · отменить запись</button></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== PROFILE ====== -->
+    <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="padding:17px 22px 0;flex:none;"><div style="display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div></div>
+        <div class="scr" style="flex:1;overflow:auto;padding:14px 24px 96px;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div style="width:74px;height:74px;border-radius:50%;background:linear-gradient(140deg,#1FD16B,#14a955);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:27px;color:#06210F;">МК</div>
+            <div style="flex:1;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;letter-spacing:-.01em;">Мерген Какабаев</div><div style="font-size:13.5px;color:#9aa39d;margin-top:3px;font-weight:600;">{{ position }} · {{ district }}</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:14px;padding:11px 14px;border-radius:14px;background:rgba(31,209,107,.1);border:1px solid rgba(31,209,107,.28);">
+            <span style="width:34px;height:20px;border-radius:999px;background:#1FD16B;position:relative;flex:none;"><span style="position:absolute;right:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#06210F;"></span></span>
+            <span style="font-size:13.5px;font-weight:700;color:#5BE39A;">Открыт к приглашению в игры</span>
+          </div>
+          <div style="display:flex;gap:11px;margin-top:16px;">
+            <div style="flex:1.3;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:16px;">
+              <div style="font-size:12px;color:#8A938E;font-weight:600;">Посещаемость</div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:900;font-size:38px;color:#1FD16B;line-height:1;margin-top:6px;">96<span style="font-size:20px;">%</span></div>
+              <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:11px;overflow:hidden;"><div style="height:100%;width:96%;background:#1FD16B;border-radius:3px;"></div></div>
+              <div style="font-size:11.5px;color:#6e756f;margin-top:8px;">пришёл на 41 из 43 игр</div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:11px;">
+              <div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;"><div style="font-size:12px;color:#8A938E;font-weight:600;">Сыграно</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;margin-top:4px;">43</div></div>
+              <div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;"><div style="font-size:12px;color:#8A938E;font-weight:600;">Рейтинг</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;margin-top:4px;color:#F2B53C;">4.9</div></div>
+            </div>
+          </div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:22px 0 12px;">Последние игры</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:13px 14px;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(31,209,107,.14);display:flex;align-items:center;justify-content:center;color:#5BE39A;font-weight:800;font-size:13px;font-family:'Archivo',sans-serif;">6:4</div><div style="flex:1;"><div style="font-weight:700;font-size:14px;">Поле «Олимп»</div><div style="font-size:12px;color:#8A938E;margin-top:2px;">14 июн · 5×5</div></div><span style="font-size:12px;font-weight:700;color:#5BE39A;">пришёл</span></div>
+            <div style="display:flex;align-items:center;gap:12px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:13px 14px;"><div style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:#C7CEC9;font-weight:800;font-size:13px;font-family:'Archivo',sans-serif;">3:3</div><div style="flex:1;"><div style="font-weight:700;font-size:14px;">«Köpetdag»</div><div style="font-size:12px;color:#8A938E;margin-top:2px;">10 июн · 7×7</div></div><span style="font-size:12px;font-weight:700;color:#5BE39A;">пришёл</span></div>
+          </div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:22px 0 12px;">Настройки</div>
+          <div style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8A938E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"></path></svg>
+              <span style="flex:1;font-weight:600;font-size:14.5px;">Язык интерфейса</span>
+              <div style="display:flex;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:3px;font-family:'Archivo',sans-serif;font-weight:700;font-size:11px;">
+                <span onClick="{{ setRu }}" style="padding:5px 11px;border-radius:999px;background:{{ ruBg }};color:{{ ruColor }};cursor:pointer;">RU</span>
+                <span onClick="{{ setTm }}" style="padding:5px 11px;border-radius:999px;background:{{ tmBg }};color:{{ tmColor }};cursor:pointer;">TM</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8A938E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z"></path></svg>
+              <span style="flex:1;font-weight:600;font-size:14.5px;">Приватность и контакты</span>
+              <span style="color:#8A938E;font-size:18px;">›</span>
+            </div>
+            <div onClick="{{ reset }}" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E0556A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3"></path><path d="M9 12h12M18 9l3 3-3 3"></path></svg>
+              <span style="flex:1;font-weight:600;font-size:14.5px;color:#E0556A;">Выйти из аккаунта</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== CREATE GAME ====== -->
+    <sc-if value="{{ isCreate }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 0;">
+          <div onClick="{{ backFeed }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;">Создать игру</div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:22px 24px 110px;display:flex;flex-direction:column;gap:20px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Тип игры</div>
+            <div style="display:flex;gap:12px;">
+              <sc-for list="{{ createTypes }}" as="t" hint-placeholder-count="2">
+                <div onClick="{{ t.onClick }}" style="flex:1;border-radius:16px;padding:15px 14px;background:{{ t.bg }};border:1.5px solid {{ t.border }};cursor:pointer;"><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;color:{{ t.titleColor }};">{{ t.label }}</div><div style="font-size:12px;color:#8A938E;margin-top:4px;line-height:1.3;">{{ t.sub }}</div></div>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Поле</div>
+            <div style="display:flex;align-items:center;gap:12px;height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;">
+              <span style="width:34px;height:34px;border-radius:10px;background:rgba(31,209,107,.14);display:flex;align-items:center;justify-content:center;color:#1FD16B;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21.5s7-6.7 7-11.5a7 7 0 10-14 0c0 4.8 7 11.5 7 11.5z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></span>
+              <span style="flex:1;font-weight:600;font-size:15px;">Поле «Олимп», корт 2</span>
+              <span style="color:#8A938E;font-size:18px;">›</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Дата</div><div style="height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;display:flex;align-items:center;font-weight:600;font-size:15px;">Сегодня</div></div>
+            <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Время</div><div style="height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;display:flex;align-items:center;font-weight:600;font-size:15px;">21:30</div></div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Сколько игроков нужно</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;height:60px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 14px;">
+              <div onClick="{{ decCount }}" style="width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;cursor:pointer;">−</div>
+              <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:24px;">{{ createCount }}</div>
+              <div onClick="{{ incCount }}" style="width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;cursor:pointer;">+</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 16px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);">
+            <div><div style="font-weight:700;font-size:15px;">Нужен вратарь</div><div style="font-size:12px;color:#8A938E;margin-top:3px;">Покажем бейдж в ленте</div></div>
+            <div onClick="{{ toggleGk }}" style="width:46px;height:26px;border-radius:999px;background:{{ gkTrackBg }};position:relative;cursor:pointer;transition:background .15s;"><span style="position:absolute;top:2px;left:{{ gkKnobX }};width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s;"></span></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);"><button onClick="{{ submitCreate }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Создать игру</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== SEARCH PLAYERS ====== -->
+    <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 0;">
+          <div onClick="{{ backFeed }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;">Поиск игроков</div><div style="font-size:12.5px;color:#8A938E;font-weight:600;margin-top:1px;">Вратарь · Берзенги</div></div>
+        </div>
+        <div style="display:flex;gap:8px;padding:16px 24px 0;">
+          <div style="display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;background:rgba(31,209,107,.13);border:1px solid rgba(31,209,107,.32);font-weight:700;font-size:13px;color:#5BE39A;">Вратарь</div>
+          <div style="padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-weight:600;font-size:13px;color:#C7CEC9;">Берзенги</div>
+          <div style="padding:8px 13px;border-radius:999px;background:rgba(31,209,107,.13);border:1px solid rgba(31,209,107,.32);font-weight:700;font-size:13px;color:#5BE39A;">✓ открыты</div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:18px 24px 40px;display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ players }}" as="p" hint-placeholder-count="3">
+            <div style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;">
+              <div style="display:flex;align-items:center;gap:13px;">
+                <div style="width:48px;height:48px;border-radius:50%;background:{{ p.bg }};display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:#06210F;flex:none;">{{ p.t }}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-weight:700;font-size:15px;">{{ p.name }}</div>
+                  <div style="font-size:12.5px;color:#8A938E;margin-top:3px;">{{ p.pos }} · {{ p.district }}</div>
+                  <div style="display:flex;align-items:center;gap:5px;margin-top:6px;"><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:12.5px;color:{{ p.attColor }};">явка {{ p.att }}</span><span style="font-size:12px;color:#6e756f;">· {{ p.games }} игр</span></div>
+                </div>
+                <button onClick="{{ openContact }}" style="height:38px;padding:0 15px;border-radius:11px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;cursor:pointer;flex:none;">Пригласить</button>
+              </div>
+              <div onClick="{{ toPlayer }}" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;cursor:pointer;"><span style="font-size:12.5px;font-weight:700;color:#8A938E;">Открыть профиль и историю</span><span style="color:#8A938E;font-size:16px;">›</span></div>
+            </div>
+          </sc-for>
+          <div style="font-size:12px;color:#6e756f;text-align:center;line-height:1.5;margin-top:6px;padding:0 20px;">Явка — главный показатель надёжности. Видно, что незнакомец реально ходит на игры.</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== RESULT ENTRY ====== -->
+    <sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 0;">
+          <div onClick="{{ backFeedFromResult }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;">Результат игры</div><div style="font-size:12.5px;color:#8A938E;font-weight:600;margin-top:1px;">Ahal Arena · вчера 21:00</div></div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:20px 24px 130px;">
+          <div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:12px;">Счёт</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:18px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:18px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px;"><div style="font-size:12px;color:#8A938E;font-weight:700;">Команда А</div><div style="font-family:'Archivo',sans-serif;font-weight:900;font-size:46px;line-height:1;color:#1FD16B;">{{ scoreA }}</div><div style="display:flex;gap:7px;"><div onClick="{{ decA }}" style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;">−</div><div onClick="{{ incA }}" style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;">+</div></div></div>
+            <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:28px;color:#6e756f;">:</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:9px;"><div style="font-size:12px;color:#8A938E;font-weight:700;">Команда Б</div><div style="font-family:'Archivo',sans-serif;font-weight:900;font-size:46px;line-height:1;">{{ scoreB }}</div><div style="display:flex;gap:7px;"><div onClick="{{ decB }}" style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;">−</div><div onClick="{{ incB }}" style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;cursor:pointer;">+</div></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:22px 0 12px;"><span style="font-size:13px;font-weight:700;color:#8A938E;">Кто пришёл</span><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;color:#5BE39A;">{{ presentCount }} из 8</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            <sc-for list="{{ resultRoster }}" as="r" hint-placeholder-count="8">
+              <div onClick="{{ r.onClick }}" style="display:flex;align-items:center;gap:12px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:11px 14px;cursor:pointer;">
+                <div style="width:36px;height:36px;border-radius:50%;background:{{ r.bg }};display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;color:#06210F;">{{ r.t }}</div>
+                <div style="flex:1;"><div style="font-weight:700;font-size:14.5px;color:{{ r.nameColor }};">{{ r.name }}</div><div style="font-size:12px;font-weight:700;color:{{ r.statusColor }};margin-top:2px;">{{ r.statusText }}</div></div>
+                <div style="width:26px;height:26px;border-radius:8px;background:{{ r.boxBg }};border:1.5px solid {{ r.boxBorder }};display:flex;align-items:center;justify-content:center;color:#06210F;font-weight:900;font-size:14px;">✓</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);"><button onClick="{{ saveResult }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Сохранить результат</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== TEAMS ====== -->
+    <sc-if value="{{ isTeams }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="padding:17px 22px 0;flex:none;"><div style="display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:25px;margin-top:14px;">Команды</div></div>
+        <div class="scr" style="flex:1;overflow:auto;padding:18px 22px 96px;display:flex;flex-direction:column;gap:13px;">
+          <sc-if value="{{ createTeamDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(31,209,107,.12);border:1px solid rgba(31,209,107,.3);"><span style="color:#1FD16B;font-weight:900;">✓</span><span style="font-size:13.5px;font-weight:700;color:#5BE39A;">Команда создана. Вы — капитан.</span></div>
+          </sc-if>
+          <div style="font-size:13px;font-weight:700;color:#8A938E;">Мои команды</div>
+          <sc-for list="{{ teams }}" as="t" hint-placeholder-count="2">
+            <div onClick="{{ t.onClick }}" style="display:flex;align-items:center;gap:14px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:15px;cursor:pointer;">
+              <div style="width:50px;height:50px;border-radius:14px;background:{{ t.logoBg }};display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;color:#06210F;flex:none;">{{ t.logo }}</div>
+              <div style="flex:1;"><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;">{{ t.name }}</div><div style="font-size:12.5px;color:#8A938E;margin-top:3px;">{{ t.sub }}</div></div>
+              <div style="text-align:right;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;color:#F2B53C;">{{ t.rank }}</div><div style="font-size:11px;color:#8A938E;margin-top:2px;">в рейтинге</div></div>
+            </div>
+          </sc-for>
+          <button onClick="{{ toCreateTeam }}" style="height:50px;border-radius:14px;border:1.5px dashed rgba(255,255,255,.16);background:transparent;color:#C7CEC9;font-family:'Manrope',sans-serif;font-weight:700;font-size:14.5px;cursor:pointer;margin-top:2px;">+ Создать команду</button>
+          <div style="font-size:13px;font-weight:700;color:#8A938E;margin-top:14px;">Рейтинг города</div>
+          <div style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;overflow:hidden;">
+            <sc-for list="{{ teamStandings }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:13px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);background:{{ r.hl }};">
+                <span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:14px;color:#8A938E;width:16px;">{{ r.rank }}</span>
+                <span style="flex:1;font-weight:600;font-size:14.5px;">{{ r.name }}</span>
+                <span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;color:#1FD16B;">{{ r.pts }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== TEAM DETAIL ====== -->
+    <sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="position:relative;height:160px;flex:none;background:linear-gradient(150deg,#1c7a45,#0f5530);overflow:hidden;">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 46px);"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,14,13,.3),rgba(11,14,13,.9));"></div>
+          <div style="position:absolute;top:17px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+          <div onClick="{{ backTeams }}" style="position:absolute;top:52px;left:22px;width:40px;height:40px;border-radius:12px;background:rgba(11,14,13,.5);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:0 24px 110px;margin-top:-44px;">
+          <div style="display:flex;align-items:flex-end;gap:14px;">
+            <div style="width:72px;height:72px;border-radius:20px;background:#1FD16B;border:3px solid #0B0E0D;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#06210F;">BU</div>
+            <div style="padding-bottom:6px;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;">Berzeňňi United</div><div style="font-size:12.5px;color:#8A938E;font-weight:600;margin-top:2px;">Берзенги · #3 в рейтинге</div></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:18px;">
+            <div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:13px;text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#5BE39A;">18</div><div style="font-size:11.5px;color:#8A938E;margin-top:3px;">побед</div></div>
+            <div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:13px;text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;">5</div><div style="font-size:11.5px;color:#8A938E;margin-top:3px;">поражений</div></div>
+            <div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:13px;text-align:center;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;color:#F2B53C;">38</div><div style="font-size:11.5px;color:#8A938E;margin-top:3px;">очков</div></div>
+          </div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:20px 0 12px;">Состав</div>
+          <div style="display:flex;flex-direction:column;gap:9px;">
+            <sc-for list="{{ teamRoster }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:11px 14px;">
+                <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(140deg,#1FD16B,#14a955);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;color:#06210F;">{{ r.t }}</div>
+                <div style="flex:1;"><div style="display:flex;align-items:center;gap:7px;"><span style="font-weight:700;font-size:14.5px;">{{ r.name }}</span><sc-if value="{{ r.cap }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:800;color:#F2B53C;background:rgba(242,181,60,.15);padding:2px 7px;border-radius:6px;">К</span></sc-if></div><div style="font-size:12px;color:#8A938E;margin-top:2px;">{{ r.pos }}</div></div>
+                <span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:12.5px;color:#5BE39A;">{{ r.att }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);"><button onClick="{{ toCreate }}" style="width:100%;height:56px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;">Создать игру команды</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== FIELDS ====== -->
+    <sc-if value="{{ isFields }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="padding:17px 22px 0;flex:none;"><div style="display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:25px;margin-top:14px;">Поля</div>
+          <div style="display:flex;gap:8px;margin-top:14px;"><div style="padding:8px 13px;border-radius:999px;background:rgba(31,209,107,.13);border:1px solid rgba(31,209,107,.32);font-weight:700;font-size:13px;color:#5BE39A;">Все районы</div><div style="padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-weight:600;font-size:13px;color:#C7CEC9;">Трава</div></div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:16px 22px 96px;display:flex;flex-direction:column;gap:13px;">
+          <sc-for list="{{ fields }}" as="f" hint-placeholder-count="3">
+            <div onClick="{{ f.onClick }}" style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;overflow:hidden;cursor:pointer;">
+              <div style="height:96px;background:linear-gradient(150deg,#1c7a45,#0f5530);position:relative;"><div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 40px);"></div></div>
+              <div style="padding:13px 15px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;"><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;">{{ f.name }}</div><span style="font-size:18px;color:#8A938E;">›</span></div>
+                <div style="display:flex;gap:8px;margin-top:9px;"><span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#C7CEC9;background:rgba(255,255,255,.05);padding:4px 9px;border-radius:7px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 21.5s7-6.7 7-11.5a7 7 0 10-14 0c0 4.8 7 11.5 7 11.5z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>{{ f.district }}</span><span style="font-size:12px;font-weight:600;color:#C7CEC9;background:rgba(255,255,255,.05);padding:4px 9px;border-radius:7px;">{{ f.surface }}</span><span style="font-size:12px;font-weight:600;color:#C7CEC9;background:rgba(255,255,255,.05);padding:4px 9px;border-radius:7px;">{{ f.cap }}</span></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== FIELD DETAIL ====== -->
+    <sc-if value="{{ isField }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="position:relative;height:200px;flex:none;background:linear-gradient(150deg,#1c7a45,#0f5530);overflow:hidden;">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 50px);"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,14,13,.3),rgba(11,14,13,0) 40%,rgba(11,14,13,.85));"></div>
+          <div style="position:absolute;top:17px;left:22px;right:22px;display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+          <div onClick="{{ backFields }}" style="position:absolute;top:52px;left:22px;width:40px;height:40px;border-radius:12px;background:rgba(11,14,13,.5);border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="position:absolute;left:24px;bottom:18px;font-family:'Archivo',sans-serif;font-weight:800;font-size:25px;">Поле «Олимп»</div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:18px 24px 110px;">
+          <div style="display:flex;flex-wrap:wrap;gap:9px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:#C7CEC9;background:#13181A;border:1px solid rgba(255,255,255,.06);padding:8px 12px;border-radius:10px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1FD16B" stroke-width="2.2" stroke-linejoin="round"><path d="M12 21.5s7-6.7 7-11.5a7 7 0 10-14 0c0 4.8 7 11.5 7 11.5z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>Берзенги, ул. Спортивная 14</span>
+            <span style="font-size:13px;font-weight:600;color:#C7CEC9;background:#13181A;border:1px solid rgba(255,255,255,.06);padding:8px 12px;border-radius:10px;">Искусств. трава</span>
+            <span style="font-size:13px;font-weight:600;color:#C7CEC9;background:#13181A;border:1px solid rgba(255,255,255,.06);padding:8px 12px;border-radius:10px;">5×5 · 7×7</span>
+          </div>
+          <div style="height:150px;border-radius:18px;margin-top:16px;background:linear-gradient(135deg,#1a2420,#101614);border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:28px 28px;"></div>
+            <div style="position:relative;width:34px;height:34px;border-radius:50%;background:#1FD16B;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -4px rgba(31,209,107,.6);color:#06210F;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 21.5s7-6.7 7-11.5a7 7 0 10-14 0c0 4.8 7 11.5 7 11.5z"></path><circle cx="12" cy="10" r="2.6"></circle></svg></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:16px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;">
+            <div style="width:40px;height:40px;border-radius:11px;background:rgba(31,209,107,.14);display:flex;align-items:center;justify-content:center;color:#1FD16B;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 005 5l1.5-2 4 1.5v3a2 2 0 01-2 2A14 14 0 013 6a2 2 0 012-2z"></path></svg></div>
+            <div style="flex:1;"><div style="font-weight:700;font-size:14.5px;">Администратор поля</div><div style="font-size:12.5px;color:#8A938E;margin-top:2px;">+993 65 ** ** **</div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);"><button onClick="{{ openContact }}" style="width:100%;height:56px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;">Позвонить</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== TOURNAMENTS ====== -->
+    <sc-if value="{{ isTournaments }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="padding:17px 22px 0;flex:none;"><div style="display:flex;justify-content:space-between;align-items:center;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:25px;margin-top:14px;">Турниры</div></div>
+        <div class="scr" style="flex:1;overflow:auto;padding:18px 22px 96px;display:flex;flex-direction:column;gap:13px;">
+          <sc-for list="{{ tournaments }}" as="t" hint-placeholder-count="2">
+            <div onClick="{{ t.onClick }}" style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:16px;cursor:pointer;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:17px;max-width:200px;">{{ t.name }}</div><span style="padding:5px 10px;border-radius:999px;background:{{ t.statusBg }};color:{{ t.statusColor }};font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;">{{ t.status }}</span></div>
+              <div style="display:flex;gap:14px;margin-top:12px;"><span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#C7CEC9;font-weight:600;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A938E" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="2"></rect><path d="M4 9h16M8 3v4M16 3v4"></path></svg>{{ t.dates }}</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#C7CEC9;font-weight:600;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A938E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19c0-3 2.4-5 5.5-5s5.5 2 5.5 5"></path><path d="M16 5.5a2.6 2.6 0 010 5"></path></svg>{{ t.teams }} команд</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== TOURNAMENT DETAIL ====== -->
+    <sc-if value="{{ isTournament }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 0;">
+          <div onClick="{{ backTournaments }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:20px;">Кубок Ашхабада</div><div style="font-size:12.5px;color:#8A938E;font-weight:600;margin-top:1px;">12–28 июн · 16 команд</div></div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:20px 24px 110px;">
+          <sc-if value="{{ tourRegDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:rgba(31,209,107,.12);border:1px solid rgba(31,209,107,.3);margin-bottom:16px;"><span style="color:#1FD16B;font-weight:900;">✓</span><span style="font-size:13.5px;font-weight:700;color:#5BE39A;">Заявка подана. Взнос — офлайн организатору.</span></div>
+          </sc-if>
+          <div style="display:flex;gap:8px;margin-bottom:18px;"><div style="padding:8px 14px;border-radius:999px;background:rgba(31,209,107,.13);border:1px solid rgba(31,209,107,.32);font-weight:700;font-size:13px;color:#5BE39A;">1/4 финала</div><div style="padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-weight:600;font-size:13px;color:#C7CEC9;">Таблица</div></div>
+          <div style="display:flex;flex-direction:column;gap:11px;">
+            <sc-for list="{{ bracket }}" as="m" hint-placeholder-count="3">
+              <div style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:6px 16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);"><span style="font-weight:700;font-size:14.5px;">{{ m.a }}</span><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;">{{ m.sa }}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;"><span style="font-weight:700;font-size:14.5px;">{{ m.b }}</span><span style="font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;">{{ m.sb }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);"><button onClick="{{ toTourReg }}" style="width:100%;height:56px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;">Зарегистрировать команду</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== CREATE TEAM ====== -->
+    <sc-if value="{{ isCreateTeam }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 0;">
+          <div onClick="{{ backTeams }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;">Создать команду</div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:24px 24px 110px;display:flex;flex-direction:column;gap:20px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:13px;">
+            <div style="width:84px;height:84px;border-radius:24px;background:#1FD16B;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;color:#06210F;">BU</div>
+            <div style="display:flex;gap:10px;">
+              <span style="width:30px;height:30px;border-radius:50%;background:#1FD16B;border:2px solid #F2F5F3;cursor:pointer;"></span>
+              <span style="width:30px;height:30px;border-radius:50%;background:#6FB1E0;border:2px solid transparent;cursor:pointer;"></span>
+              <span style="width:30px;height:30px;border-radius:50%;background:#F2B53C;border:2px solid transparent;cursor:pointer;"></span>
+              <span style="width:30px;height:30px;border-radius:50%;background:#E0556A;border:2px solid transparent;cursor:pointer;"></span>
+              <span style="width:30px;height:30px;border-radius:50%;background:#9B8FE0;border:2px solid transparent;cursor:pointer;"></span>
+            </div>
+          </div>
+          <div><div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Название команды</div><input class="mey-in" value="Berzeňňi United" style="width:100%;height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:700;font-size:16px;" /></div>
+          <div><div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Район</div><div style="display:flex;align-items:center;gap:12px;height:56px;border-radius:15px;background:#13181A;border:1.5px solid rgba(255,255,255,.1);padding:0 16px;"><span style="flex:1;font-weight:600;font-size:15px;">Берзенги (Ашхабад)</span><span style="color:#8A938E;font-size:18px;">›</span></div></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:13px 15px;border-radius:14px;background:rgba(31,209,107,.08);border:1px solid rgba(31,209,107,.22);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5BE39A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z"></path></svg><span style="font-size:13px;line-height:1.4;color:#A9E2C2;">Вы станете капитаном — сможете создавать игры и вносить результаты.</span></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);"><button onClick="{{ submitTeam }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Создать команду</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== PLAYER PROFILE (чужой) ====== -->
+    <sc-if value="{{ isPlayer }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 0;">
+          <div onClick="{{ backSearch }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:18px;">Профиль игрока</div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:18px 24px 110px;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div style="width:74px;height:74px;border-radius:50%;background:#1FD16B;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:27px;color:#06210F;">Я</div>
+            <div style="flex:1;"><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:22px;">Язмурад Оразов</div><div style="font-size:13.5px;color:#9aa39d;margin-top:3px;font-weight:600;">Вратарь · Берзенги · 27 лет</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:14px;padding:11px 14px;border-radius:14px;background:rgba(31,209,107,.1);border:1px solid rgba(31,209,107,.28);"><span style="width:8px;height:8px;border-radius:50%;background:#1FD16B;"></span><span style="font-size:13.5px;font-weight:700;color:#5BE39A;">Открыт к приглашению в игры</span></div>
+          <div style="display:flex;gap:11px;margin-top:16px;">
+            <div style="flex:1.3;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:16px;"><div style="font-size:12px;color:#8A938E;font-weight:600;">Посещаемость</div><div style="font-family:'Archivo',sans-serif;font-weight:900;font-size:38px;color:#1FD16B;line-height:1;margin-top:6px;">98<span style="font-size:20px;">%</span></div><div style="height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:11px;overflow:hidden;"><div style="height:100%;width:98%;background:#1FD16B;border-radius:3px;"></div></div><div style="font-size:11.5px;color:#6e756f;margin-top:8px;">пришёл на 56 из 57 игр</div></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:11px;"><div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;"><div style="font-size:12px;color:#8A938E;font-weight:600;">Сыграно</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;margin-top:4px;">57</div></div><div style="flex:1;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:14px;"><div style="font-size:12px;color:#8A938E;font-weight:600;">Рейтинг</div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:26px;margin-top:4px;color:#F2B53C;">4.8</div></div></div>
+          </div>
+          <div style="font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;margin:22px 0 12px;">Команды</div>
+          <div style="display:flex;align-items:center;gap:12px;background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px 14px;"><div style="width:38px;height:38px;border-radius:11px;background:#6FB1E0;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:13px;color:#06210F;">KF</div><div style="flex:1;"><div style="font-weight:700;font-size:14.5px;">Köpetdag FC</div><div style="font-size:12px;color:#8A938E;margin-top:2px;">Парахат · вратарь</div></div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);display:flex;gap:11px;">
+          <button onClick="{{ openContact }}" style="flex:1;height:56px;border-radius:16px;border:1.5px solid rgba(255,255,255,.16);background:transparent;color:#F2F5F3;font-family:'Manrope',sans-serif;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 005 5l1.5-2 4 1.5v3a2 2 0 01-2 2A14 14 0 013 6a2 2 0 012-2z"></path></svg>Контакт</button>
+          <button onClick="{{ openContact }}" style="flex:1.3;height:56px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;">Пригласить в игру</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== TOURNAMENT REGISTRATION ====== -->
+    <sc-if value="{{ isTourReg }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 0;">
+          <div onClick="{{ backTournament }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div><div style="font-family:'Archivo',sans-serif;font-weight:800;font-size:20px;">Регистрация</div><div style="font-size:12.5px;color:#8A938E;font-weight:600;margin-top:1px;">Кубок Ашхабада 2026</div></div>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:24px 24px 110px;display:flex;flex-direction:column;gap:18px;">
+          <div><div style="font-size:13px;font-weight:700;color:#8A938E;margin-bottom:10px;">Команда</div>
+            <div style="display:flex;align-items:center;gap:13px;background:#13181A;border:1.5px solid #1FD16B;border-radius:16px;padding:14px;"><div style="width:46px;height:46px;border-radius:13px;background:#1FD16B;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;color:#06210F;">BU</div><div style="flex:1;"><div style="font-weight:700;font-size:15px;">Berzeňňi United</div><div style="font-size:12.5px;color:#8A938E;margin-top:2px;">Вы — капитан · 11 игроков</div></div><span style="color:#1FD16B;font-weight:800;font-size:17px;">✓</span></div>
+          </div>
+          <div style="background:#13181A;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:16px;">
+            <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="font-size:13.5px;color:#8A938E;font-weight:600;">Формат</span><span style="font-weight:700;font-size:14px;">7×7, плей-офф</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="font-size:13.5px;color:#8A938E;font-weight:600;">Даты</span><span style="font-weight:700;font-size:14px;">12–28 июня</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;"><span style="font-size:13.5px;color:#8A938E;font-weight:600;">Команд</span><span style="font-weight:700;font-size:14px;">16</span></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;padding:14px 15px;border-radius:14px;background:rgba(242,181,60,.1);border:1px solid rgba(242,181,60,.28);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2B53C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg><span style="font-size:13px;line-height:1.4;color:#E8D6AE;">Взнос оплачивается <b style="color:#F2B53C;">офлайн</b> организатору. В приложении оплата не проводится.</span></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 24px 34px;background:linear-gradient(180deg,rgba(11,14,13,0),#0B0E0D 28%);"><button onClick="{{ submitTourReg }}" style="width:100%;height:58px;border-radius:16px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;cursor:pointer;">Подать заявку</button></div>
+      </div>
+    </sc-if>
+
+    <!-- ====== NOTIFICATIONS ====== -->
+    <sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}">
+      <div class="scr" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:17px 26px 0;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;"><span>21:30</span><span style="display:flex;gap:5px;align-items:center;opacity:.85;"><span style="width:17px;height:11px;border:1.5px solid #F2F5F3;border-radius:2px;display:inline-block;"></span><span style="width:3px;height:11px;background:#F2F5F3;border-radius:1px;display:inline-block;"></span></span></div>
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 24px 6px;">
+          <div onClick="{{ backFeed }}" style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="display:inline-block;width:9px;height:9px;border-left:2px solid #F2F5F3;border-bottom:2px solid #F2F5F3;transform:rotate(45deg);margin-left:3px;"></span></div>
+          <div style="flex:1;font-family:'Archivo',sans-serif;font-weight:800;font-size:21px;">Уведомления</div>
+          <span onClick="{{ readAll }}" style="font-size:13px;font-weight:700;color:#5BE39A;cursor:pointer;">Прочитать все</span>
+        </div>
+        <div class="scr" style="flex:1;overflow:auto;padding:12px 18px 40px;display:flex;flex-direction:column;gap:9px;">
+          <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="6">
+            <div onClick="{{ n.onClick }}" style="display:flex;gap:13px;align-items:flex-start;padding:14px 15px;border-radius:16px;background:{{ n.bg }};border:1px solid {{ n.border }};cursor:pointer;">
+              <div style="flex:none;width:38px;height:38px;border-radius:11px;background:{{ n.iconBg }};display:flex;align-items:center;justify-content:center;color:{{ n.iconColor }};">{{ n.icon }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;line-height:1.45;color:#E7ECE8;font-weight:{{ n.weight }};text-wrap:pretty;">{{ n.text }}</div>
+                <div style="font-size:12px;color:#6e756f;margin-top:5px;font-weight:600;">{{ n.ago }}</div>
+              </div>
+              <sc-if value="{{ n.unread }}" hint-placeholder-val="{{ false }}"><span style="flex:none;width:9px;height:9px;border-radius:50%;background:#1FD16B;margin-top:5px;"></span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== BOTTOM NAV ====== -->
+    <sc-if value="{{ showNav }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:0;right:0;bottom:0;height:84px;background:#0E1312;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:flex-start;padding:12px 12px 0;z-index:5;">
+        <div onClick="{{ navGames.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ navGames.color }};">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7l4.2 3.1-1.6 5h-5.2L7.8 10z"></path><path d="M12 7V3.2M16.2 10.1l3.6-1.2M14.6 15.1l2.3 3M9.4 15.1l-2.3 3M7.8 10.1L4.2 8.9"></path></svg>
+          <span style="font-size:11px;font-weight:{{ navGames.weight }};color:{{ navGames.text }};">Игры</span>
+        </div>
+        <div onClick="{{ navTeams.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ navTeams.color }};">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3.5 19c0-3 2.4-5 5.5-5s5.5 2 5.5 5"></path><path d="M16 5.2a3 3 0 010 5.6"></path><path d="M17 14.2c2 .6 3.5 2.2 3.5 4.8"></path></svg>
+          <span style="font-size:11px;font-weight:{{ navTeams.weight }};color:{{ navTeams.text }};">Команды</span>
+        </div>
+        <div onClick="{{ navFields.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ navFields.color }};">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 21.5s7-6.7 7-11.5a7 7 0 10-14 0c0 4.8 7 11.5 7 11.5z"></path><circle cx="12" cy="10" r="2.6"></circle></svg>
+          <span style="font-size:11px;font-weight:{{ navFields.weight }};color:{{ navFields.text }};">Поля</span>
+        </div>
+        <div onClick="{{ navTournaments.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ navTournaments.color }};">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4.5a5 5 0 01-10 0z"></path><path d="M7 5.5H4v2A3 3 0 007 11M17 5.5h3v2a3 3 0 01-3 3.5"></path><path d="M9.5 17.5h5M12 13.5v4"></path></svg>
+          <span style="font-size:11px;font-weight:{{ navTournaments.weight }};color:{{ navTournaments.text }};">Турниры</span>
+        </div>
+        <div onClick="{{ navProfile.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:{{ navProfile.color }};">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5"></path></svg>
+          <span style="font-size:11px;font-weight:{{ navProfile.weight }};color:{{ navProfile.text }};">Профиль</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ====== CONTACT SHEET ====== -->
+    <sc-if value="{{ contactOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeContact }}" style="position:absolute;inset:0;background:rgba(5,7,6,.6);z-index:20;display:flex;flex-direction:column;justify-content:flex-end;">
+        <div style="background:#14191A;border-top-left-radius:26px;border-top-right-radius:26px;border-top:1px solid rgba(255,255,255,.08);padding:10px 24px 36px;">
+          <div style="width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);margin:0 auto 20px;"></div>
+          <div style="display:flex;align-items:center;gap:13px;margin-bottom:20px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(140deg,#1FD16B,#14a955);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;color:#06210F;">МК</div>
+            <div style="flex:1;"><div style="font-weight:700;font-size:16px;">Мерген Какабаев</div><div style="font-size:13px;color:#8A938E;margin-top:2px;font-weight:600;">+993 65 12 34 56</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:11px;">
+            <a href="tel:+99365123456" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:56px;border-radius:15px;border:none;background:#1FD16B;color:#06210F;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;box-sizing:border-box;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3l1.5 4-2 1.5a11 11 0 005 5l1.5-2 4 1.5v3a2 2 0 01-2 2A14 14 0 013 6a2 2 0 012-2z"></path></svg>Позвонить</a>
+            <a href="https://wa.me/99365123456" target="_blank" rel="noreferrer" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:56px;border-radius:15px;border:1.5px solid rgba(37,211,102,.45);background:rgba(37,211,102,.1);color:#25D366;font-family:'Archivo',sans-serif;font-weight:800;font-size:16px;cursor:pointer;box-sizing:border-box;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 01-12.5 7.5L3 20.5l1.5-5.5A8.5 8.5 0 1121 11.5z"></path><path d="M8.5 9.5c0 3.5 2.5 6 6 6 .8 0 1.3-.6 1.3-1.2 0-.4-1.6-1.1-2-1.1-.5 0-.7.7-1.1.7-.8 0-2.5-1.7-2.5-2.5 0-.4.7-.6.7-1.1 0-.4-.7-2-1.1-2-.6 0-1.2.5-1.2 1.3z"></path></svg>Написать в WhatsApp</a>
+            <button onClick="{{ closeContact }}" style="width:100%;height:48px;border-radius:14px;border:none;background:transparent;color:#8A938E;font-family:'Manrope',sans-serif;font-weight:600;font-size:15px;cursor:pointer;">Закрыть</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+  <div style="margin-top:22px;font-size:13px;color:#9a9f99;display:flex;align-items:center;gap:14px;">
+    <span onClick="{{ reset }}" style="cursor:pointer;font-weight:700;color:#1a8f4c;border-bottom:1px dashed #1a8f4c;">↺ Начать сначала</span>
+    <span style="color:#bcbfb9;">·</span>
+    <span>Текущий экран: {{ screenLabel }}</span>
+  </div>
+
+  <sc-if value="{{ onFeed }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+      <span style="font-size:12px;font-weight:700;color:#8a8f89;letter-spacing:.04em;text-transform:uppercase;">Состояние ленты:</span>
+      <span onClick="{{ setStFull }}" style="cursor:pointer;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:{{ chipFull }};color:{{ chipFullC }};border:1px solid #d8d5cd;">Есть игры</span>
+      <span onClick="{{ setStEmpty }}" style="cursor:pointer;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:{{ chipEmpty }};color:{{ chipEmptyC }};border:1px solid #d8d5cd;">Пусто</span>
+      <span onClick="{{ setStLoading }}" style="cursor:pointer;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:{{ chipLoad }};color:{{ chipLoadC }};border:1px solid #d8d5cd;">Загрузка</span>
+      <span onClick="{{ setStOffline }}" style="cursor:pointer;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;background:{{ chipOff }};color:{{ chipOffC }};border:1px solid #d8d5cd;">Оффлайн</span>
+    </div>
+  </sc-if>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:486,&quot;height&quot;:1020},&quot;embed&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;screen&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;feedState&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;full&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;joined&quot;:{&quot;editor&quot;:null,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;lang&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;RU&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;feedTab&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;open&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {  state = (() => { const p = (this.props||{}); return { screen: p.screen || 'login', lang: p.lang || 'RU', position:'Защитник', district:'Берзенги (Ашхабад)', age:'25–30', joined: (p.joined===true||p.joined==='true'),
+            feedTab: p.feedTab || 'open', createType:'open', createField:'Поле «Олимп», корт 2', createCount:10, gkNeeded:true, createDone:false,
+            scoreA:6, scoreB:4, attendance:[true,true,true,true,true,true,false,true], resultSaved:false, contactOpen:false, createTeamDone:false, tourRegDone:false, feedState: p.feedState || 'full', notifsRead:false }; })();
+
+  go(sc, extra) { return () => this.setState({ screen: sc, ...(extra||{}) }); }
+
+  notifList() {
+    const read = this.state.notifsRead;
+    const I = {
+      call:{ icon:'⚽', iconBg:'rgba(31,209,107,.14)', iconColor:'#5BE39A' },
+      free:{ icon:'+', iconBg:'rgba(31,209,107,.14)', iconColor:'#5BE39A' },
+      soon:{ icon:'⏱', iconBg:'rgba(242,181,60,.16)', iconColor:'#F2B53C' },
+      result:{ icon:'✎', iconBg:'rgba(108,177,224,.16)', iconColor:'#8FC4EE' },
+      joined:{ icon:'✓', iconBg:'rgba(31,209,107,.14)', iconColor:'#5BE39A' },
+      cancel:{ icon:'✕', iconBg:'rgba(224,85,106,.14)', iconColor:'#E0556A' },
+      team:{ icon:'★', iconBg:'rgba(155,143,224,.16)', iconColor:'#B3A8EC' },
+    };
+    const raw = [
+      { type:'call', text:'Мерген зовёт тебя в игру: Поле «Олимп», сегодня 21:30', ago:'5 мин назад', unread:true, go:'detail' },
+      { type:'soon', text:'Через 2 часа игра: Поле «Олимп», 21:30', ago:'1 ч назад', unread:true, go:'detail' },
+      { type:'free', text:'В игре «Köpetdag» освободилось место', ago:'2 ч назад', unread:true, go:'detail' },
+      { type:'result', text:'Внеси результат игры «Ahal Arena» — игроки ждут статистику', ago:'5 ч назад', unread:false, go:'result' },
+      { type:'joined', text:'Реджеп записался в твою игру', ago:'вчера', unread:false, go:'detail' },
+      { type:'team', text:'Бегенч зовёт в команду «Köpetdag FC»', ago:'вчера', unread:false, go:'team' },
+      { type:'cancel', text:'Игра «Чоганлы» отменена организатором', ago:'2 дня назад', unread:false, go:null },
+    ];
+    return raw.map(n => {
+      const meta = I[n.type];
+      const unread = n.unread && !read;
+      return {
+        ...meta, text:n.text, ago:n.ago, unread,
+        weight: unread ? '700' : '500',
+        bg: unread ? 'rgba(31,209,107,.05)' : '#13181A',
+        border: unread ? 'rgba(31,209,107,.16)' : 'rgba(255,255,255,.06)',
+        onClick: n.go ? this.go(n.go) : (()=>{}),
+      };
+    });
+  }
+
+  static TM = {
+    // login / phone
+    'Войти через Google':'Google bilen gir',
+    'Войти по номеру телефона':'Telefon belgisi bilen gir',
+    'Найди открытую игру рядом. Приходи и играй.':'Ýakyndaky açyk oýny tap. Gel-de oýna.',
+    'Продолжая, вы принимаете условия использования и политику конфиденциальности':'Dowam etmek bilen ulanyş şertlerini we gizlinlik syýasatyny kabul edýärsiňiz',
+    'Вход по номеру':'Belgi bilen giriş',
+    'Без SMS — просто номер и пароль.':'SMS-siz — diňe belgi we parol.',
+    'Номер телефона':'Telefon belgisi','Пароль':'Parol','Войти':'Gir',
+    // onboarding
+    'Как тебя зовут?':'Adyň näme?','Имя из Google можно изменить.':'Google ady üýtgedip bolýar.',
+    'Далее':'Indiki','Твой номер':'Belgiň',
+    'Чтобы тебя могли позвать в игру. Номер не виден другим — только по кнопке «показать контакт».':'Seni oýna çagyryp bilsinler. Belgi başgalara görünmeýär — diňe «kontakty görkez» düwmesi bilen.',
+    'Приватно. SMS-подтверждение не требуется.':'Gizlin. SMS tassyklama gerek däl.',
+    'Твоя позиция':'Pozisiýaň','На какой позиции ты обычно играешь?':'Adatça haýsy pozisiýada oýnaýarsyň?',
+    'Вратарь':'Derwezeçi','Голкипер':'Derwezeçi','Защитник':'Goragçy','Оборона':'Gorag',
+    'Полузащитник':'Ýarymgoragçy','Центр поля':'Meýdan merkezi','Нападающий':'Hüjümçi','Атака':'Hüjüm',
+    'Твой район':'Etrabyň','Покажем игры рядом с тобой.':'Ýakyndaky oýunlary görkezeris.',
+    'Возраст':'Ýaş','Опционально — поможет подобрать ровесников.':'Islege bagly — deň-duşlary saýlamaga kömek eder.',
+    'Готово — к играм':'Taýýar — oýunlara','Пропустить':'Geçmek',
+    // feed
+    'Игры рядом':'Ýakyndaky oýunlar','Открытые игры':'Açyk oýunlar','Мои игры':'Meniň oýunlarym',
+    'Сегодня':'Şu gün','Завтра':'Ertir','Вчера':'Düýn','идут':'barýar',
+    'нужен вратарь':'derwezeçi gerek','нужен защитник':'goragçy gerek',
+    'ВАША ИГРА':'SIZIŇ OÝNUŇYZ','ЗАВЕРШЕНА':'TAMAMLANDY',
+    'Результат ещё не внесён — начислите статистику игрокам.':'Netije entek girizilmedi — oýunçylara statistika ýaz.',
+    'Внести результат':'Netijäni gir','Найти игрока на позицию':'Pozisiýa oýunçy tap',
+    'Игра создана и опубликована в ленте.':'Oýun döredildi we lentada çap edildi.',
+    'Результат сохранён. Статистика обновлена.':'Netije saklandy. Statistika täzelendi.',
+    // detail
+    'Когда':'Haçan','Цена':'Baha','Состав':'Düzüm',
+    'Вы в игре! Сегодня 21:30, поле «Олимп». Соберитесь к началу.':'Siz oýundaňyz! Şu gün 21:30, «Olimp» meýdançasy. Başlanýança ýygnanyň.',
+    'Организатор':'Guramaçy','Записаться · занять место':'Ýazyl · orun al',
+    'Найти вратаря на эту игру':'Bu oýna derwezeçi tap','Показать контакт организатора':'Guramaçynyň kontaktyny görkez',
+    // create game
+    'Создать игру':'Oýun döret','Тип игры':'Oýun görnüşi','Игра команды':'Topar oýny',
+    'Любой может записаться':'Islendik adam ýazylyp biler','Вызов другой команды':'Başga topara çakylyk',
+    'Поле':'Meýdança','Дата':'Sene','Время':'Wagt','Сколько игроков нужно':'Näçe oýunçy gerek',
+    'Нужен вратарь':'Derwezeçi gerek','Покажем бейдж в ленте':'Lentada bellik görkezeris',
+    // search
+    'Поиск игроков':'Oýunçy gözleg','Пригласить':'Çagyr','открыты':'açyk',
+    'Открыть профиль и историю':'Profili we taryhy aç',
+    'Явка — главный показатель надёжности. Видно, что незнакомец реально ходит на игры.':'Gatnaşyk — ygtybarlylygyň esasy görkezijisi. Nätanyşyň hakykatdanam oýunlara gelýändigi görünýär.',
+    // result
+    'Результат игры':'Oýnuň netijesi','Счёт':'Hasap','Команда А':'A topary','Команда Б':'B topary',
+    'Кто пришёл':'Kim geldi','пришёл':'geldi','не пришёл':'gelmedi','Сохранить результат':'Netijäni sakla',
+    // teams
+    'Команды':'Toparlar','Мои команды':'Meniň toparlarym','в рейтинге':'reýtingde',
+    'Создать команду':'Topar döret','Рейтинг города':'Şäher reýtingi','Команда создана. Вы — капитан.':'Topar döredildi. Siz — kapitan.',
+    'Состав':'Düzüm','Создать игру команды':'Topar oýnuny döret','побед':'ýeňiş','поражений':'ýeňliş','очков':'utuk',
+    'Название команды':'Topar ady','Район':'Etrap','Вы станете капитаном — сможете создавать игры и вносить результаты.':'Siz kapitan bolarsyňyz — oýun döredip we netije girizip bilersiňiz.',
+    // player profile
+    'Профиль игрока':'Oýunçy profili','Открыт к приглашению в игры':'Oýunlara çakylyga açyk',
+    'Посещаемость':'Gatnaşyk','Сыграно':'Oýnaldy','Рейтинг':'Reýting','Контакт':'Kontakt','Пригласить в игру':'Oýna çagyr',
+    // fields
+    'Поля':'Meýdançalar','Все районы':'Ähli etraplar','Трава':'Ot','Администратор поля':'Meýdança administratory','Позвонить':'Jaň et',
+    // tournaments
+    'Турниры':'Ýaryşlar','команд':'topar','Идёт':'Dowam edýär','Скоро':'Tiz wagtda',
+    'Зарегистрировать команду':'Topary hasaba al','Регистрация':'Hasaba alyş','Подать заявку':'Arza ber',
+    'Команда':'Topar','Формат':'Format','Даты':'Seneler',
+    'Заявка подана. Взнос — офлайн организатору.':'Arza berildi. Töleg — guramaça oflaýn.',
+    'Взнос оплачивается':'Töleg tölenýär','офлайн':'oflaýn','организатору. В приложении оплата не проводится.':'guramaça. Programmada töleg geçirilmeýär.',
+    // profile
+    'Профиль':'Profil','Последние игры':'Soňky oýunlar','Настройки':'Sazlamalar',
+    'Язык интерфейса':'Interfeýs dili','Приватность и контакты':'Gizlinlik we kontaktlar','Выйти из аккаунта':'Hasapdan çyk',
+    // nav
+    'Игры':'Oýunlar','Закрыть':'Ýap','Написать в WhatsApp':'WhatsApp-da ýaz',
+  };
+
+  componentDidMount() { this.applyLang(); window.__goTo = (sc, extra) => this.setState({ screen:sc, ...(extra||{}) }); }
+  componentDidUpdate() { this.applyLang(); }
+
+  applyLang() {
+    const root = this._device;
+    if (!root) return;
+    const tm = this.state.lang === 'TM';
+    if (!Component._rev) {
+      Component._rev = {};
+      for (const k in Component.TM) Component._rev[Component.TM[k]] = k;
+    }
+    const fwd = Component.TM, rev = Component._rev;
+    const walk = (node) => {
+      for (let n = node.firstChild; n; n = n.nextSibling) {
+        if (n.nodeType === 3) {
+          const raw = n.nodeValue;
+          const key = raw.trim();
+          if (!key) continue;
+          if (tm && fwd[key] != null) n.nodeValue = raw.replace(key, fwd[key]);
+          else if (!tm && rev[key] != null) n.nodeValue = raw.replace(key, rev[key]);
+        } else if (n.nodeType === 1) {
+          const tag = n.tagName;
+          if (tag !== 'INPUT' && tag !== 'svg' && tag !== 'SVG' && tag !== 'PATH' && tag !== 'path') walk(n);
+        }
+      }
+    };
+    walk(root);
+  }
+
+  renderVals() {
+    const s = this.state.screen;
+    const lang = this.state.lang;
+
+    const POS = [
+      { abbr:'ВРТ', label:'Вратарь', sub:'Голкипер' },
+      { abbr:'ЗАЩ', label:'Защитник', sub:'Оборона' },
+      { abbr:'ПЗЩ', label:'Полузащитник', sub:'Центр поля' },
+      { abbr:'НАП', label:'Нападающий', sub:'Атака' },
+    ];
+    const positions = POS.map(p => {
+      const sel = p.label === this.state.position;
+      return {
+        ...p,
+        onClick: () => this.setState({ position: p.label }),
+        border: sel ? '#1FD16B' : 'rgba(255,255,255,.09)',
+        bg: sel ? 'rgba(31,209,107,.12)' : 'rgba(255,255,255,.03)',
+        chipBg: sel ? '#1FD16B' : 'rgba(255,255,255,.05)',
+        chipBorder: sel ? '#1FD16B' : 'rgba(255,255,255,.1)',
+        chipText: sel ? '#06210F' : '#C7CEC9',
+      };
+    });
+
+    const DISTRICTS = ['Берзенги (Ашхабад)','Парахат (Ашхабад)','Чоганлы (Ашхабад)','Анев','Аркадаг','Туркменабат'];
+    const districts = DISTRICTS.map(d => {
+      const sel = d === this.state.district;
+      return {
+        label: d,
+        onClick: () => this.setState({ district: d }),
+        bg: sel ? 'rgba(31,209,107,.12)' : '#13181A',
+        border: sel ? '#1FD16B' : 'rgba(255,255,255,.07)',
+        dot: sel ? '#1FD16B' : 'rgba(255,255,255,.15)',
+        check: sel,
+      };
+    });
+
+    const AGES = ['18–24','25–30','31–38','39+'];
+    const ages = AGES.map(a => {
+      const sel = a === this.state.age;
+      return {
+        label: a,
+        onClick: () => this.setState({ age: a }),
+        bg: sel ? 'rgba(31,209,107,.12)' : '#13181A',
+        border: sel ? '#1FD16B' : 'rgba(255,255,255,.07)',
+        color: sel ? '#5BE39A' : '#C7CEC9',
+      };
+    });
+
+    const games = [
+      { time:'21:30', day:'Сегодня', venue:'Поле «Олимп», корт 2', district:'Берзенги', format:'5×5',
+        badgeBg:'rgba(31,209,107,.14)', badgeColor:'#5BE39A', fillPct:'80%', fillColor:'#1FD16B',
+        spotsColor:'#5BE39A', spotsLabel:'2 места', need:'нужен вратарь', needShow:true,
+        avatars:[{t:'А',bg:'#1FD16B'},{t:'М',bg:'#7BC96F'},{t:'Б',bg:'#4FB477'}], joinedLabel:'8 идут', price:'25 ман', onClick: this.go('detail') },
+      { time:'19:00', day:'Завтра', venue:'Стадион «Көпетдаг»', district:'Парахат', format:'7×7',
+        badgeBg:'rgba(255,255,255,.07)', badgeColor:'#C7CEC9', fillPct:'50%', fillColor:'#7BC96F',
+        spotsColor:'#C7CEC9', spotsLabel:'7 мест', need:'', needShow:false,
+        avatars:[{t:'Д',bg:'#4FB477'},{t:'Г',bg:'#1FD16B'}], joinedLabel:'7 идут', price:'30 ман', onClick: this.go('detail') },
+      { time:'18:30', day:'Сб, 21 июн', venue:'Манеж «Ahal Arena»', district:'Анев', format:'5×5',
+        badgeBg:'rgba(242,181,60,.15)', badgeColor:'#F2B53C', fillPct:'95%', fillColor:'#F2B53C',
+        spotsColor:'#F2B53C', spotsLabel:'1 место', need:'нужен защитник', needShow:true,
+        avatars:[{t:'К',bg:'#1FD16B'},{t:'С',bg:'#7BC96F'},{t:'Н',bg:'#4FB477'}], joinedLabel:'9 идут', price:'25 ман', onClick: this.go('detail') },
+    ];
+
+    const roster = [
+      { t:'М', bg:'#1FD16B', color:'#06210F' }, { t:'А', bg:'#7BC96F', color:'#06210F' },
+      { t:'Б', bg:'#4FB477', color:'#06210F' }, { t:'Д', bg:'#3FA9A0', color:'#06210F' },
+      { t:'Г', bg:'#6FB1E0', color:'#06210F' }, { t:'С', bg:'#9B8FE0', color:'#fff' },
+    ];
+
+    const navDefs = [
+      { key:'games', label:'Игры' }, { key:'teams', label:'Команды' },
+      { key:'fields', label:'Поля' }, { key:'tournaments', label:'Турниры' }, { key:'profile', label:'Профиль' },
+    ];
+    const tabFor = { feed:'games', detail:'games', create:'games', search:'games', result:'games', player:'games', notif:'games',
+      teams:'teams', team:'teams', createteam:'teams', fields:'fields', field:'fields',
+      tournaments:'tournaments', tournament:'tournaments', tourreg:'tournaments', profile:'profile' };
+    const activeTab = tabFor[s] || 'games';
+    const mkNav = key => ({
+      onClick: this.go(key==='games'?'feed':key),
+      color: key===activeTab ? '#1FD16B' : '#6b736d',
+      text:  key===activeTab ? '#F2F5F3' : '#8A938E',
+      weight: key===activeTab ? '700' : '500',
+    });
+    const nav = navDefs.map(n => ({
+      label: n.label,
+      onClick: this.go(n.key === 'games' ? 'feed' : n.key),
+      dot: n.key === activeTab ? '#1FD16B' : 'rgba(255,255,255,.16)',
+      color: n.key === activeTab ? '#F2F5F3' : '#8A938E',
+      weight: n.key === activeTab ? '700' : '500',
+    }));
+    const navGames = mkNav('games'), navTeams = mkNav('teams'), navFields = mkNav('fields'),
+          navTournaments = mkNav('tournaments'), navProfile = mkNav('profile');
+
+    const labels = { login:'Вход', phone:'Вход по номеру', onb_name:'Онбординг 1/5', onb_phone:'Онбординг 2/5',
+      onb_position:'Онбординг 3/5', onb_district:'Онбординг 4/5', onb_age:'Онбординг 5/5',
+      feed:'Лента игр', detail:'Карточка игры', create:'Создание игры', search:'Поиск игроков', result:'Ввод результата',
+      profile:'Профиль', teams:'Команды', team:'Команда', createteam:'Создание команды', player:'Профиль игрока',
+      fields:'Поля', field:'Поле', tournaments:'Турниры', tournament:'Турнир', tourreg:'Регистрация' };
+
+    // ---- create game ----
+    const ctype = this.state.createType;
+    const createTypes = [
+      { key:'open', label:'Открытая игра', sub:'Любой может записаться' },
+      { key:'team', label:'Игра команды', sub:'Вызов другой команды' },
+    ].map(t => ({ ...t, sel:t.key===ctype,
+      bg:t.key===ctype?'rgba(31,209,107,.12)':'#13181A', border:t.key===ctype?'#1FD16B':'rgba(255,255,255,.07)',
+      titleColor:t.key===ctype?'#F2F5F3':'#C7CEC9', onClick:()=>this.setState({createType:t.key}) }));
+
+    // ---- player search results ----
+    const players = [
+      { t:'Я', name:'Язмурад О.', bg:'#1FD16B', pos:'Вратарь', district:'Берзенги', att:'98%', games:57, attColor:'#5BE39A' },
+      { t:'Р', name:'Реджеп А.', bg:'#7BC96F', pos:'Вратарь', district:'Парахат', att:'91%', games:34, attColor:'#5BE39A' },
+      { t:'Б', name:'Бегенч Н.', bg:'#6FB1E0', pos:'Вратарь', district:'Анев', att:'76%', games:22, attColor:'#F2B53C' },
+    ];
+
+    // ---- result entry roster ----
+    const RNAMES = ['Мерген К.','Аман Д.','Бегенч Н.','Дмитрий П.','Гурбан О.','Сердар А.','Курбан М.','Шамурад Б.'];
+    const RBG = ['#1FD16B','#7BC96F','#4FB477','#3FA9A0','#6FB1E0','#9B8FE0','#7BC96F','#4FB477'];
+    const att = this.state.attendance;
+    const resultRoster = RNAMES.map((nm,i)=>({
+      name:nm, t:nm[0], bg:RBG[i], present:att[i],
+      onClick:()=>{ const a=[...this.state.attendance]; a[i]=!a[i]; this.setState({attendance:a}); },
+      boxBg:att[i]?'#1FD16B':'transparent', boxBorder:att[i]?'#1FD16B':'rgba(255,255,255,.2)',
+      nameColor:att[i]?'#F2F5F3':'#6e756f', statusText:att[i]?'пришёл':'не пришёл', statusColor:att[i]?'#5BE39A':'#6e756f',
+    }));
+    const presentCount = att.filter(Boolean).length;
+
+    // ---- teams ----
+    const teams = [
+      { name:'Berzeňňi United', sub:'Берзенги · 11 игроков', rank:'#3', logo:'BU', logoBg:'#1FD16B', w:18, l:5, onClick:this.go('team') },
+      { name:'Köpetdag FC', sub:'Парахат · 9 игроков', rank:'#7', logo:'KF', logoBg:'#6FB1E0', w:12, l:9, onClick:this.go('team') },
+    ];
+    const teamRoster = [
+      { t:'МК', name:'Мерген К.', pos:'Защитник', cap:true, att:'96%' },
+      { t:'АД', name:'Аман Д.', pos:'Нападающий', cap:false, att:'89%' },
+      { t:'ГО', name:'Гурбан О.', pos:'Полузащитник', cap:false, att:'92%' },
+      { t:'ДП', name:'Дмитрий П.', pos:'Вратарь', cap:false, att:'97%' },
+    ];
+    const teamStandings = [
+      { rank:'1', name:'Anew Stars', pts:46, hl:'transparent' },
+      { rank:'2', name:'Aşgabat Lions', pts:41, hl:'transparent' },
+      { rank:'3', name:'Berzeňňi United', pts:38, hl:'rgba(31,209,107,.1)' },
+      { rank:'4', name:'Arkadag FC', pts:33, hl:'transparent' },
+    ];
+
+    // ---- fields ----
+    const fields = [
+      { name:'Поле «Олимп»', district:'Берзенги', surface:'Искусств. трава', cap:'5×5 · 7×7', onClick:this.go('field') },
+      { name:'Стадион «Köpetdag»', district:'Парахат', surface:'Натур. трава', cap:'до 11×11', onClick:this.go('field') },
+      { name:'Манеж «Ahal Arena»', district:'Анев', surface:'Резина', cap:'5×5', onClick:this.go('field') },
+    ];
+
+    // ---- tournaments ----
+    const tournaments = [
+      { name:'Кубок Ашхабада 2026', dates:'12–28 июн', teams:16, status:'Идёт', statusBg:'rgba(31,209,107,.14)', statusColor:'#5BE39A', onClick:this.go('tournament') },
+      { name:'Летний турнир 5×5', dates:'5–10 июл', teams:8, status:'Скоро', statusBg:'rgba(242,181,60,.15)', statusColor:'#F2B53C', onClick:this.go('tournament') },
+    ];
+    const bracket = [
+      { a:'Anew Stars', sa:3, b:'Köpetdag FC', sb:1, winner:'a' },
+      { a:'Berzeňňi United', sa:2, b:'Lions', sb:2, winner:'pen' },
+      { a:'Arkadag FC', sa:0, b:'Aşgabat City', sb:4, winner:'b' },
+    ];
+
+    return {
+      // screen flags
+      isLogin: s==='login', isPhone: s==='phone', isName: s==='onb_name', isOnbPhone: s==='onb_phone',
+      isPosition: s==='onb_position', isDistrict: s==='onb_district', isAge: s==='onb_age',
+      isFeed: s==='feed', isDetail: s==='detail', isProfile: s==='profile',
+      isCreate: s==='create', isSearch: s==='search', isResult: s==='result',
+      isTeams: s==='teams', isTeam: s==='team', isFields: s==='fields', isField: s==='field',
+      isTournaments: s==='tournaments', isTournament: s==='tournament',
+      showNav: ['feed','profile','teams','fields','tournaments'].includes(s),
+      demoState: this.state.feedState,
+      onFeed: s==='feed',
+      setStFull: () => this.setState({ feedState:'full' }),
+      setStEmpty: () => this.setState({ feedState:'empty' }),
+      setStLoading: () => this.setState({ feedState:'loading' }),
+      setStOffline: () => this.setState({ feedState:'offline' }),
+      chipFull: this.state.feedState==='full'?'#0B0E0D':'#fff', chipFullC: this.state.feedState==='full'?'#5BE39A':'#5a615a',
+      chipEmpty: this.state.feedState==='empty'?'#0B0E0D':'#fff', chipEmptyC: this.state.feedState==='empty'?'#5BE39A':'#5a615a',
+      chipLoad: this.state.feedState==='loading'?'#0B0E0D':'#fff', chipLoadC: this.state.feedState==='loading'?'#5BE39A':'#5a615a',
+      chipOff: this.state.feedState==='offline'?'#0B0E0D':'#fff', chipOffC: this.state.feedState==='offline'?'#5BE39A':'#5a615a',
+      // lang
+      ruBg: lang==='RU' ? '#1FD16B' : 'transparent', ruColor: lang==='RU' ? '#06210F' : '#8A938E',
+      tmBg: lang==='TM' ? '#1FD16B' : 'transparent', tmColor: lang==='TM' ? '#06210F' : '#8A938E',
+      setRu: () => this.setState({ lang:'RU' }), setTm: () => this.setState({ lang:'TM' }),
+      deviceRef: (el) => { this._device = el; },
+      showChrome: !this.props.embed,
+      pageStyle: this.props.embed
+        ? 'display:inline-block;font-family:\'Manrope\',sans-serif;'
+        : 'min-height:100vh;width:100%;box-sizing:border-box;padding:48px;background:#e7e5df;font-family:\'Manrope\',sans-serif;display:flex;flex-direction:column;align-items:center;',
+      // nav handlers
+      toPhone: this.go('phone'), backLogin: this.go('login'),
+      toName: this.go('onb_name'), backName: this.go('onb_name'),
+      toOnbPhone: this.go('onb_phone'), backPhoneStep: this.go('phone'),
+      toPosition: this.go('onb_position'), backOnbPhone: this.go('onb_phone'),
+      toDistrict: this.go('onb_district'), backPosition: this.go('onb_position'),
+      toAge: this.go('onb_age'), backDistrict: this.go('onb_district'),
+      toFeed: this.go('feed', { joined:false }), backFeed: this.go('feed'),
+      toProfile: this.go('profile'),
+      join: () => this.setState({ joined:true }),
+      cancelJoin: () => this.setState({ joined:false }),
+      // feed states
+      stFull: this.state.feedState==='full', stEmpty: this.state.feedState==='empty',
+      stLoading: this.state.feedState==='loading', stOffline: this.state.feedState==='offline',
+      skeletons: [1,2,3],
+      retryNet: () => { this.setState({ feedState:'loading' }); setTimeout(()=>this.setState({ feedState:'full' }), 1100); },
+      // notifications
+      toNotif: this.go('notif'), isNotif: s==='notif',
+      readAll: () => this.setState({ notifsRead:true }),
+      notifs: this.notifList(),
+      openContact: () => this.setState({ contactOpen:true }),
+      closeContact: () => this.setState({ contactOpen:false }),
+      contactOpen: this.state.contactOpen,
+      // feed tabs
+      feedOpen: this.state.feedTab==='open', feedMine: this.state.feedTab==='mine',
+      setFeedOpen: () => this.setState({ feedTab:'open' }), setFeedMine: () => this.setState({ feedTab:'mine' }),
+      openTabBg: this.state.feedTab==='open' ? '#1A201E' : 'transparent',
+      openTabColor: this.state.feedTab==='open' ? '#F2F5F3' : '#8A938E',
+      openTabShadow: this.state.feedTab==='open' ? '0 2px 8px rgba(0,0,0,.3)' : 'none',
+      mineTabBg: this.state.feedTab==='mine' ? '#1A201E' : 'transparent',
+      mineTabColor: this.state.feedTab==='mine' ? '#F2F5F3' : '#8A938E',
+      mineTabShadow: this.state.feedTab==='mine' ? '0 2px 8px rgba(0,0,0,.3)' : 'none',
+      // create / search / result
+      toCreate: this.go('create'), submitCreate: this.go('feed', { feedTab:'mine', createDone:true }),
+      createTypes, createCount: this.state.createCount, gkNeeded: this.state.gkNeeded,
+      toggleGk: () => this.setState({ gkNeeded: !this.state.gkNeeded }),
+      gkTrackBg: this.state.gkNeeded ? '#1FD16B' : 'rgba(255,255,255,.14)',
+      gkKnobX: this.state.gkNeeded ? '16px' : '2px',
+      incCount: () => this.setState({ createCount: Math.min(22, this.state.createCount+1) }),
+      decCount: () => this.setState({ createCount: Math.max(6, this.state.createCount-1) }),
+      toSearch: this.go('search'), players,
+      toResult: this.go('result'), backFeedFromResult: this.go('feed', { feedTab:'mine' }),
+      resultRoster, presentCount, scoreA: this.state.scoreA, scoreB: this.state.scoreB,
+      incA:()=>this.setState({scoreA:this.state.scoreA+1}), decA:()=>this.setState({scoreA:Math.max(0,this.state.scoreA-1)}),
+      incB:()=>this.setState({scoreB:this.state.scoreB+1}), decB:()=>this.setState({scoreB:Math.max(0,this.state.scoreB-1)}),
+      saveResult: this.go('feed', { feedTab:'mine', resultSaved:true }),
+      createDone: this.state.createDone, resultSaved: this.state.resultSaved,
+      // teams / fields / tournaments
+      teams, teamRoster, teamStandings, toTeam: this.go('team'), backTeams: this.go('teams'),
+      toCreateTeam: this.go('createteam'), createTeamDone: this.state.createTeamDone,
+      submitTeam: this.go('teams', { createTeamDone:true }),
+      toPlayer: this.go('player'), backSearch: this.go('search'),
+      toTourReg: this.go('tourreg'), backTournament: this.go('tournament'),
+      submitTourReg: this.go('tournament', { tourRegDone:true }), tourRegDone: this.state.tourRegDone,
+      isCreateTeam: s==='createteam', isPlayer: s==='player', isTourReg: s==='tourreg',
+      fields, toField: this.go('field'), backFields: this.go('fields'),
+      tournaments, bracket, toTournament: this.go('tournament'), backTournaments: this.go('tournaments'),
+      reset: () => this.setState({ screen:'login', joined:false, lang:'RU', position:'Защитник', district:'Берзенги (Ашхабад)', age:'25–30', feedTab:'open', createDone:false, resultSaved:false, contactOpen:false, createTeamDone:false, tourRegDone:false }),
+      // data
+      positions, districts, ages, games, roster, nav,
+      navGames, navTeams, navFields, navTournaments, navProfile,
+      position: this.state.position, district: this.state.district, age: this.state.age,
+      joined: this.state.joined, notJoined: !this.state.joined,
+      rosterCount: this.state.joined ? 9 : 8,
+      rosterPct: this.state.joined ? '90%' : '80%',
+      openSlots: this.state.joined ? '+1' : '+2',
+      screenLabel: labels[s] || s,
+    };
+  }
+}
+</script>
+</body>
+</html>
+

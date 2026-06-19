@@ -1,0 +1,80 @@
+{
+  "common": {
+    "back": "Yza",
+    "next": "Indiki",
+    "save": "Saklamak",
+    "cancel": "Goýbolsun",
+    "skip": "Geç",
+    "done": "Taýýar",
+    "retry": "Täzeden",
+    "loading": "Ýüklenýär…"
+  },
+  "auth": {
+    "tagline": "Golaýdaky açyk oýny tap. Gel-de oýna.",
+    "google": "Google bilen gir",
+    "phone": "Telefon belgi bilen gir",
+    "phone_title": "Telefon bilen giriş",
+    "phone_sub": "SMS ýok — diňe belgi we parol.",
+    "phone_label": "Telefon belgisi",
+    "password_label": "Parol",
+    "login": "Gir",
+    "terms": "Dowam etmek bilen ulanyş şertlerini we gizlinlik syýasatyny kabul edýärsiňiz"
+  },
+  "onboarding": {
+    "name_title": "Adyň näme?",
+    "name_sub": "Google adyňy üýtgedip bilersiň.",
+    "phone_title": "Telefon belgiň",
+    "phone_sub": "Seni oýna çagyrmak üçin. Belgini başgalar görmeýär — diňe «kontakt görkezmek» düwmesi arkaly.",
+    "private_hint": "Gizlin. SMS tassyklama gerek däl.",
+    "position_title": "Pozisiýaň",
+    "position_sub": "Adatça haýsy pozisiýada oýnaýarsyň?",
+    "district_title": "Etrabyň",
+    "district_sub": "Golaýdaky oýunlary görkezeris.",
+    "age_title": "Ýaşyň",
+    "age_sub": "Hökman däl — deň-duşlaryňy tapmaga kömek eder.",
+    "finish": "Taýýar — oýunlara"
+  },
+  "games": {
+    "feed_title": "Golaýdaky oýunlar",
+    "open_games": "Açyk oýunlar",
+    "my_games": "Meniň oýunlarym",
+    "join": "Goşul",
+    "joined": "Oýundasyňyz",
+    "full": "Ýer ýok",
+    "create": "Oýun dör",
+    "spots": "{current}/{total} oýunçy",
+    "needed": "{position} gerek",
+    "today_at": "Şu gün {time}",
+    "result": "Netijesini giriziň"
+  },
+  "positions": {
+    "GOALKEEPER": "Derwezeban",
+    "DEFENDER": "Goragçy",
+    "MIDFIELDER": "Ýarym goragçy",
+    "FORWARD": "Hüjümçi"
+  },
+  "attendance": {
+    "reliable": "Ygtybarly",
+    "new_player": "Täze"
+  },
+  "empty": {
+    "no_games": "Golaýda oýun ýok. Ilkinjini dör!",
+    "no_my_games": "Heniz hiç oýna ýazylmadyňyz.",
+    "no_teams": "Entek komandaňyz ýok",
+    "no_results": "Hiç zat tapylmady",
+    "no_stats": "Statistika ýok — ilkinji oýnuňy oýna."
+  },
+  "errors": {
+    "offline_title": "Birikme ýok",
+    "offline_sub": "Saklanan oýunlar görkezilýär. Interneti barlap, täzelemek üçin aşak süýrüň.",
+    "join_failed": "Ýazylyp bolmady. Täzeden synanyşyň",
+    "game_full": "Ýer galmady"
+  },
+  "nav": {
+    "games": "Oýunlar",
+    "teams": "Komandalar",
+    "fields": "Meýdançalar",
+    "tournaments": "Turnirler",
+    "profile": "Profil"
+  }
+}
