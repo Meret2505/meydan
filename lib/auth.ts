@@ -19,7 +19,7 @@ declare module "next-auth" {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "database" },
+  session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
     Google({
@@ -45,11 +45,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      if (session.user && user) {
-        session.user.id = user.id;
+    async jwt({ token, user }) {
+      if (user?.id) (token as Record<string, unknown>).userId = user.id;
+      return token;
+    },
+    async session({ session, token }) {
+      const userId = (token as Record<string, unknown>).userId as
+        | string
+        | undefined;
+      if (userId && session.user) {
+        session.user.id = userId;
         const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
+          where: { id: userId },
           select: { phone: true },
         });
         session.user.onboardingComplete = !!dbUser?.phone;

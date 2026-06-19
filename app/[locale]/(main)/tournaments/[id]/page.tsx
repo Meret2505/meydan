@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { computeStandings, tournamentStatus } from "@/lib/tournament-status";
-import { RegisterTeamControls } from "./RegisterTeamControls";
 import { RecordResultForm } from "./RecordResultForm";
 import { CancelTournamentButton } from "./CancelTournamentButton";
 
@@ -129,15 +128,15 @@ export default async function TournamentDetail({
           )}
 
           {status !== "cancelled" && status !== "ended" && myCaptainTeams.length > 0 && (
-            <RegisterTeamControls
-              tournamentId={tr.id}
-              locale={locale}
-              myTeams={myCaptainTeams.map((m) => ({
-                id: m.team.id,
-                name: m.team.name,
-                registered: registeredTeamIds.includes(m.team.id),
-              }))}
-            />
+            <Link
+              href={`/${locale}/tournaments/${tr.id}/register`}
+              className="mt-1 inline-flex items-center justify-center h-11 rounded-xl bg-primary/10 border border-primary/35 text-primary font-display font-bold text-[13px] gap-1.5"
+            >
+              {myCaptainTeams.some((m) => registeredTeamIds.includes(m.team.id))
+                ? "Управлять заявкой"
+                : "Зарегистрировать команду"}
+              <span>›</span>
+            </Link>
           )}
         </Section>
 

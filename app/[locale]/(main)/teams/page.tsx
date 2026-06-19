@@ -3,151 +3,148 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { TeamCard, type TeamCardData } from "@/components/teams/TeamCard";
-import { DISTRICTS } from "@/lib/data";
-import { cn } from "@/lib/utils";
+
+function hue(seed: string) {
+  let h = 0;
+  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return h % 360;
+}
 
 export default async function TeamsPage({
   params: { locale },
-  searchParams,
 }: {
   params: { locale: string };
-  searchParams: { district?: string; tab?: string };
 }) {
   unstable_setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const userId = session!.user.id;
 
-  const tab = searchParams.tab === "mine" ? "mine" : "all";
-  const districtFilter = DISTRICTS.includes(searchParams.district ?? "")
-    ? (searchParams.district as string)
-    : null;
-
-  const teams = await prisma.team.findMany({
-    where: {
-      ...(districtFilter ? { district: districtFilter } : {}),
-      ...(tab === "mine" ? { members: { some: { userId } } } : {}),
-    },
+  const myTeams = await prisma.team.findMany({
+    where: { members: { some: { userId } } },
     include: {
+      _count: { select: { members: true, games: true } },
       members: {
-        include: { user: { select: { id: true, name: true } } },
+        where: { isCaptain: true },
+        include: { user: { select: { name: true } } },
+        take: 1,
       },
     },
-    orderBy: [{ district: "asc" }, { name: "asc" }],
-    take: 50,
+    orderBy: { name: "asc" },
   });
+  const myTeamIds = new Set(myTeams.map((t) => t.id));
 
-  const cards: TeamCardData[] = teams.map((t) => {
-    const captain = t.members.find((m) => m.isCaptain);
-    return {
-      id: t.id,
-      name: t.name,
-      district: t.district,
-      memberCount: t.members.length,
-      captainName: captain?.user.name ?? null,
-    };
+  const others = await prisma.team.findMany({
+    where: { id: { notIn: Array.from(myTeamIds) } },
+    include: {
+      _count: { select: { members: true, games: true } },
+    },
+    orderBy: [{ games: { _count: "desc" } }, { members: { _count: "desc" } }],
+    take: 30,
   });
 
   return (
     <>
       <StatusBar />
-      <div className="px-6 pt-4 flex justify-between items-center">
-        <div className="font-display font-extrabold text-[25px]">{t("nav.teams")}</div>
+      <div className="px-6 pt-4 pb-24">
+        <div className="font-display font-extrabold text-[25px]">
+          {t("nav.teams")}
+        </div>
+
+        <div className="text-[13px] font-bold text-text-muted mt-5 mb-3">
+          Мои команды
+        </div>
+
+        {myTeams.length === 0 ? (
+          <div className="bg-surface border border-border rounded-[18px] p-5 text-center">
+            <div className="text-text-muted text-[13.5px]">
+              Вы пока не состоите в команде.
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {myTeams.map((team, i) => {
+              const captain = team.members[0]?.user.name;
+              return (
+                <Link
+                  key={team.id}
+                  href={`/${locale}/teams/${team.id}`}
+                  className="flex items-center gap-3.5 bg-surface border border-border rounded-[18px] p-[15px]"
+                >
+                  <div
+                    className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center font-display font-extrabold text-[16px] text-[#06210F] shrink-0"
+                    style={{
+                      background: `linear-gradient(140deg, hsl(${hue(team.id)} 70% 55%), hsl(${
+                        (hue(team.id) + 30) % 360
+                      } 70% 40%))`,
+                    }}
+                  >
+                    {team.name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display font-bold text-[16px] truncate">
+                      {team.name}
+                    </div>
+                    <div className="text-[12.5px] text-text-muted mt-0.5 truncate">
+                      {team.district ?? "—"} · {team._count.members} в составе
+                      {captain && ` · кап. ${captain.split(" ")[0]}`}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-display font-extrabold text-[17px] text-warning">
+                      #{i + 1}
+                    </div>
+                    <div className="text-[11px] text-text-muted mt-0.5">
+                      в рейтинге
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
         <Link
           href={`/${locale}/teams/create`}
-          className="h-9 px-3 rounded-lg bg-primary text-primary-text font-display font-extrabold text-[13px] inline-flex items-center"
+          className="mt-3 h-[50px] rounded-[14px] flex items-center justify-center text-text-soft font-sans font-bold text-[14.5px]"
+          style={{
+            border: "1.5px dashed rgba(255,255,255,.16)",
+            background: "transparent",
+          }}
         >
-          + создать
+          + Создать команду
         </Link>
-      </div>
 
-      <div className="px-6 pt-4 flex bg-white/5 rounded-2xl p-1">
-        <TabLink locale={locale} active={tab === "all"} tab="all" label="Все" />
-        <TabLink locale={locale} active={tab === "mine"} tab="mine" label="Мои" />
-      </div>
-
-      <div className="px-6 pt-3 flex gap-2 overflow-x-auto scrollbar-none">
-        <Chip
-          href={`/${locale}/teams?tab=${tab}`}
-          label="Все районы"
-          active={!districtFilter}
-        />
-        {DISTRICTS.map((d) => (
-          <Chip
-            key={d}
-            href={`/${locale}/teams?tab=${tab}&district=${encodeURIComponent(d)}`}
-            label={d}
-            active={districtFilter === d}
-          />
-        ))}
-      </div>
-
-      <div className="px-6 pt-4 pb-8 flex flex-col gap-2.5">
-        {cards.length === 0 ? (
-          <EmptyState
-            icon={<span className="text-2xl">👥</span>}
-            title={tab === "mine" ? t("empty.no_teams") : "Команд пока нет"}
-            description={
-              tab === "mine"
-                ? "Создай свою или присоединись к существующей."
-                : "Будь первым — собери команду."
-            }
-            action={{ label: "Создать команду", href: `/${locale}/teams/create` }}
-          />
-        ) : (
-          cards.map((c) => <TeamCard key={c.id} team={c} />)
+        {others.length > 0 && (
+          <>
+            <div className="text-[13px] font-bold text-text-muted mt-6 mb-3">
+              Команды города
+            </div>
+            <div className="bg-surface border border-border rounded-[18px] overflow-hidden">
+              {others.map((team, i) => (
+                <Link
+                  key={team.id}
+                  href={`/${locale}/teams/${team.id}`}
+                  className="flex items-center gap-3 px-4 py-[13px] border-b border-white/[0.04] last:border-0"
+                >
+                  <span className="font-display font-extrabold text-[14px] text-text-muted w-4">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1 font-semibold text-[14.5px] truncate">
+                    {team.name}
+                  </span>
+                  <span className="font-display font-extrabold text-[15px] text-primary">
+                    {team._count.games}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="text-center text-text-muted text-[11.5px] mt-2">
+              Число — сыгранных матчей
+            </div>
+          </>
         )}
       </div>
     </>
-  );
-}
-
-function TabLink({
-  locale,
-  active,
-  tab,
-  label,
-}: {
-  locale: string;
-  active: boolean;
-  tab: "all" | "mine";
-  label: string;
-}) {
-  return (
-    <Link
-      href={`/${locale}/teams?tab=${tab}`}
-      className={cn(
-        "flex-1 text-center py-2.5 rounded-xl font-display font-bold text-[14px]",
-        active ? "bg-bg text-text shadow" : "text-text-muted",
-      )}
-    >
-      {label}
-    </Link>
-  );
-}
-
-function Chip({
-  href,
-  label,
-  active,
-}: {
-  href: string;
-  label: string;
-  active: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "px-3 py-2 rounded-full whitespace-nowrap border font-bold text-[13px]",
-        active
-          ? "bg-primary/13 border-primary/35 text-primary"
-          : "bg-white/5 border-white/8 text-text/80",
-      )}
-    >
-      {label}
-    </Link>
   );
 }

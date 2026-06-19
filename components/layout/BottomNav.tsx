@@ -16,9 +16,17 @@ const TABS: Tab[] = [
     key: "games",
     href: "/games",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinejoin="round"
+        className="w-6 h-6"
+      >
         <circle cx="12" cy="12" r="9" />
         <path d="M12 7l4.2 3.1-1.6 5h-5.2L7.8 10z" />
+        <path d="M12 7V3.2M16.2 10.1l3.6-1.2M14.6 15.1l2.3 3M9.4 15.1l-2.3 3M7.8 10.1L4.2 8.9" />
       </svg>
     ),
   },
@@ -26,11 +34,19 @@ const TABS: Tab[] = [
     key: "teams",
     href: "/teams",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
-        <path d="M17 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" />
-        <circle cx="10" cy="7" r="4" />
-        <path d="M21 21v-2a4 4 0 00-3-3.87" />
-        <path d="M17 3.13a4 4 0 010 7.75" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-6 h-6"
+      >
+        <circle cx="9" cy="8" r="3" />
+        <path d="M3.5 19c0-3 2.4-5 5.5-5s5.5 2 5.5 5" />
+        <path d="M16 5.2a3 3 0 010 5.6" />
+        <path d="M17 14.2c2 .6 3.5 2.2 3.5 4.8" />
       </svg>
     ),
   },
@@ -38,9 +54,16 @@ const TABS: Tab[] = [
     key: "fields",
     href: "/fields",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
-        <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
-        <circle cx="12" cy="10" r="3" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinejoin="round"
+        className="w-6 h-6"
+      >
+        <path d="M12 21.5s7-6.7 7-11.5a7 7 0 10-14 0c0 4.8 7 11.5 7 11.5z" />
+        <circle cx="12" cy="10" r="2.6" />
       </svg>
     ),
   },
@@ -48,9 +71,18 @@ const TABS: Tab[] = [
     key: "tournaments",
     href: "/tournaments",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
-        <path d="M6 9a6 6 0 0012 0V3H6v6z" />
-        <path d="M9 21h6M12 17v4M5 5H3v3a3 3 0 003 3M19 5h2v3a3 3 0 01-3 3" />
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-6 h-6"
+      >
+        <path d="M7 4h10v4.5a5 5 0 01-10 0z" />
+        <path d="M7 5.5H4v2A3 3 0 007 11M17 5.5h3v2a3 3 0 01-3 3.5" />
+        <path d="M9.5 17.5h5M12 13.5v4" />
       </svg>
     ),
   },
@@ -58,9 +90,17 @@ const TABS: Tab[] = [
     key: "profile",
     href: "/profile",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-6 h-6">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-6 h-6"
+      >
         <circle cx="12" cy="8" r="4" />
-        <path d="M4 21a8 8 0 0116 0" />
+        <path d="M5 21c0-4 3-6.5 7-6.5s7 2.5 7 6.5" />
       </svg>
     ),
   },
@@ -72,8 +112,11 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 bg-bg/90 backdrop-blur border-t border-border z-40">
-      <div className="max-w-md mx-auto flex pb-[max(env(safe-area-inset-bottom),8px)] pt-2">
+    <nav
+      className="fixed bottom-0 inset-x-0 z-40 border-t border-white/[0.06]"
+      style={{ background: "#0E1312" }}
+    >
+      <div className="max-w-md mx-auto flex pt-3 pb-[max(env(safe-area-inset-bottom),12px)]">
         {TABS.map((tab) => {
           const href = `/${locale}${tab.href}`;
           const active = pathname.startsWith(href);
@@ -82,12 +125,19 @@ export function BottomNav() {
               key={tab.key}
               href={href}
               className={cn(
-                "flex-1 flex flex-col items-center gap-1 py-1 text-[11px] font-display font-bold",
-                active ? "text-primary" : "text-text-muted",
+                "flex-1 flex flex-col items-center gap-1.5 transition-colors",
+                active ? "text-primary" : "text-[#4f5450]",
               )}
             >
               {tab.icon}
-              <span>{t(tab.key)}</span>
+              <span
+                className={cn(
+                  "text-[11px]",
+                  active ? "font-bold" : "font-semibold",
+                )}
+              >
+                {t(tab.key)}
+              </span>
             </Link>
           );
         })}

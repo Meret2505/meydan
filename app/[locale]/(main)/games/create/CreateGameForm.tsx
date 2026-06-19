@@ -149,6 +149,17 @@ export function CreateGameForm({
         </div>
       </Field>
 
+      <Field label="Цена с игрока (ман, опц.)">
+        <input
+          name="pricePerPlayer"
+          type="number"
+          min={0}
+          max={500}
+          placeholder="25"
+          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+        />
+      </Field>
+
       <Field label={labels.needed}>
         <div className="grid grid-cols-2 gap-2.5">
           {positions.map((p) => {

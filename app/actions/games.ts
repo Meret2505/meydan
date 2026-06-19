@@ -23,6 +23,8 @@ export async function createGame(formData: FormData): Promise<void> {
   const fieldId = String(formData.get("fieldId") ?? "") || null;
   const fieldName = String(formData.get("fieldName") ?? "").trim() || null;
   const totalSpots = parseInt(String(formData.get("totalSpots") ?? "0"), 10);
+  const priceRaw = String(formData.get("pricePerPlayer") ?? "").trim();
+  const pricePerPlayer = priceRaw ? Math.max(0, parseInt(priceRaw, 10)) : null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const positions = formData
     .getAll("neededPositions")
@@ -40,6 +42,7 @@ export async function createGame(formData: FormData): Promise<void> {
       fieldId,
       fieldName: fieldId ? null : fieldName,
       totalSpots,
+      pricePerPlayer,
       neededPositions: positions,
       notes,
       organizerId: userId,

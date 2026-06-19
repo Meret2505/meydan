@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { ResultForm } from "./ResultForm";
+import { formatGameDateTime } from "@/lib/date";
 
 export default async function ResultPage({
   params: { locale, id },
@@ -18,6 +19,7 @@ export default async function ResultPage({
   const game = await prisma.game.findUnique({
     where: { id },
     include: {
+      field: { select: { name: true } },
       participants: {
         include: { user: { select: { id: true, name: true, position: true } } },
         orderBy: { joinedAt: "asc" },
@@ -27,13 +29,20 @@ export default async function ResultPage({
   if (!game) notFound();
   if (game.organizerId !== session!.user.id) redirect(`/${locale}/games/${id}`);
 
+  const { time, day } = formatGameDateTime(game.scheduledAt, locale);
+
   return (
     <>
       <StatusBar />
-      <div className="px-6 pt-4 flex items-center gap-4">
+      <div className="flex items-center gap-3.5 px-6 pt-4">
         <BackButton href={`/${locale}/games/${id}`} />
-        <div className="font-display font-extrabold text-[22px]">
-          {t("games.result")}
+        <div>
+          <div className="font-display font-extrabold text-[21px]">
+            Результат игры
+          </div>
+          <div className="text-text-muted text-[12.5px] font-semibold mt-0.5 truncate max-w-[260px]">
+            {game.field?.name ?? game.fieldName ?? "—"} · {day} {time}
+          </div>
         </div>
       </div>
       <ResultForm
@@ -48,7 +57,7 @@ export default async function ResultPage({
             : null,
           attended: p.attended,
         }))}
-        labels={{ save: t("common.save"), came: "Пришёл" }}
+        labels={{ save: t("common.save"), came: "пришёл" }}
       />
     </>
   );

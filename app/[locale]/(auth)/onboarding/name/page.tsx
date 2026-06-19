@@ -30,7 +30,7 @@ export default async function NamePage({ params: { locale } }: { params: { local
       </div>
       <div className="flex flex-col items-center px-7 pt-9">
         <div className="relative w-[104px] h-[104px] rounded-full flex items-center justify-center font-display font-extrabold text-[38px] text-[#06210F]"
-          style={{ background: "linear-gradient(140deg,#22c55e,#14a955)" }}>
+          style={{ background: "linear-gradient(140deg,#1FD16B,#14a955)" }}>
           {initials}
         </div>
       </div>

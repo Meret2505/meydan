@@ -139,6 +139,7 @@ model Game {
   fieldId         String?
   fieldName       String?
   totalSpots      Int
+  pricePerPlayer  Int?
   neededPositions Position[]
   notes           String?
   scoreHome       Int?

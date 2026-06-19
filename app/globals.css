@@ -3,19 +3,31 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0a0a0a;
-  --surface: #141414;
-  --surface-2: #1e1e1e;
+  /* Brand greys (matches prototype exactly) */
+  --bg: #0B0E0D;
+  --surface: #13181A;
+  --surface-2: #1B2123;
 
-  --primary: #22c55e;
-  --primary-text: #000000;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  /* Brand green family */
+  --primary: #1FD16B;
+  --primary-text: #06210F;
+  --primary-soft: #5BE39A;
 
-  --text: #f5f5f5;
-  --text-muted: #737373;
-  --border: #2a2a2a;
+  /* Status */
+  --warning: #F2B53C;
+  --danger:  #E0556A;
 
+  /* Text */
+  --text:       #F2F5F3;
+  --text-soft:  #C7CEC9;
+  --text-muted: #8A938E;
+  --text-faint: #5f665f;
+
+  /* Lines / surfaces */
+  --border:     rgba(255,255,255,.08);
+  --border-strong: rgba(255,255,255,.12);
+
+  /* Spacing scale (matches spec) */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -23,6 +35,7 @@
   --space-6: 24px;
   --space-8: 32px;
 
+  /* Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;

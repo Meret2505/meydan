@@ -2,10 +2,22 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getPlayerStats, attendanceTier } from "@/lib/stats";
+import { getPlayerStats } from "@/lib/stats";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
+import { gameFormat } from "@/lib/game-format";
 import { LogoutButton } from "./LogoutButton";
+
+function initials(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .map((s) => s[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "?"
+  );
+}
 
 export default async function ProfilePage({
   params: { locale },
@@ -18,79 +30,218 @@ export default async function ProfilePage({
   const user = await prisma.user.findUnique({ where: { id: session!.user.id } });
   if (!user) return null;
   const stats = await getPlayerStats(user.id);
-  const tier = attendanceTier(stats.attendanceRate);
 
-  const initials =
-    user.name
-      .split(/\s+/)
-      .map((s) => s[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?";
+  const recent = await prisma.gameParticipant.findMany({
+    where: { userId: user.id, game: { status: "COMPLETED" } },
+    include: {
+      game: {
+        include: { field: { select: { name: true } } },
+      },
+    },
+    orderBy: { joinedAt: "desc" },
+    take: 3,
+  });
 
-  const tierStyles: Record<typeof tier, { bg: string; text: string; label: string }> = {
-    reliable: { bg: "bg-primary/15", text: "text-primary", label: t("attendance.reliable") },
-    ok: { bg: "bg-warning/15", text: "text-warning", label: `${stats.attendanceRate ?? 0}%` },
-    poor: { bg: "bg-danger/15", text: "text-danger", label: `${stats.attendanceRate ?? 0}%` },
-    new: { bg: "bg-white/8", text: "text-text-muted", label: t("attendance.new_player") },
-  };
-  const badge = tierStyles[tier];
+  const dateFmt = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
+  const positionLabel = user.position ? t(`positions.${user.position}`) : "—";
+  const attendancePct = stats.attendanceRate ?? 0;
 
   return (
     <>
       <StatusBar />
-      <div className="px-6 pt-4 flex justify-between items-center">
-        <div className="font-display font-extrabold text-[22px]">
-          {t("profile.title")}
+      <div className="px-6 pt-3.5 pb-24">
+        {/* Header avatar + name */}
+        <div className="flex items-center gap-4">
+          <div
+            className="w-[74px] h-[74px] rounded-full flex items-center justify-center font-display font-extrabold text-[27px] text-[#06210F]"
+            style={{ background: "linear-gradient(140deg,#1FD16B,#14a955)" }}
+          >
+            {initials(user.name)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-display font-extrabold text-[22px] tracking-tight truncate">
+              {user.name}
+            </div>
+            <div className="text-[13.5px] text-[#9aa39d] font-semibold mt-1">
+              {positionLabel} · {user.district ?? "—"}
+            </div>
+          </div>
         </div>
-        <LocaleToggle />
-      </div>
 
-      <div className="px-7 pt-7 flex flex-col items-center text-center">
+        {/* Open-to-invites pill */}
         <div
-          className="w-28 h-28 rounded-full flex items-center justify-center font-display font-extrabold text-[40px] text-[#06210F]"
-          style={{ background: "linear-gradient(140deg,#22c55e,#14a955)" }}
+          className={`mt-3.5 flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl ${
+            user.isOpenToInvite
+              ? "bg-primary/10 border border-primary/30"
+              : "bg-white/5 border border-white/10"
+          }`}
         >
-          {initials}
+          <div className="relative w-[34px] h-5 rounded-full shrink-0">
+            <div
+              className={`absolute inset-0 rounded-full transition-colors ${
+                user.isOpenToInvite ? "bg-primary" : "bg-white/15"
+              }`}
+            />
+            <div
+              className={`absolute top-[2px] w-4 h-4 rounded-full bg-[#06210F] transition-all ${
+                user.isOpenToInvite ? "right-[2px]" : "left-[2px]"
+              }`}
+            />
+          </div>
+          <span
+            className={`text-[13.5px] font-bold ${
+              user.isOpenToInvite ? "text-primary-soft" : "text-text-muted"
+            }`}
+          >
+            {user.isOpenToInvite
+              ? "Открыт к приглашению в игры"
+              : "Закрыт от приглашений"}
+          </span>
         </div>
-        <div className="mt-5 font-display font-extrabold text-[24px]">{user.name}</div>
-        <div className="mt-1 text-text-muted text-[14px]">
-          {user.district ?? "—"} ·{" "}
-          {user.position ? t(`positions.${user.position}`) : "—"}
-        </div>
-        <div className={`mt-3 inline-flex px-3 py-1.5 rounded-full text-[12px] font-display font-bold ${badge.bg} ${badge.text}`}>
-          {badge.label}
-        </div>
-      </div>
 
-      <div className="px-6 pt-8 grid grid-cols-3 gap-3">
-        <Stat label={t("profile.stats_played")} value={stats.gamesPlayed.toString()} />
-        <Stat
-          label={t("profile.stats_attendance")}
-          value={stats.attendanceRate === null ? "—" : `${stats.attendanceRate}%`}
-        />
-        <Stat label={t("profile.stats_joined")} value={stats.totalJoined.toString()} />
-      </div>
+        {/* Stats grid */}
+        <div className="flex gap-3 mt-4">
+          <div className="basis-[58%] bg-surface border border-border rounded-[18px] p-4">
+            <div className="text-[12px] text-text-muted font-semibold">
+              Посещаемость
+            </div>
+            <div className="font-display font-black text-[38px] text-primary leading-none mt-1.5">
+              {stats.attendanceRate === null ? "—" : stats.attendanceRate}
+              {stats.attendanceRate !== null && (
+                <span className="text-[20px]">%</span>
+              )}
+            </div>
+            <div className="h-1.5 rounded bg-white/8 overflow-hidden mt-3">
+              <div
+                className="h-full bg-primary rounded"
+                style={{ width: `${attendancePct}%` }}
+              />
+            </div>
+            <div className="text-[11.5px] text-[#6e756f] mt-2">
+              пришёл на {stats.gamesPlayed} из {stats.totalJoined} игр
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col gap-2.5">
+            <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
+              <div className="text-[12px] text-text-muted font-semibold">
+                Сыграно
+              </div>
+              <div className="font-display font-extrabold text-[26px] mt-1">
+                {stats.gamesPlayed}
+              </div>
+            </div>
+            <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
+              <div className="text-[12px] text-text-muted font-semibold">
+                Записан
+              </div>
+              <div className="font-display font-extrabold text-[26px] mt-1">
+                {stats.totalJoined}
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div className="px-6 pt-8 flex flex-col gap-3">
-        <Link
-          href={`/${locale}/profile/edit`}
-          className="h-12 rounded-xl bg-white/5 border border-white/8 flex items-center justify-between px-4 text-text font-sans font-semibold text-[15px]"
-        >
-          <span>{t("profile.edit")}</span>
-          <span>›</span>
-        </Link>
-        <LogoutButton locale={locale} logoutLabel={t("auth.logout")} />
+        {/* Recent games */}
+        {recent.length > 0 && (
+          <>
+            <div className="font-display font-bold text-[15px] mt-5 mb-3">
+              Последние игры
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {recent.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/${locale}/games/${p.gameId}`}
+                  className="flex items-center gap-3 bg-surface border border-border rounded-[14px] px-3.5 py-3"
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-display font-extrabold text-[13px] ${
+                      p.attended === true
+                        ? "bg-primary/15 text-primary-soft"
+                        : "bg-white/5 text-text-soft"
+                    }`}
+                  >
+                    {p.game.scoreHome !== null && p.game.scoreAway !== null
+                      ? `${p.game.scoreHome}:${p.game.scoreAway}`
+                      : "—"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display font-bold text-[14px] truncate">
+                      {p.game.field?.name ?? p.game.fieldName ?? "—"}
+                    </div>
+                    <div className="text-[12px] text-text-muted mt-0.5">
+                      {dateFmt.format(p.game.scheduledAt)} · {gameFormat(p.game)}
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[12px] font-bold ${
+                      p.attended === true
+                        ? "text-primary-soft"
+                        : p.attended === false
+                        ? "text-danger"
+                        : "text-text-muted"
+                    }`}
+                  >
+                    {p.attended === true
+                      ? "пришёл"
+                      : p.attended === false
+                      ? "не был"
+                      : "—"}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Settings */}
+        <div className="font-display font-bold text-[15px] mt-5 mb-3">
+          Настройки
+        </div>
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.04]">
+            <svg
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#8A938E"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
+            </svg>
+            <span className="flex-1 font-semibold text-[14.5px]">
+              Язык интерфейса
+            </span>
+            <LocaleToggle />
+          </div>
+          <Link
+            href={`/${locale}/profile/edit`}
+            className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.04]"
+          >
+            <svg
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#8A938E"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z" />
+            </svg>
+            <span className="flex-1 font-semibold text-[14.5px]">
+              Профиль и контакты
+            </span>
+            <span className="text-text-muted text-[18px]">›</span>
+          </Link>
+          <LogoutButton locale={locale} logoutLabel="Выйти из аккаунта" />
+        </div>
       </div>
     </>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-surface border border-border p-4 text-center">
-      <div className="font-display font-extrabold text-[22px]">{value}</div>
-      <div className="text-text-muted text-[12px] mt-1">{label}</div>
-    </div>
   );
 }

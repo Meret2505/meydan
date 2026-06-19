@@ -7,6 +7,7 @@ import { StatusBar } from "@/components/ui/StatusBar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GameCardSkeleton } from "@/components/ui/Skeleton";
 import { GameCard, type GameCardData } from "@/components/games/GameCard";
+import { FeedOfflineGuard } from "@/components/games/FeedOffline";
 import { gameFormat } from "@/lib/game-format";
 import { cn } from "@/lib/utils";
 
@@ -92,15 +93,17 @@ export default async function GamesPage({
       </div>
 
       <div className="px-6 pt-4 pb-6 flex flex-col gap-3.5">
-        <Suspense fallback={<FeedSkeleton />} key={`${tab}-${chip}`}>
-          <Feed
-            userId={session!.user.id}
-            district={user?.district ?? null}
-            tab={tab}
-            chip={chip}
-            locale={locale}
-          />
-        </Suspense>
+        <FeedOfflineGuard>
+          <Suspense fallback={<FeedSkeleton />} key={`${tab}-${chip}`}>
+            <Feed
+              userId={session!.user.id}
+              district={user?.district ?? null}
+              tab={tab}
+              chip={chip}
+              locale={locale}
+            />
+          </Suspense>
+        </FeedOfflineGuard>
       </div>
 
       <Link

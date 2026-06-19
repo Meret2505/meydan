@@ -6,11 +6,11 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 
-function normalizePhone(input: string) {
+function normalizePhone(input: string): string | null {
   const digits = input.replace(/\D/g, "");
   if (digits.length === 8) return `+993${digits}`;
-  if (digits.startsWith("993")) return `+${digits}`;
-  return `+${digits}`;
+  if (digits.length === 11 && digits.startsWith("993")) return `+${digits}`;
+  return null;
 }
 
 export async function phoneLoginOrSignup(formData: FormData) {
@@ -18,11 +18,10 @@ export async function phoneLoginOrSignup(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const locale = String(formData.get("locale") ?? "ru");
 
-  if (!rawPhone || password.length < 6) {
+  const phone = normalizePhone(rawPhone);
+  if (!phone || password.length < 6) {
     return { error: "invalid_input" as const };
   }
-
-  const phone = normalizePhone(rawPhone);
   let user = await prisma.user.findFirst({ where: { phone } });
 
   if (!user) {
