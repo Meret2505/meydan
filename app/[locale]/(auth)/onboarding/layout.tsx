@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 
+export const dynamic = "force-dynamic";
+
 export default async function OnboardingLayout({
   children,
   params: { locale },

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { BottomNav } from "@/components/layout/BottomNav";
 
+export const dynamic = "force-dynamic";
+
 export default async function MainLayout({
   children,
   params: { locale },
