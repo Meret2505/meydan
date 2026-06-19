@@ -115,6 +115,29 @@ export default async function GameDetailPage({
             )}
           </div>
           <ProgressBar filled={game.participants.length} total={game.totalSpots} />
+          {isOrganizer && !isPast && game.status !== "CANCELLED" && (
+            <Link
+              href={`/${locale}/players?back=/${locale}/games/${game.id}${
+                game.neededPositions[0] ? `&position=${game.neededPositions[0]}` : ""
+              }`}
+              className="mt-4 flex items-center justify-center gap-2 h-11 rounded-xl border border-white/15 text-text font-display font-bold text-[13.5px]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                className="w-4 h-4"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="M21 21l-4-4" />
+              </svg>
+              {game.neededPositions.length > 0
+                ? `Найти ${t(`positions.${game.neededPositions[0]}`).toLowerCase()}а`
+                : "Найти игрока"}
+            </Link>
+          )}
           <div className="mt-4 flex flex-col gap-2.5">
             {game.participants.map((p) => {
               const isMe = p.userId === userId;
