@@ -180,10 +180,11 @@ model Team {
   district  String?
   createdAt DateTime @default(now())
 
-  members     TeamMember[]
-  games       Game[]
-  homeMatches TournamentMatch[] @relation("HomeTeam")
-  awayMatches TournamentMatch[] @relation("AwayTeam")
+  members         TeamMember[]
+  games           Game[]
+  homeMatches     TournamentMatch[] @relation("HomeTeam")
+  awayMatches     TournamentMatch[] @relation("AwayTeam")
+  tournamentTeams TournamentTeam[]
 
   @@map("teams")
 }
@@ -208,11 +209,27 @@ model Tournament {
   startDate   DateTime
   endDate     DateTime?
   description String?
+  creatorId   String?
+  cancelled   Boolean   @default(false)
   createdAt   DateTime  @default(now())
 
   matches TournamentMatch[]
+  teams   TournamentTeam[]
 
   @@map("tournaments")
+}
+
+model TournamentTeam {
+  id           String   @id @default(cuid())
+  tournamentId String
+  teamId       String
+  joinedAt     DateTime @default(now())
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  team       Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, teamId])
+  @@map("tournament_teams")
 }
 
 model TournamentMatch {
