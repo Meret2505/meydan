@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/fcm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Position } from "@prisma/client";
@@ -53,14 +54,14 @@ export async function createGame(formData: FormData): Promise<void> {
 export async function joinGame(gameId: string, locale: string): Promise<void> {
   const userId = await requireUserId();
 
-  await prisma.$transaction(async (tx) => {
+  const organizerId = await prisma.$transaction(async (tx) => {
     const game = await tx.game.findUnique({
       where: { id: gameId },
       include: { _count: { select: { participants: true } } },
     });
-    if (!game) return;
-    if (game.status !== "OPEN" && game.status !== "FULL") return;
-    if (game._count.participants >= game.totalSpots) return;
+    if (!game) return null;
+    if (game.status !== "OPEN" && game.status !== "FULL") return null;
+    if (game._count.participants >= game.totalSpots) return null;
 
     await tx.gameParticipant.upsert({
       where: { gameId_userId: { gameId, userId } },
@@ -83,8 +84,26 @@ export async function joinGame(gameId: string, locale: string): Promise<void> {
           data: { gameId },
         },
       });
+      return game.organizerId;
     }
+    return null;
   });
+
+  if (organizerId) {
+    const organizer = await prisma.user.findUnique({
+      where: { id: organizerId },
+      select: { fcmToken: true, locale: true },
+    });
+    if (organizer?.fcmToken) {
+      const ru = organizer.locale !== "tm";
+      await sendPush(
+        organizer.fcmToken,
+        ru ? "Новый игрок" : "Täze oýunçy",
+        ru ? "Игрок записался на твою игру." : "Oýunçy oýnuňa ýazyldy.",
+        { gameId, url: `/${organizer.locale}/games/${gameId}` },
+      );
+    }
+  }
 
   revalidatePath(`/${locale}/games`);
   revalidatePath(`/${locale}/games/${gameId}`);
@@ -113,7 +132,12 @@ export async function cancelGame(gameId: string, locale: string): Promise<void> 
   const userId = await requireUserId();
   const game = await prisma.game.findUnique({
     where: { id: gameId },
-    include: { participants: { where: { userId: { not: userId } } } },
+    include: {
+      participants: {
+        where: { userId: { not: userId } },
+        include: { user: { select: { fcmToken: true, locale: true } } },
+      },
+    },
   });
   if (!game || game.organizerId !== userId) return;
 
@@ -132,6 +156,17 @@ export async function cancelGame(gameId: string, locale: string): Promise<void> 
       })),
     }),
   ]);
+
+  for (const p of game.participants) {
+    if (!p.user.fcmToken) continue;
+    const ru = p.user.locale !== "tm";
+    await sendPush(
+      p.user.fcmToken,
+      ru ? "Игра отменена" : "Oýun ýatyryldy",
+      ru ? "Организатор отменил игру." : "Guramaçy oýny ýatyrdy.",
+      { gameId, url: `/${p.user.locale}/games/${gameId}` },
+    );
+  }
 
   revalidatePath(`/${locale}/games`);
   redirect(`/${locale}/games`);

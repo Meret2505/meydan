@@ -29,6 +29,9 @@ export default async function GamesPage({
     where: { id: session!.user.id },
     select: { name: true, district: true },
   });
+  const unreadCount = await prisma.notification.count({
+    where: { userId: session!.user.id, isRead: false },
+  });
   const t = await getTranslations();
 
   return (
@@ -39,12 +42,35 @@ export default async function GamesPage({
           <div className="font-display font-extrabold text-[25px]">
             {t("games.feed_title")}
           </div>
-          {user?.district && (
-            <div className="text-text-muted text-[13px] font-semibold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-primary" />
-              {user.district}
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {user?.district && (
+              <div className="text-text-muted text-[13px] font-semibold flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-primary" />
+                {user.district}
+              </div>
+            )}
+            <Link
+              href={`/${locale}/notifications`}
+              aria-label="notifications"
+              className="relative w-10 h-10 rounded-xl bg-white/5 border border-white/8 flex items-center justify-center text-text-muted"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
+              >
+                <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.5 21a2 2 0 01-3 0" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-primary border border-bg" />
+              )}
+            </Link>
+          </div>
         </div>
 
         <div className="flex bg-white/5 rounded-2xl p-1 mt-4">

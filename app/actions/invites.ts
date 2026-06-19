@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/fcm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -30,9 +31,15 @@ export async function invitePlayerToGame(
 
   const receiver = await prisma.user.findUnique({
     where: { id: receiverId },
-    select: { isOpenToInvite: true, locale: true },
+    select: { isOpenToInvite: true, locale: true, fcmToken: true },
   });
   if (!receiver?.isOpenToInvite) return;
+
+  const ru = receiver.locale !== "tm";
+  const title = ru ? "Приглашение в игру" : "Oýna çakylyk";
+  const body = ru
+    ? "Вас пригласили в открытую игру."
+    : "Sizi açyk oýna çagyrýarlar.";
 
   await prisma.$transaction(async (tx) => {
     await tx.gameInvite.upsert({
@@ -44,14 +51,16 @@ export async function invitePlayerToGame(
       data: {
         userId: receiverId,
         type: "GAME_INVITE",
-        title: receiver.locale === "tm" ? "Oýna çakylyk" : "Приглашение в игру",
-        body:
-          receiver.locale === "tm"
-            ? "Sizi açyk oýna çagyrýarlar."
-            : "Вас пригласили в открытую игру.",
+        title,
+        body,
         data: { gameId },
       },
     });
+  });
+
+  await sendPush(receiver.fcmToken, title, body, {
+    gameId,
+    url: `/${receiver.locale}/games/${gameId}`,
   });
 
   revalidatePath(`/${locale}/players/${receiverId}`);

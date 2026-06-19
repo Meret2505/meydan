@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { FcmRegister } from "@/components/FcmRegister";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export default async function MainLayout({
     <div className="min-h-dvh pb-20">
       {children}
       <BottomNav />
+      <FcmRegister />
     </div>
   );
 }
