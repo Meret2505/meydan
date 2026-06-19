@@ -29,6 +29,7 @@ export default async function TournamentRegisterPage({
     where: { members: { some: { userId, isCaptain: true } } },
     include: { _count: { select: { members: true } } },
     orderBy: { name: "asc" },
+    // include `color` since RegisterTeamPicker tiles use it
   });
 
   const registeredTeamIds = new Set(tr.teams.map((t) => t.teamId));
@@ -60,6 +61,7 @@ export default async function TournamentRegisterPage({
             id: t.id,
             name: t.name,
             district: t.district,
+            color: t.color,
             members: t._count.members,
             registered: registeredTeamIds.has(t.id),
           }))}

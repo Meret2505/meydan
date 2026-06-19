@@ -7,12 +7,14 @@ import {
   registerTeamForTournament,
   unregisterTeamFromTournament,
 } from "@/app/actions/tournaments";
+import { teamGradient } from "@/lib/team-color";
 import { cn } from "@/lib/utils";
 
 interface Team {
   id: string;
   name: string;
   district: string | null;
+  color: string | null;
   members: number;
   registered: boolean;
 }
@@ -81,12 +83,8 @@ export function RegisterTeamPicker({
                 )}
               >
                 <div
-                  className={cn(
-                    "w-[46px] h-[46px] rounded-[13px] flex items-center justify-center font-display font-extrabold text-[15px]",
-                    active
-                      ? "bg-primary text-primary-text"
-                      : "bg-white/5 text-text-soft border border-white/10",
-                  )}
+                  className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center font-display font-extrabold text-[15px] text-[#06210F]"
+                  style={{ background: teamGradient(t.color) }}
                 >
                   {monogram(t.name)}
                 </div>

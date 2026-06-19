@@ -8,6 +8,7 @@ import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { TeamActions } from "./TeamActions";
 import { RemoveMemberButton } from "./RemoveMemberButton";
+import { getTeamColor } from "@/lib/team-color";
 
 function initials(name: string) {
   return (
@@ -68,6 +69,7 @@ export default async function TeamDetailPage({
     else draws++;
   }
   const points = wins * 3 + draws;
+  const teamColor = getTeamColor(team.color);
 
   const membersWithStats = await Promise.all(
     team.members.map(async (m) => ({
@@ -108,8 +110,11 @@ export default async function TeamDetailPage({
       <div className="px-6 pb-28 -mt-[44px]">
         <div className="flex items-end gap-3.5">
           <div
-            className="w-[72px] h-[72px] rounded-[20px] bg-primary flex items-center justify-center font-display font-extrabold text-[22px] text-[#06210F]"
-            style={{ border: "3px solid #0B0E0D" }}
+            className="w-[72px] h-[72px] rounded-[20px] flex items-center justify-center font-display font-extrabold text-[22px] text-[#06210F]"
+            style={{
+              background: `linear-gradient(140deg, ${teamColor.base}, ${teamColor.edge})`,
+              border: "3px solid #0B0E0D",
+            }}
           >
             {monogram}
           </div>

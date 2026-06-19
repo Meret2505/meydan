@@ -11,11 +11,17 @@ async function requireUserId() {
   return session.user.id;
 }
 
+const ALLOWED_COLORS = ["green", "blue", "amber", "red", "purple"] as const;
+
 export async function createTeam(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const locale = String(formData.get("locale") ?? "ru");
   const name = String(formData.get("name") ?? "").trim();
   const district = String(formData.get("district") ?? "").trim() || null;
+  const rawColor = String(formData.get("color") ?? "");
+  const color = (ALLOWED_COLORS as readonly string[]).includes(rawColor)
+    ? rawColor
+    : "green";
 
   if (name.length < 2) return;
 
@@ -23,6 +29,7 @@ export async function createTeam(formData: FormData): Promise<void> {
     data: {
       name,
       district,
+      color,
       members: { create: { userId, isCaptain: true } },
     },
   });

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
+import { teamGradient } from "@/lib/team-color";
 
 function hue(seed: string) {
   let h = 0;
@@ -46,7 +47,7 @@ export default async function PlayerPublicProfile({
       isOpenToInvite: true,
       createdAt: true,
       teamMemberships: {
-        include: { team: { select: { id: true, name: true, district: true } } },
+        include: { team: { select: { id: true, name: true, district: true, color: true } } },
       },
     },
   });
@@ -174,11 +175,7 @@ export default async function PlayerPublicProfile({
                 >
                   <div
                     className="w-[38px] h-[38px] rounded-[11px] flex items-center justify-center font-display font-extrabold text-[13px] text-[#06210F]"
-                    style={{
-                      background: `linear-gradient(140deg, hsl(${hue(tm.team.id)} 70% 55%), hsl(${
-                        (hue(tm.team.id) + 30) % 360
-                      } 70% 40%))`,
-                    }}
+                    style={{ background: teamGradient(tm.team.color) }}
                   >
                     {tm.team.name.slice(0, 2).toUpperCase()}
                   </div>

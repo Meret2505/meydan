@@ -108,7 +108,7 @@ export default async function FieldDetailPage({
         )}
 
         <Link
-          href={`/${locale}/games/create`}
+          href={`/${locale}/games/create?fieldId=${field.id}`}
           className="h-12 rounded-xl border border-white/15 text-text font-display font-bold text-[14px] flex items-center justify-center"
         >
           Собрать игру здесь

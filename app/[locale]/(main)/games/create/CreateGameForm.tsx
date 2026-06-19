@@ -44,16 +44,22 @@ function Submit({ label }: { label: string }) {
 
 export function CreateGameForm({
   fields,
+  preselectedFieldId,
   positions,
   labels,
 }: {
   fields: Field[];
+  preselectedFieldId?: string | null;
   positions: { value: Position; label: string }[];
   labels: Labels;
 }) {
   const locale = useLocale();
-  const [useCustom, setUseCustom] = useState(fields.length === 0);
-  const [selectedFieldId, setSelectedFieldId] = useState<string>("");
+  const [useCustom, setUseCustom] = useState(
+    fields.length === 0 && !preselectedFieldId,
+  );
+  const [selectedFieldId, setSelectedFieldId] = useState<string>(
+    preselectedFieldId ?? "",
+  );
   const [selectedPositions, setSelectedPositions] = useState<Position[]>([]);
 
   function toggle(p: Position) {

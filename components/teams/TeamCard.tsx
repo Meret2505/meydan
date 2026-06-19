@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
+import { teamGradient } from "@/lib/team-color";
 
 export interface TeamCardData {
   id: string;
   name: string;
   district: string | null;
+  color: string | null;
   memberCount: number;
   captainName: string | null;
-}
-
-function hue(seed: string) {
-  let h = 0;
-  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h % 360;
 }
 
 export function TeamCard({ team }: { team: TeamCardData }) {
@@ -25,11 +21,7 @@ export function TeamCard({ team }: { team: TeamCardData }) {
     >
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center font-display font-extrabold text-[16px] text-[#06210F] shrink-0"
-        style={{
-          background: `linear-gradient(140deg, hsl(${hue(team.id)} 70% 55%), hsl(${
-            (hue(team.id) + 30) % 360
-          } 70% 40%))`,
-        }}
+        style={{ background: teamGradient(team.color) }}
       >
         {monogram}
       </div>

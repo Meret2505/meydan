@@ -113,18 +113,29 @@ model VerificationToken {
 }
 
 model Field {
-  id        String   @id @default(cuid())
-  name      String
-  address   String
-  district  String
-  surface   String
-  capacity  Int
-  phone     String?
-  photos    String[]
-  latitude  Float?
-  longitude Float?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  externalId Int?     @unique
+  name       String
+  nameTm     String?
+  nameRu     String?
+  address    String
+  addressTm  String?
+  addressRu  String?
+  bodyTm     String?
+  bodyRu     String?
+  district   String
+  surface    String
+  capacity   Int
+  phone      String?
+  image      String?
+  photos     String[]
+  latitude   Float?
+  longitude  Float?
+  hours      Json?
+  contacts   Json?
+  attributes Json?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
 
   games Game[]
 
@@ -178,6 +189,7 @@ model Team {
   id        String   @id @default(cuid())
   name      String
   logo      String?
+  color     String?
   district  String?
   createdAt DateTime @default(now())
 

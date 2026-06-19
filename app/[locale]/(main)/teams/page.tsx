@@ -3,12 +3,7 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
-
-function hue(seed: string) {
-  let h = 0;
-  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h % 360;
-}
+import { teamGradient } from "@/lib/team-color";
 
 export default async function TeamsPage({
   params: { locale },
@@ -73,11 +68,7 @@ export default async function TeamsPage({
                 >
                   <div
                     className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center font-display font-extrabold text-[16px] text-[#06210F] shrink-0"
-                    style={{
-                      background: `linear-gradient(140deg, hsl(${hue(team.id)} 70% 55%), hsl(${
-                        (hue(team.id) + 30) % 360
-                      } 70% 40%))`,
-                    }}
+                    style={{ background: teamGradient(team.color) }}
                   >
                     {team.name.slice(0, 2).toUpperCase()}
                   </div>

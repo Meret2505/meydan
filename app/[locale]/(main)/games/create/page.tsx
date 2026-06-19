@@ -6,8 +6,10 @@ import { CreateGameForm } from "./CreateGameForm";
 
 export default async function CreateGamePage({
   params: { locale },
+  searchParams,
 }: {
   params: { locale: string };
+  searchParams: { fieldId?: string };
 }) {
   unstable_setRequestLocale(locale);
   const t = await getTranslations();
@@ -17,6 +19,9 @@ export default async function CreateGamePage({
     orderBy: { name: "asc" },
     select: { id: true, name: true, district: true },
   });
+
+  const preselectedFieldId = fields.find((f) => f.id === searchParams.fieldId)?.id
+    ?? null;
 
   return (
     <>
@@ -29,6 +34,7 @@ export default async function CreateGamePage({
       </div>
       <CreateGameForm
         fields={fields}
+        preselectedFieldId={preselectedFieldId}
         positions={(["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD"] as const).map((p) => ({
           value: p,
           label: t(`positions.${p}`),
