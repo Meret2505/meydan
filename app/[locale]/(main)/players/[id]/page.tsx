@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
+import { Avatar } from "@/components/avatar/Avatar";
 import { teamGradient } from "@/lib/team-color";
 
 function hue(seed: string) {
@@ -78,22 +79,18 @@ export default async function PlayerPublicProfile({
       <div className="flex items-center gap-3.5 px-6 pt-4">
         <BackButton href={`/${locale}/players`} />
         <div className="font-display font-extrabold text-[18px]">
-          Профиль игрока
+          {t("players.profile_title")}
         </div>
       </div>
 
       <div className="px-6 pt-[18px] pb-32">
         <div className="flex items-center gap-4">
-          <div
-            className="w-[74px] h-[74px] rounded-full flex items-center justify-center font-display font-extrabold text-[27px] text-[#06210F]"
-            style={{
-              background: `linear-gradient(140deg, hsl(${hue(player.id)} 70% 55%), hsl(${
-                (hue(player.id) + 30) % 360
-              } 70% 40%))`,
-            }}
-          >
-            {initials(player.name)}
-          </div>
+          <Avatar
+            name={player.name}
+            seed={player.id}
+            src={player.avatar}
+            size={74}
+          />
           <div className="flex-1 min-w-0">
             <div className="font-display font-extrabold text-[22px] tracking-tight truncate">
               {player.name}
@@ -101,7 +98,7 @@ export default async function PlayerPublicProfile({
             <div className="text-[13.5px] text-[#9aa39d] font-semibold mt-1">
               {player.position ? t(`positions.${player.position}`) : "—"}
               {player.district && ` · ${player.district}`}
-              {player.age && ` · ${player.age} лет`}
+              {player.age && ` · ` + t("players.age_years", { age: player.age })}
             </div>
           </div>
         </div>
@@ -110,12 +107,12 @@ export default async function PlayerPublicProfile({
           <div className="mt-3.5 flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-primary/10 border border-primary/30">
             <span className="w-2 h-2 rounded-full bg-primary" />
             <span className="text-[13.5px] font-bold text-primary-soft">
-              Открыт к приглашению в игры
+              {t("players.open_invites")}
             </span>
           </div>
         ) : (
           <div className="mt-3.5 px-3.5 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-[13.5px] font-bold text-text-muted">
-            Игрок закрыл приглашения
+            {t("players.closed_to_invites")}
           </div>
         )}
 
@@ -123,7 +120,7 @@ export default async function PlayerPublicProfile({
         <div className="flex gap-3 mt-4">
           <div className="basis-[58%] bg-surface border border-border rounded-[18px] p-4">
             <div className="text-[12px] text-text-muted font-semibold">
-              Посещаемость
+              {t("players.attendance")}
             </div>
             <div className="font-display font-black text-[38px] text-primary leading-none mt-1.5">
               {stats.attendanceRate === null ? "—" : stats.attendanceRate}
@@ -138,13 +135,13 @@ export default async function PlayerPublicProfile({
               />
             </div>
             <div className="text-[11.5px] text-[#6e756f] mt-2">
-              пришёл на {stats.gamesPlayed} из {stats.totalJoined} игр
+              {t("players.attendance_detail", { played: stats.gamesPlayed, total: stats.totalJoined })}
             </div>
           </div>
           <div className="flex-1 flex flex-col gap-2.5">
             <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
               <div className="text-[12px] text-text-muted font-semibold">
-                Сыграно
+                {t("players.played")}
               </div>
               <div className="font-display font-extrabold text-[26px] mt-1">
                 {stats.gamesPlayed}
@@ -152,7 +149,7 @@ export default async function PlayerPublicProfile({
             </div>
             <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
               <div className="text-[12px] text-text-muted font-semibold">
-                Записан
+                {t("players.joined_stat")}
               </div>
               <div className="font-display font-extrabold text-[26px] mt-1">
                 {stats.totalJoined}
@@ -164,7 +161,7 @@ export default async function PlayerPublicProfile({
         {player.teamMemberships.length > 0 && (
           <>
             <div className="font-display font-bold text-[15px] mt-5 mb-3">
-              Команды
+              {t("players.teams_label")}
             </div>
             <div className="flex flex-col gap-2.5">
               {player.teamMemberships.map((tm) => (
@@ -185,7 +182,7 @@ export default async function PlayerPublicProfile({
                     </div>
                     <div className="text-[12px] text-text-muted mt-0.5">
                       {tm.team.district ?? "—"}
-                      {tm.isCaptain && " · капитан"}
+                      {tm.isCaptain && ` · ` + t("teams.captain_full")}
                     </div>
                   </div>
                 </Link>
@@ -220,18 +217,18 @@ export default async function PlayerPublicProfile({
             <circle cx="11" cy="11" r="7" />
             <path d="M21 21l-4-4" />
           </svg>
-          Другие
+          {t("players.others_label")}
         </Link>
         {player.isOpenToInvite ? (
           <Link
             href={`/${locale}/players/${player.id}/invite`}
             className="flex-[1.3] h-14 rounded-2xl bg-primary text-primary-text font-display font-extrabold text-[16px] flex items-center justify-center"
           >
-            Пригласить в игру
+            {t("players.invite_to_game")}
           </Link>
         ) : (
           <div className="flex-[1.3] h-14 rounded-2xl border border-white/10 text-text-muted font-display font-bold text-[14px] flex items-center justify-center">
-            Закрыт от приглашений
+            {t("players.closed_btn")}
           </div>
         )}
       </div>

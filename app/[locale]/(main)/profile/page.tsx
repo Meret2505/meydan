@@ -1,23 +1,13 @@
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
+import { Avatar } from "@/components/avatar/Avatar";
 import { gameFormat } from "@/lib/game-format";
 import { LogoutButton } from "./LogoutButton";
-
-function initials(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .map((s) => s[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?"
-  );
-}
 
 export default async function ProfilePage({
   params: { locale },
@@ -25,22 +15,23 @@ export default async function ProfilePage({
   params: { locale: string };
 }) {
   unstable_setRequestLocale(locale);
-  const t = await getTranslations();
-  const session = await auth();
-  const user = await prisma.user.findUnique({ where: { id: session!.user.id } });
-  if (!user) return null;
-  const stats = await getPlayerStats(user.id);
-
-  const recent = await prisma.gameParticipant.findMany({
-    where: { userId: user.id, game: { status: "COMPLETED" } },
-    include: {
-      game: {
-        include: { field: { select: { name: true } } },
+  const [t, session] = await Promise.all([getTranslations(), getSession()]);
+  const userId = session!.user.id;
+  const [user, stats, recent] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId } }),
+    getPlayerStats(userId),
+    prisma.gameParticipant.findMany({
+      where: { userId, game: { status: "COMPLETED" } },
+      include: {
+        game: {
+          include: { field: { select: { name: true } } },
+        },
       },
-    },
-    orderBy: { joinedAt: "desc" },
-    take: 3,
-  });
+      orderBy: { joinedAt: "desc" },
+      take: 3,
+    }),
+  ]);
+  if (!user) return null;
 
   const dateFmt = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
   const positionLabel = user.position ? t(`positions.${user.position}`) : "—";
@@ -52,12 +43,13 @@ export default async function ProfilePage({
       <div className="px-6 pt-3.5 pb-24">
         {/* Header avatar + name */}
         <div className="flex items-center gap-4">
-          <div
-            className="w-[74px] h-[74px] rounded-full flex items-center justify-center font-display font-extrabold text-[27px] text-[#06210F]"
-            style={{ background: "linear-gradient(140deg,#1FD16B,#14a955)" }}
-          >
-            {initials(user.name)}
-          </div>
+          <Avatar
+            name={user.name}
+            seed={user.id}
+            src={user.avatar}
+            size={74}
+          />
+
           <div className="flex-1 min-w-0">
             <div className="font-display font-extrabold text-[22px] tracking-tight truncate">
               {user.name}
@@ -94,8 +86,8 @@ export default async function ProfilePage({
             }`}
           >
             {user.isOpenToInvite
-              ? "Открыт к приглашению в игры"
-              : "Закрыт от приглашений"}
+              ? t("profile.open_invites")
+              : t("profile.closed_invites")}
           </span>
         </div>
 
@@ -103,7 +95,7 @@ export default async function ProfilePage({
         <div className="flex gap-3 mt-4">
           <div className="basis-[58%] bg-surface border border-border rounded-[18px] p-4">
             <div className="text-[12px] text-text-muted font-semibold">
-              Посещаемость
+              {t("profile.attendance")}
             </div>
             <div className="font-display font-black text-[38px] text-primary leading-none mt-1.5">
               {stats.attendanceRate === null ? "—" : stats.attendanceRate}
@@ -118,13 +110,16 @@ export default async function ProfilePage({
               />
             </div>
             <div className="text-[11.5px] text-[#6e756f] mt-2">
-              пришёл на {stats.gamesPlayed} из {stats.totalJoined} игр
+              {t("profile.attendance_detail", {
+                played: stats.gamesPlayed,
+                total: stats.totalJoined,
+              })}
             </div>
           </div>
           <div className="flex-1 flex flex-col gap-2.5">
             <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
               <div className="text-[12px] text-text-muted font-semibold">
-                Сыграно
+                {t("profile.played")}
               </div>
               <div className="font-display font-extrabold text-[26px] mt-1">
                 {stats.gamesPlayed}
@@ -132,7 +127,7 @@ export default async function ProfilePage({
             </div>
             <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
               <div className="text-[12px] text-text-muted font-semibold">
-                Записан
+                {t("profile.joined_stat")}
               </div>
               <div className="font-display font-extrabold text-[26px] mt-1">
                 {stats.totalJoined}
@@ -145,7 +140,7 @@ export default async function ProfilePage({
         {recent.length > 0 && (
           <>
             <div className="font-display font-bold text-[15px] mt-5 mb-3">
-              Последние игры
+              {t("profile.recent_games")}
             </div>
             <div className="flex flex-col gap-2.5">
               {recent.map((p) => (
@@ -183,9 +178,9 @@ export default async function ProfilePage({
                     }`}
                   >
                     {p.attended === true
-                      ? "пришёл"
+                      ? t("profile.came")
                       : p.attended === false
-                      ? "не был"
+                      ? t("profile.absent")
                       : "—"}
                   </span>
                 </Link>
@@ -196,7 +191,7 @@ export default async function ProfilePage({
 
         {/* Settings */}
         <div className="font-display font-bold text-[15px] mt-5 mb-3">
-          Настройки
+          {t("profile.settings")}
         </div>
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.04]">
@@ -214,7 +209,7 @@ export default async function ProfilePage({
               <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
             </svg>
             <span className="flex-1 font-semibold text-[14.5px]">
-              Язык интерфейса
+              {t("profile.language")}
             </span>
             <LocaleToggle />
           </div>
@@ -235,11 +230,11 @@ export default async function ProfilePage({
               <path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7z" />
             </svg>
             <span className="flex-1 font-semibold text-[14.5px]">
-              Профиль и контакты
+              {t("profile.profile_contacts")}
             </span>
             <span className="text-text-muted text-[18px]">›</span>
           </Link>
-          <LogoutButton locale={locale} logoutLabel="Выйти из аккаунта" />
+          <LogoutButton locale={locale} logoutLabel={t("profile.logout_full")} />
         </div>
       </div>
     </>

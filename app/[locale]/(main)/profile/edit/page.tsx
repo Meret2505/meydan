@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { POSITIONS, DISTRICTS } from "@/lib/data";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
+import { AvatarUploader } from "@/components/avatar/AvatarUploader";
 import { ProfileEditForm } from "./ProfileEditForm";
 import { Locale } from "@/i18n";
 
@@ -29,9 +30,14 @@ export default async function EditProfilePage({
       <div className="px-6 pt-4 flex items-center gap-4">
         <BackButton href={`/${locale}/profile`} />
         <div className="font-display font-extrabold text-[22px]">
-          Редактировать профиль
+          {t("profile.edit_title")}
         </div>
       </div>
+
+      <div className="px-7 pt-6">
+        <AvatarUploader name={user.name} current={user.avatar ?? null} />
+      </div>
+
       <ProfileEditForm
         user={{
           name: user.name,
