@@ -55,5 +55,7 @@ export async function phoneLoginOrSignup(formData: FormData) {
 }
 
 export async function googleSignIn(locale: string) {
-  await signIn("google", { redirectTo: `/${locale}/onboarding/name` });
+  // Land on the feed; the (main) layout guard sends users with incomplete
+  // onboarding to /onboarding/name and lets returning users straight in.
+  await signIn("google", { redirectTo: `/${locale}` });
 }
