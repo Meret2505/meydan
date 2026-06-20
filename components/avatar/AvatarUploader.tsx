@@ -29,6 +29,7 @@ export function AvatarUploader({
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(current);
   const [busy, setBusy] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
 
   function onPick(file: File) {
     if (file.size > 5 * 1024 * 1024) {
@@ -47,6 +48,7 @@ export function AvatarUploader({
   }
 
   async function onRemove() {
+    if (!confirm("Удалить фото профиля?")) return;
     setBusy(true);
     try {
       await removeAvatar(locale);
@@ -64,6 +66,8 @@ export function AvatarUploader({
           fd.set("locale", locale);
           await uploadAvatar(fd);
           setBusy(false);
+          setSavedFlash(true);
+          setTimeout(() => setSavedFlash(false), 2200);
         }}
       >
         <input
@@ -84,26 +88,29 @@ export function AvatarUploader({
         onClick={() => fileRef.current?.click()}
         disabled={busy}
         aria-label="upload avatar"
-        className="relative rounded-full flex items-center justify-center font-display font-extrabold text-[#06210F] disabled:opacity-60"
-        style={{
-          width: size,
-          height: size,
-          background: preview
-            ? undefined
-            : "linear-gradient(140deg,#1FD16B,#14a955)",
-          fontSize: Math.round(size * 0.36),
-        }}
+        className="relative rounded-full overflow-hidden disabled:opacity-60"
+        style={{ width: size, height: size }}
       >
-        {preview ? (
+        {/* Always-visible gradient + initials placeholder */}
+        <div
+          className="absolute inset-0 flex items-center justify-center font-display font-extrabold text-[#06210F]"
+          style={{
+            background: "linear-gradient(140deg,#1FD16B,#14a955)",
+            fontSize: Math.round(size * 0.36),
+          }}
+        >
+          {initials(name)}
+        </div>
+        {/* Overlaid image (real photo or local data-URL preview) */}
+        {preview && (
           <img
             src={preview}
             alt={name}
-            className="w-full h-full rounded-full object-cover"
             draggable={false}
+            className="absolute inset-0 w-full h-full object-cover"
           />
-        ) : (
-          initials(name)
         )}
+        {/* Camera badge */}
         <span
           className="absolute right-0 bottom-0 w-9 h-9 rounded-full bg-surface flex items-center justify-center text-text-soft"
           style={{ border: "2px solid #0B0E0D" }}
@@ -124,12 +131,19 @@ export function AvatarUploader({
         </span>
       </button>
 
-      {preview && (
+      {savedFlash && (
+        <div className="text-primary-soft text-[12.5px] font-bold">
+          ✓ Фото сохранено
+        </div>
+      )}
+      {!savedFlash && busy && (
+        <div className="text-text-muted text-[12.5px] font-bold">Загрузка…</div>
+      )}
+      {!busy && !savedFlash && preview && (
         <button
           type="button"
           onClick={onRemove}
-          disabled={busy}
-          className="text-text-muted text-[12.5px] font-bold disabled:opacity-50"
+          className="text-text-muted text-[12.5px] font-bold"
         >
           Удалить фото
         </button>

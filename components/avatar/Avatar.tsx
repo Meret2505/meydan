@@ -53,7 +53,6 @@ export function Avatar({
           alt={name}
           width={size}
           height={size}
-          loading="lazy"
           draggable={false}
           className="absolute inset-0 w-full h-full object-cover"
         />
