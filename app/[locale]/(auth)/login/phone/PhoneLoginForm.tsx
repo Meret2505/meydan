@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { phoneLoginOrSignup } from "@/app/actions/auth";
 
@@ -32,6 +32,7 @@ function formatPhoneDisplay(raw: string) {
 
 export function PhoneLoginForm({ labels }: { labels: Labels }) {
   const locale = useLocale();
+  const t = useTranslations();
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -85,10 +86,10 @@ export function PhoneLoginForm({ labels }: { labels: Labels }) {
         {error && (
           <p className="text-danger text-[13px]">
             {error === "wrong_password"
-              ? "Неверный пароль"
+              ? t("errors.wrong_password")
               : error === "invalid_input"
-              ? "Введите 8 цифр номера и пароль (минимум 6 символов)"
-              : "Не удалось войти"}
+              ? t("errors.invalid_input")
+              : t("errors.auth_failed")}
           </p>
         )}
       </div>

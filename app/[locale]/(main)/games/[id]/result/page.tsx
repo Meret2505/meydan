@@ -38,7 +38,7 @@ export default async function ResultPage({
         <BackButton href={`/${locale}/games/${id}`} />
         <div>
           <div className="font-display font-extrabold text-[21px]">
-            Результат игры
+            {t("games.result_title")}
           </div>
           <div className="text-text-muted text-[12.5px] font-semibold mt-0.5 truncate max-w-[260px]">
             {game.field?.name ?? game.fieldName ?? "—"} · {day} {time}
@@ -57,7 +57,7 @@ export default async function ResultPage({
             : null,
           attended: p.attended,
         }))}
-        labels={{ save: t("common.save"), came: "пришёл" }}
+        labels={{ save: t("common.save"), came: t("games.came") }}
       />
     </>
   );

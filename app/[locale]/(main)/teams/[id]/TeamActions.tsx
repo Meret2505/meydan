@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { disbandTeam, joinTeam, leaveTeam } from "@/app/actions/teams";
@@ -16,6 +17,7 @@ export function TeamActions({
   isMember: boolean;
   isCaptain: boolean;
 }) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -27,14 +29,14 @@ export function TeamActions({
           onClick={() => setOpen(true)}
           className="w-full h-12 rounded-xl border border-danger/40 text-danger font-display font-bold text-[14px]"
         >
-          Расформировать команду
+          {t("teams.disband")}
         </button>
         <ConfirmDialog
           open={open}
-          title="Расформировать команду?"
-          description="Действие необратимо. Команда без матчей будет удалена."
-          confirmLabel="Расформировать"
-          cancelLabel="Назад"
+          title={t("teams.disband_confirm_title")}
+          description={t("teams.disband_confirm_desc")}
+          confirmLabel={t("teams.disband")}
+          cancelLabel={t("common.back")}
           destructive
           isPending={isPending}
           onCancel={() => setOpen(false)}
@@ -52,7 +54,7 @@ export function TeamActions({
         disabled={isPending}
         onClick={() => startTransition(() => leaveTeam(teamId, locale))}
       >
-        Выйти из команды
+        {t("teams.leave")}
       </Button>
     );
   }
@@ -63,7 +65,7 @@ export function TeamActions({
       disabled={isPending}
       onClick={() => startTransition(() => joinTeam(teamId, locale))}
     >
-      Вступить в команду
+      {t("teams.join")}
     </Button>
   );
 }

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
@@ -45,23 +46,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user?.id) (token as Record<string, unknown>).userId = user.id;
-      return token;
-    },
-    async session({ session, token }) {
-      const userId = (token as Record<string, unknown>).userId as
-        | string
-        | undefined;
-      if (userId && session.user) {
-        session.user.id = userId;
+      const t = token as Record<string, unknown>;
+      const userId = t.userId as string | undefined;
+      // Resolve onboardingComplete lazily and cache it in the token.
+      // Onboarding is one-way (once a phone is set it stays), so once this is
+      // true we never need to hit the DB again on subsequent requests.
+      // `trigger === "update"` forces a re-check (used right after onboarding).
+      if (userId && (t.onboardingComplete !== true || trigger === "update")) {
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
           select: { phone: true },
         });
-        session.user.onboardingComplete = !!dbUser?.phone;
+        t.onboardingComplete = !!dbUser?.phone;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      const t = token as Record<string, unknown>;
+      const userId = t.userId as string | undefined;
+      if (userId && session.user) {
+        session.user.id = userId;
+        session.user.onboardingComplete = t.onboardingComplete === true;
       }
       return session;
     },
   },
 });
+
+/**
+ * Request-deduped session accessor. Multiple calls within a single server
+ * render (e.g. the layout and the page) share one resolution instead of each
+ * paying a fresh round-trip.
+ */
+export const getSession = cache(auth);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { removeMember } from "@/app/actions/teams";
 
@@ -15,6 +16,7 @@ export function RemoveMemberButton({
   memberName: string;
   locale: string;
 }) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -34,10 +36,10 @@ export function RemoveMemberButton({
       </button>
       <ConfirmDialog
         open={open}
-        title={`Удалить ${memberName}?`}
-        description="Игрок будет исключён из состава команды. Он сможет вернуться позже."
-        confirmLabel="Удалить"
-        cancelLabel="Назад"
+        title={t("teams.remove_member_title", { name: memberName })}
+        description={t("teams.remove_member_desc")}
+        confirmLabel={t("common.delete")}
+        cancelLabel={t("common.back")}
         destructive
         isPending={isPending}
         onCancel={() => setOpen(false)}

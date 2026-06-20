@@ -5,10 +5,14 @@ import { StatusBar } from "@/components/ui/StatusBar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FieldCard, type FieldCardData } from "@/components/fields/FieldCard";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
-import { DISTRICTS } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
-const SURFACES = ["Искусственная трава", "Резиновое", "Грунт"];
+const SURFACES = ["Искусственная трава", "Резиновое", "Грунт"] as const;
+const SURFACE_KEY: Record<string, string> = {
+  "Искусственная трава": "fields.surface_turf",
+  "Резиновое": "fields.surface_rubber",
+  "Грунт": "fields.surface_dirt",
+};
 
 export default async function FieldsPage({
   params: { locale },
@@ -19,10 +23,19 @@ export default async function FieldsPage({
 }) {
   unstable_setRequestLocale(locale);
   const t = await getTranslations();
-  const districtFilter = DISTRICTS.includes(searchParams.district ?? "")
+
+  const districtRows = await prisma.field.findMany({
+    where: { isActive: true },
+    select: { district: true },
+    distinct: ["district"],
+    orderBy: { district: "asc" },
+  });
+  const districts = districtRows.map((r) => r.district);
+
+  const districtFilter = districts.includes(searchParams.district ?? "")
     ? (searchParams.district as string)
     : null;
-  const surfaceFilter = SURFACES.includes(searchParams.surface ?? "")
+  const surfaceFilter = (SURFACES as readonly string[]).includes(searchParams.surface ?? "")
     ? (searchParams.surface as string)
     : null;
   const view = searchParams.view === "map" ? "map" : "list";
@@ -52,12 +65,21 @@ export default async function FieldsPage({
   const cards: FieldCardData[] = fields.map((f) => ({
     id: f.id,
     name: f.name,
+    nameTm: f.nameTm,
+    nameRu: f.nameRu,
     address: f.address,
+    addressTm: f.addressTm,
+    addressRu: f.addressRu,
     district: f.district,
     surface: f.surface,
     capacity: f.capacity,
     photo: f.photos[0] ?? null,
   }));
+
+  const pickName = (f: (typeof fields)[number]) =>
+    locale === "tm" ? f.nameTm ?? f.name : f.nameRu ?? f.name;
+  const pickAddress = (f: (typeof fields)[number]) =>
+    locale === "tm" ? f.addressTm ?? f.address : f.addressRu ?? f.address;
 
   return (
     <>
@@ -68,7 +90,7 @@ export default async function FieldsPage({
           href={`/${locale}/fields${queryFor({ view: view === "map" ? null : "map" })}`}
           className="h-9 px-3 rounded-lg bg-white/5 border border-white/10 font-display font-bold text-[13px] inline-flex items-center"
         >
-          {view === "map" ? "Списком" : "Карта"}
+          {view === "map" ? t("fields.view_list") : t("fields.view_map")}
         </Link>
       </div>
 
@@ -76,10 +98,10 @@ export default async function FieldsPage({
         <div className="flex gap-2 overflow-x-auto scrollbar-none">
           <Chip
             href={`/${locale}/fields${queryFor({ district: null })}`}
-            label="Все районы"
+            label={t("fields.districts_any")}
             active={!districtFilter}
           />
-          {DISTRICTS.map((d) => (
+          {districts.map((d) => (
             <Chip
               key={d}
               href={`/${locale}/fields${queryFor({ district: d })}`}
@@ -91,14 +113,14 @@ export default async function FieldsPage({
         <div className="flex gap-2 overflow-x-auto scrollbar-none">
           <Chip
             href={`/${locale}/fields${queryFor({ surface: null })}`}
-            label="Любое покрытие"
+            label={t("fields.surfaces_any")}
             active={!surfaceFilter}
           />
           {SURFACES.map((s) => (
             <Chip
               key={s}
               href={`/${locale}/fields${queryFor({ surface: s })}`}
-              label={s}
+              label={t(SURFACE_KEY[s] as never)}
               active={surfaceFilter === s}
             />
           ))}
@@ -110,8 +132,8 @@ export default async function FieldsPage({
           <FieldMapLazy
             fields={fields.map((f) => ({
               id: f.id,
-              name: f.name,
-              address: f.address,
+              name: pickName(f),
+              address: pickAddress(f),
               district: f.district,
               latitude: f.latitude,
               longitude: f.longitude,
@@ -125,7 +147,7 @@ export default async function FieldsPage({
             <EmptyState
               icon={<span className="text-2xl">📍</span>}
               title={t("empty.no_results")}
-              description="Снимите фильтры или загляните позже."
+              description={t("fields.no_results_sub")}
             />
           ) : (
             cards.map((c) => <FieldCard key={c.id} field={c} />)

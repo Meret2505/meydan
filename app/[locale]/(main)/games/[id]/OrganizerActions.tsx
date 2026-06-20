@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -17,13 +18,14 @@ export function OrganizerActions({
   isPast: boolean;
   isCompleted: boolean;
 }) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   if (isCompleted) {
     return (
       <Button type="button" variant="secondary" disabled>
-        Игра завершена
+        {t("games.completed")}
       </Button>
     );
   }
@@ -34,7 +36,7 @@ export function OrganizerActions({
         href={`/${locale}/games/${gameId}/result`}
         className="h-[58px] w-full rounded-lg bg-primary text-primary-text font-display font-extrabold text-[17px] flex items-center justify-center"
       >
-        Внести результат
+        {t("games.result")}
       </Link>
     );
   }
@@ -46,14 +48,14 @@ export function OrganizerActions({
         onClick={() => setOpen(true)}
         className="w-full h-[58px] rounded-lg border border-danger/40 text-danger font-display font-bold text-[15px]"
       >
-        Отменить игру
+        {t("games.cancel_game")}
       </button>
       <ConfirmDialog
         open={open}
-        title="Отменить игру?"
-        description="Все участники получат уведомление. Действие нельзя отменить."
-        confirmLabel="Да, отменить"
-        cancelLabel="Назад"
+        title={t("games.cancel_confirm_title")}
+        description={t("games.cancel_confirm_desc")}
+        confirmLabel={t("games.cancel_confirm_yes")}
+        cancelLabel={t("common.back")}
         destructive
         isPending={isPending}
         onCancel={() => setOpen(false)}

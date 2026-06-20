@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { cancelTournament } from "@/app/actions/tournaments";
 
@@ -13,6 +14,7 @@ export function CancelTournamentButton({
 }) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations();
   return (
     <>
       <button
@@ -20,14 +22,14 @@ export function CancelTournamentButton({
         onClick={() => setOpen(true)}
         className="w-full h-12 rounded-xl border border-danger/40 text-danger font-display font-bold text-[14px]"
       >
-        Отменить турнир
+        {t("tournaments.cancel_tournament")}
       </button>
       <ConfirmDialog
         open={open}
-        title="Отменить турнир?"
-        description="Турнир пометится как отменённый. Команды и матчи останутся видны."
-        confirmLabel="Отменить"
-        cancelLabel="Назад"
+        title={t("tournaments.cancel_confirm_title")}
+        description={t("tournaments.cancel_confirm_desc")}
+        confirmLabel={t("tournaments.cancel_tournament")}
+        cancelLabel={t("common.back")}
         destructive
         isPending={isPending}
         onCancel={() => setOpen(false)}

@@ -14,11 +14,16 @@ export default async function CreateGamePage({
   unstable_setRequestLocale(locale);
   const t = await getTranslations();
 
-  const fields = await prisma.field.findMany({
+  const fieldRows = await prisma.field.findMany({
     where: { isActive: true },
     orderBy: { name: "asc" },
-    select: { id: true, name: true, district: true },
+    select: { id: true, name: true, nameTm: true, nameRu: true, district: true },
   });
+  const fields = fieldRows.map((f) => ({
+    id: f.id,
+    name: (locale === "tm" ? f.nameTm : f.nameRu) ?? f.name,
+    district: f.district,
+  }));
 
   const preselectedFieldId = fields.find((f) => f.id === searchParams.fieldId)?.id
     ?? null;
@@ -40,14 +45,14 @@ export default async function CreateGamePage({
           label: t(`positions.${p}`),
         }))}
         labels={{
-          when: "Когда",
-          field: "Поле",
-          fieldFree: "Или впиши название поля",
-          totalSpots: "Всего игроков",
-          needed: "Каких позиций не хватает",
-          notes: "Комментарий",
+          when: t("games.create_when"),
+          field: t("games.create_field_label"),
+          fieldFree: t("games.create_field_free"),
+          totalSpots: t("games.create_total"),
+          needed: t("games.create_needed"),
+          notes: t("games.create_notes"),
           submit: t("games.create"),
-          choose: "выбрать из каталога",
+          choose: t("games.create_field_choose"),
         }}
       />
     </>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { teamGradient } from "@/lib/team-color";
@@ -11,8 +11,7 @@ export default async function TeamsPage({
   params: { locale: string };
 }) {
   unstable_setRequestLocale(locale);
-  const t = await getTranslations();
-  const session = await auth();
+  const [t, session] = await Promise.all([getTranslations(), getSession()]);
   const userId = session!.user.id;
 
   const myTeams = await prisma.team.findMany({
@@ -47,13 +46,13 @@ export default async function TeamsPage({
         </div>
 
         <div className="text-[13px] font-bold text-text-muted mt-5 mb-3">
-          Мои команды
+          {t("teams.my_teams")}
         </div>
 
         {myTeams.length === 0 ? (
           <div className="bg-surface border border-border rounded-[18px] p-5 text-center">
             <div className="text-text-muted text-[13.5px]">
-              Вы пока не состоите в команде.
+              {t("teams.not_in_team")}
             </div>
           </div>
         ) : (
@@ -77,8 +76,10 @@ export default async function TeamsPage({
                       {team.name}
                     </div>
                     <div className="text-[12.5px] text-text-muted mt-0.5 truncate">
-                      {team.district ?? "—"} · {team._count.members} в составе
-                      {captain && ` · кап. ${captain.split(" ")[0]}`}
+                      {team.district ?? "—"} ·{" "}
+                      {t("teams.members_count", { count: team._count.members })}
+                      {captain &&
+                        ` · ${t("teams.captain_short", { name: captain.split(" ")[0] })}`}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -86,7 +87,7 @@ export default async function TeamsPage({
                       #{i + 1}
                     </div>
                     <div className="text-[11px] text-text-muted mt-0.5">
-                      в рейтинге
+                      {t("teams.ranking")}
                     </div>
                   </div>
                 </Link>
@@ -103,13 +104,13 @@ export default async function TeamsPage({
             background: "transparent",
           }}
         >
-          + Создать команду
+          + {t("teams.create_team")}
         </Link>
 
         {others.length > 0 && (
           <>
             <div className="text-[13px] font-bold text-text-muted mt-6 mb-3">
-              Команды города
+              {t("teams.city_teams")}
             </div>
             <div className="bg-surface border border-border rounded-[18px] overflow-hidden">
               {others.map((team, i) => (
@@ -131,7 +132,7 @@ export default async function TeamsPage({
               ))}
             </div>
             <div className="text-center text-text-muted text-[11.5px] mt-2">
-              Число — сыгранных матчей
+              {t("teams.matches_hint")}
             </div>
           </>
         )}

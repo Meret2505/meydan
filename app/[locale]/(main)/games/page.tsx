@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { auth } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -25,15 +25,16 @@ export default async function GamesPage({
   const tab: Tab = searchParams.tab === "mine" ? "mine" : "open";
   const chip = (searchParams.chip as Chip | undefined) ?? undefined;
 
-  const session = await auth();
-  const user = await prisma.user.findUnique({
-    where: { id: session!.user.id },
-    select: { name: true, district: true },
-  });
-  const unreadCount = await prisma.notification.count({
-    where: { userId: session!.user.id, isRead: false },
-  });
-  const t = await getTranslations();
+  const session = await getSession();
+  const userId = session!.user.id;
+  const [user, unreadCount, t] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, district: true },
+    }),
+    prisma.notification.count({ where: { userId, isRead: false } }),
+    getTranslations(),
+  ]);
 
   return (
     <>
@@ -80,14 +81,14 @@ export default async function GamesPage({
         </div>
 
         <div className="flex gap-2 mt-3.5 overflow-x-auto scrollbar-none">
-          <ChipLink locale={locale} tab={tab} chip="today" active={chip === "today"} label="Сегодня" />
-          <ChipLink locale={locale} tab={tab} chip="five" active={chip === "five"} label="5×5" />
+          <ChipLink locale={locale} tab={tab} chip="today" active={chip === "today"} label={t("games.today")} />
+          <ChipLink locale={locale} tab={tab} chip="five" active={chip === "five"} label={t("games.chip_five")} />
           <ChipLink
             locale={locale}
             tab={tab}
             chip="goalie"
             active={chip === "goalie"}
-            label="Нужен вратарь"
+            label={t("games.chip_goalie")}
           />
         </div>
       </div>
@@ -246,7 +247,7 @@ async function Feed({
         title={t(tab === "open" ? "empty.no_games" : "empty.no_my_games")}
         description={
           tab === "open"
-            ? "Создай первую — и позови игроков из своего района."
+            ? t("games.create_first_sub")
             : undefined
         }
         action={

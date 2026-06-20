@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { recordMatchResult } from "@/app/actions/tournaments";
 
-function Submit() {
+function Submit({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
     <button
@@ -12,7 +13,7 @@ function Submit() {
       disabled={pending}
       className="w-full h-10 rounded-lg bg-primary text-primary-text font-display font-extrabold text-[13px] disabled:opacity-50"
     >
-      Добавить
+      {label}
     </button>
   );
 }
@@ -27,6 +28,7 @@ export function RecordResultForm({
   teams: { id: string; name: string }[];
 }) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations();
 
   if (!open) {
     return (
@@ -35,7 +37,7 @@ export function RecordResultForm({
         onClick={() => setOpen(true)}
         className="h-10 rounded-lg border border-white/15 text-text font-display font-bold text-[13px]"
       >
-        + Добавить результат
+        {t("tournaments.add_result")}
       </button>
     );
   }
@@ -54,10 +56,10 @@ export function RecordResultForm({
           required
           className="flex-1 h-10 rounded-lg bg-bg border border-border px-2 text-[13px] font-sans font-semibold outline-none focus:border-primary"
         >
-          <option value="">Хозяева —</option>
-          {teams.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
+          <option value="">{t("tournaments.home_placeholder")}</option>
+          {teams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
             </option>
           ))}
         </select>
@@ -83,17 +85,17 @@ export function RecordResultForm({
           required
           className="flex-1 h-10 rounded-lg bg-bg border border-border px-2 text-[13px] font-sans font-semibold outline-none focus:border-primary"
         >
-          <option value="">Гости —</option>
-          {teams.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
+          <option value="">{t("tournaments.away_placeholder")}</option>
+          {teams.map((team) => (
+            <option key={team.id} value={team.id}>
+              {team.name}
             </option>
           ))}
         </select>
       </div>
       <input
         name="round"
-        placeholder="Группа A / 1/4 / Финал (опц.)"
+        placeholder={t("tournaments.round_placeholder")}
         className="h-10 rounded-lg bg-bg border border-border px-3 text-[13px] font-sans font-semibold outline-none focus:border-primary"
       />
       <div className="flex gap-2">
@@ -102,10 +104,10 @@ export function RecordResultForm({
           onClick={() => setOpen(false)}
           className="flex-1 h-10 rounded-lg border border-white/10 text-text-muted font-display font-bold text-[13px]"
         >
-          Отмена
+          {t("common.cancel")}
         </button>
         <div className="flex-1">
-          <Submit />
+          <Submit label={t("tournaments.add")} />
         </div>
       </div>
     </form>

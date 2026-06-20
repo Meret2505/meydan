@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/Button";
 import { updateProfile } from "@/app/actions/profile";
@@ -38,10 +38,11 @@ export function ProfileEditForm({
   saveLabel: string;
 }) {
   const locale = useLocale();
+  const t = useTranslations();
   return (
     <form action={updateProfile} className="px-7 pt-6 pb-8 flex flex-col gap-5">
       <input type="hidden" name="locale" value={locale} />
-      <Field label="Имя">
+      <Field label={t("profile.name")}>
         <input
           name="name"
           defaultValue={user.name}
@@ -49,7 +50,7 @@ export function ProfileEditForm({
           className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         />
       </Field>
-      <Field label="Район">
+      <Field label={t("profile.district")}>
         <select
           name="district"
           defaultValue={user.district ?? ""}
@@ -63,7 +64,7 @@ export function ProfileEditForm({
           ))}
         </select>
       </Field>
-      <Field label="Позиция">
+      <Field label={t("profile.position")}>
         <select
           name="position"
           defaultValue={user.position ?? ""}
@@ -77,7 +78,7 @@ export function ProfileEditForm({
           ))}
         </select>
       </Field>
-      <Field label="Уровень">
+      <Field label={t("profile.skill")}>
         <select
           name="skillLevel"
           defaultValue={user.skillLevel}
@@ -85,12 +86,12 @@ export function ProfileEditForm({
         >
           {SKILL_LEVELS.map((s) => (
             <option key={s} value={s}>
-              {s === "BEGINNER" ? "Начинающий" : s === "INTERMEDIATE" ? "Средний" : "Опытный"}
+              {t(`skills.${s}`)}
             </option>
           ))}
         </select>
       </Field>
-      <Field label="Возраст">
+      <Field label={t("profile.age")}>
         <input
           name="age"
           type="number"
@@ -102,7 +103,7 @@ export function ProfileEditForm({
       </Field>
       <label className="flex items-center justify-between rounded-xl bg-surface border border-border px-4 h-14">
         <span className="font-sans font-semibold text-[15px]">
-          Открыт для приглашений в игры
+          {t("profile.open_to_invites")}
         </span>
         <input
           type="checkbox"

@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
@@ -12,6 +12,7 @@ export default async function TournamentRegisterPage({
   params: { locale: string; id: string };
 }) {
   unstable_setRequestLocale(locale);
+  const t = await getTranslations();
   const session = await auth();
   const userId = session!.user.id;
 
@@ -46,7 +47,7 @@ export default async function TournamentRegisterPage({
       <div className="flex items-center gap-3.5 px-6 pt-4">
         <BackButton href={`/${locale}/tournaments/${id}`} />
         <div>
-          <div className="font-display font-extrabold text-[20px]">Регистрация</div>
+          <div className="font-display font-extrabold text-[20px]">{t("tournaments.registration_title")}</div>
           <div className="text-text-muted text-[12.5px] font-semibold mt-0.5 truncate max-w-[260px]">
             {tr.name}
           </div>
@@ -68,8 +69,8 @@ export default async function TournamentRegisterPage({
         />
 
         <div className="rounded-2xl bg-surface border border-border p-4">
-          <Row label="Даты" value={dates} />
-          <Row label="Команд" value={tr._count.teams.toString()} />
+          <Row label={t("tournaments.dates")} value={dates} />
+          <Row label={t("tournaments.teams_label")} value={tr._count.teams.toString()} />
           {tr.description && (
             <div className="pt-2.5 mt-1 border-t border-border">
               <div className="text-[13px] text-text/85 leading-relaxed whitespace-pre-line">
@@ -95,9 +96,9 @@ export default async function TournamentRegisterPage({
             <path d="M12 8v5M12 16h.01" />
           </svg>
           <span className="text-[13px] leading-snug text-warning/85">
-            Взнос оплачивается{" "}
-            <b className="text-warning">офлайн</b> организатору. В приложении оплата не
-            проводится.
+            {t("tournaments.fee_note_before")}
+            <b className="text-warning">{t("tournaments.fee_offline_word")}</b>
+            {t("tournaments.fee_note_after")}
           </span>
         </div>
       </div>

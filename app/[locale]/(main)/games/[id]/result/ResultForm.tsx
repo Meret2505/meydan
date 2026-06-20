@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { saveResult } from "@/app/actions/games";
 
@@ -96,6 +96,7 @@ export function ResultForm({
   labels: { save: string; came: string };
 }) {
   const locale = useLocale();
+  const t = useTranslations();
   const [scoreA, setScoreA] = useState(defaultScoreHome);
   const [scoreB, setScoreB] = useState(defaultScoreAway);
   const [attended, setAttended] = useState<Record<string, boolean>>(
@@ -111,19 +112,19 @@ export function ResultForm({
       <input type="hidden" name="scoreHome" value={scoreA} />
       <input type="hidden" name="scoreAway" value={scoreB} />
 
-      <div className="text-[13px] font-bold text-text-muted mb-3">Счёт</div>
+      <div className="text-[13px] font-bold text-text-muted mb-3">{t("games.score")}</div>
       <div className="flex items-center justify-center gap-[18px] bg-surface border border-border rounded-[18px] py-[18px]">
-        <ScoreStepper label="Команда А" value={scoreA} onChange={setScoreA} primary />
+        <ScoreStepper label={t("games.team_a")} value={scoreA} onChange={setScoreA} primary />
         <span className="font-display font-extrabold text-[28px] text-[#6e756f]">
           :
         </span>
-        <ScoreStepper label="Команда Б" value={scoreB} onChange={setScoreB} />
+        <ScoreStepper label={t("games.team_b")} value={scoreB} onChange={setScoreB} />
       </div>
 
       <div className="flex justify-between items-center mt-[22px] mb-3">
-        <span className="text-[13px] font-bold text-text-muted">Кто пришёл</span>
+        <span className="text-[13px] font-bold text-text-muted">{t("games.who_came")}</span>
         <span className="font-display font-extrabold text-[13px] text-primary-soft">
-          {presentCount} из {participants.length}
+          {t("games.x_of_y", { present: presentCount, total: participants.length })}
         </span>
       </div>
 
@@ -167,7 +168,7 @@ export function ResultForm({
                     came ? "text-primary-soft" : "text-danger/80"
                   }`}
                 >
-                  {came ? labels.came : "не был"}
+                  {came ? labels.came : t("games.absent")}
                 </div>
               </div>
               <div
@@ -191,7 +192,7 @@ export function ResultForm({
             "linear-gradient(180deg, rgba(11,14,13,0), #0B0E0D 28%)",
         }}
       >
-        <Submit label="Сохранить результат" />
+        <Submit label={t("games.save_result")} />
       </div>
     </form>
   );

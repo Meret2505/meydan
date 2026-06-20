@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 
 function hue(seed: string) {
   let h = 0;
@@ -39,6 +40,7 @@ export function ContactSheet({
   seed: string;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -106,7 +108,7 @@ export function ContactSheet({
             >
               <path d="M5 4h3l1.5 4-2 1.5a11 11 0 005 5l1.5-2 4 1.5v3a2 2 0 01-2 2A14 14 0 013 6a2 2 0 012-2z" />
             </svg>
-            Позвонить
+            {t("contact.call")}
           </a>
           <a
             href={`https://wa.me/${waNumber}`}
@@ -132,14 +134,14 @@ export function ContactSheet({
               <path d="M21 11.5a8.5 8.5 0 01-12.5 7.5L3 20.5l1.5-5.5A8.5 8.5 0 1121 11.5z" />
               <path d="M8.5 9.5c0 3.5 2.5 6 6 6 .8 0 1.3-.6 1.3-1.2 0-.4-1.6-1.1-2-1.1-.5 0-.7.7-1.1.7-.8 0-2.5-1.7-2.5-2.5 0-.4.7-.6.7-1.1 0-.4-.7-2-1.1-2-.6 0-1.2.5-1.2 1.3z" />
             </svg>
-            Написать в WhatsApp
+            {t("contact.whatsapp")}
           </a>
           <button
             type="button"
             onClick={onClose}
             className="w-full h-12 rounded-[14px] bg-transparent text-text-muted font-sans font-semibold text-[15px]"
           >
-            Закрыть
+            {t("contact.close")}
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { teamGradient } from "@/lib/team-color";
 
 export interface TeamCardData {
@@ -13,6 +13,7 @@ export interface TeamCardData {
 
 export function TeamCard({ team }: { team: TeamCardData }) {
   const locale = useLocale();
+  const t = useTranslations();
   const monogram = team.name.slice(0, 2).toUpperCase();
   return (
     <Link
@@ -29,14 +30,15 @@ export function TeamCard({ team }: { team: TeamCardData }) {
         <div className="font-display font-extrabold text-[16px] truncate">{team.name}</div>
         <div className="text-text-muted text-[12.5px] mt-0.5 truncate">
           {team.district ?? "—"}
-          {team.captainName && ` · капитан ${team.captainName}`}
+          {team.captainName &&
+            ` · ${t("teams.captain_short", { name: team.captainName })}`}
         </div>
       </div>
       <div className="text-right shrink-0">
         <div className="font-display font-extrabold text-[18px]">
           {team.memberCount}
         </div>
-        <div className="text-text-muted text-[11px]">в составе</div>
+        <div className="text-text-muted text-[11px]">{t("teams.members")}</div>
       </div>
     </Link>
   );

@@ -6,6 +6,20 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // No next-intl context here (root boundary) — detect locale from the URL path.
+  const tm =
+    typeof window !== "undefined" && window.location.pathname.startsWith("/tm");
+  const txt = tm
+    ? {
+        title: "Bir zat ýalňyş geçdi",
+        sub: "Programmany täzeden işlet ýa-da birsalymdan synanyş.",
+        reload: "Täzeden ýükle",
+      }
+    : {
+        title: "Что-то пошло не так",
+        sub: "Перезапусти приложение или попробуй чуть позже.",
+        reload: "Перезагрузить",
+      };
   return (
     <html>
       <body
@@ -25,10 +39,10 @@ export default function GlobalError({
         <div>
           <div style={{ fontSize: 48 }}>⚽</div>
           <h1 style={{ fontWeight: 800, fontSize: 22, marginTop: 12 }}>
-            Что-то пошло не так
+            {txt.title}
           </h1>
           <p style={{ color: "#737373", marginTop: 8, fontSize: 14 }}>
-            Перезапусти приложение или попробуй чуть позже.
+            {txt.sub}
           </p>
           <button
             onClick={() => reset()}
@@ -44,7 +58,7 @@ export default function GlobalError({
               fontSize: 14,
             }}
           >
-            Перезагрузить
+            {txt.reload}
           </button>
         </div>
       </body>

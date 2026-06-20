@@ -1,17 +1,24 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, unstable_setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales } from "@/i18n";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: "MEÝDAN",
-  description: "Найди открытую игру рядом. Приходи и играй.",
-  manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MEÝDAN" },
-};
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale });
+  return {
+    title: "MEÝDAN",
+    description: t("auth.tagline"),
+    manifest: "/manifest.json",
+    appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MEÝDAN" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#1FD16B",

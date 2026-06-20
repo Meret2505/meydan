@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
@@ -15,6 +15,7 @@ export default async function TournamentDetail({
   params: { locale: string; id: string };
 }) {
   unstable_setRequestLocale(locale);
+  const t = await getTranslations();
   const session = await auth();
   const userId = session!.user.id;
 
@@ -92,12 +93,12 @@ export default async function TournamentDetail({
               }
             >
               {status === "upcoming"
-                ? "скоро"
+                ? t("tournaments.status_upcoming")
                 : status === "ongoing"
-                ? "идёт"
+                ? t("tournaments.status_ongoing")
                 : status === "cancelled"
-                ? "отменён"
-                : "завершён"}
+                ? t("tournaments.status_cancelled")
+                : t("tournaments.status_ended")}
             </span>
           </div>
           {tr.description && (
@@ -107,9 +108,9 @@ export default async function TournamentDetail({
           )}
         </div>
 
-        <Section title={`Команды (${tr.teams.length})`}>
+        <Section title={t("tournaments.teams_section", { count: tr.teams.length })}>
           {tr.teams.length === 0 ? (
-            <div className="text-text-muted text-[13px]">Пока никто не зарегистрировался.</div>
+            <div className="text-text-muted text-[13px]">{t("tournaments.no_registered")}</div>
           ) : (
             <div className="flex flex-wrap gap-2">
               {tr.teams.map((tt) => (
@@ -133,26 +134,26 @@ export default async function TournamentDetail({
               className="mt-1 inline-flex items-center justify-center h-11 rounded-xl bg-primary/10 border border-primary/35 text-primary font-display font-bold text-[13px] gap-1.5"
             >
               {myCaptainTeams.some((m) => registeredTeamIds.includes(m.team.id))
-                ? "Управлять заявкой"
-                : "Зарегистрировать команду"}
+                ? t("tournaments.manage_application")
+                : t("tournaments.register_team")}
               <span>›</span>
             </Link>
           )}
         </Section>
 
         {standings.length > 0 && tr.matches.length > 0 && (
-          <Section title="Таблица">
+          <Section title={t("tournaments.table")}>
             <div className="overflow-x-auto">
               <table className="w-full text-[13px] font-sans">
                 <thead>
                   <tr className="text-text-muted text-[11.5px] uppercase font-display font-bold">
-                    <th className="text-left py-2 pr-2">Команда</th>
-                    <th className="px-1">И</th>
-                    <th className="px-1">В</th>
-                    <th className="px-1">Н</th>
-                    <th className="px-1">П</th>
-                    <th className="px-1">±</th>
-                    <th className="pl-2 text-right text-primary">Очки</th>
+                    <th className="text-left py-2 pr-2">{t("tournaments.col_team")}</th>
+                    <th className="px-1">{t("tournaments.col_played")}</th>
+                    <th className="px-1">{t("tournaments.col_won")}</th>
+                    <th className="px-1">{t("tournaments.col_drawn")}</th>
+                    <th className="px-1">{t("tournaments.col_lost")}</th>
+                    <th className="px-1">{t("tournaments.col_diff")}</th>
+                    <th className="pl-2 text-right text-primary">{t("tournaments.col_points")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -180,10 +181,10 @@ export default async function TournamentDetail({
           </Section>
         )}
 
-        <Section title={`Матчи (${tr.matches.length})`}>
+        <Section title={t("tournaments.matches_section", { count: tr.matches.length })}>
           {tr.matches.length === 0 ? (
             <div className="text-text-muted text-[13px]">
-              Матчи появятся после первого результата.
+              {t("tournaments.no_matches")}
             </div>
           ) : (
             <div className="flex flex-col gap-2">

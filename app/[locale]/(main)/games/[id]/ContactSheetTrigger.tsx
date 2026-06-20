@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ContactSheet } from "@/components/ui/ContactSheet";
 
 export function ContactSheetTrigger({
@@ -12,6 +13,7 @@ export function ContactSheetTrigger({
   phone: string;
   seed: string;
 }) {
+  const t = useTranslations();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -33,7 +35,7 @@ export function ContactSheetTrigger({
         >
           <path d="M5 4h3l1.5 4-2 1.5a11 11 0 005 5l1.5-2 4 1.5v3a2 2 0 01-2 2A14 14 0 013 6a2 2 0 012-2z" />
         </svg>
-        Показать контакт организатора
+        {t("games.show_contact")}
       </button>
       <ContactSheet
         open={open}

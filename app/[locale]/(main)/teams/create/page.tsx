@@ -16,16 +16,15 @@ export default async function CreateTeamPage({
       <StatusBar />
       <div className="px-6 pt-4 flex items-center gap-4">
         <BackButton href={`/${locale}/teams`} />
-        <div className="font-display font-extrabold text-[22px]">Создать команду</div>
+        <div className="font-display font-extrabold text-[22px]">{t("teams.create_title")}</div>
       </div>
       <CreateTeamForm
         districts={DISTRICTS}
         labels={{
-          name: "Название",
-          district: "Район",
+          name: t("teams.name_label"),
+          district: t("teams.district_label"),
           submit: t("common.save"),
-          hint:
-            "Ты станешь капитаном. Сможешь добавлять матчи и удалять участников.",
+          hint: t("teams.captain_hint"),
         }}
       />
     </>

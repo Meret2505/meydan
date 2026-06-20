@@ -6,40 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
+import { Avatar } from "@/components/avatar/Avatar";
 import { formatGameDateTime } from "@/lib/date";
 import { gameFormat } from "@/lib/game-format";
 import { JoinLeaveButton } from "./JoinLeaveButton";
 import { OrganizerActions } from "./OrganizerActions";
 import { ContactSheetTrigger } from "./ContactSheetTrigger";
-
-function hue(seed: string) {
-  let h = 0;
-  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h % 360;
-}
-function initials(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .map((s) => s[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?"
-  );
-}
-function avatarStyle(seed: string) {
-  return {
-    background: `linear-gradient(140deg, hsl(${hue(seed)} 70% 55%), hsl(${
-      (hue(seed) + 30) % 360
-    } 70% 40%))`,
-  };
-}
-const POSITION_ABBR: Record<string, string> = {
-  GOALKEEPER: "ВРТ",
-  DEFENDER: "ЗАЩ",
-  MIDFIELDER: "ПЗ",
-  FORWARD: "НАП",
-};
 
 export default async function GameDetailPage({
   params: { locale, id },
@@ -110,7 +82,11 @@ export default async function GameDetailPage({
             style={{ background: "rgba(31,209,107,.92)", color: "#06210F" }}
           >
             {gameFormat(game)} ·{" "}
-            {isOver ? "ИГРА ЗАВЕРШЕНА" : isOrganizer ? "ВАША ИГРА" : "ОТКРЫТАЯ ИГРА"}
+            {isOver
+              ? t("games.banner_over")
+              : isOrganizer
+                ? t("games.banner_yours")
+                : t("games.banner_open")}
           </span>
           <div className="font-display font-extrabold text-[26px] tracking-tight mt-2.5">
             {game.field?.name ?? game.fieldName ?? "—"}
@@ -125,24 +101,32 @@ export default async function GameDetailPage({
               ✓
             </div>
             <div className="text-[13.5px] leading-snug text-[#C9F0D8]">
-              Вы в игре! {day} {time}, {game.field?.name ?? game.fieldName ?? "—"}.
+              {t("games.joined_banner", {
+                day,
+                time,
+                venue: game.field?.name ?? game.fieldName ?? "—",
+              })}
             </div>
           </div>
         )}
 
         {/* When + Price */}
         <div className="flex gap-2.5">
-          <InfoTile label="Когда" value={`${day} · ${time}`} />
+          <InfoTile label={t("games.when")} value={`${day} · ${time}`} />
           <InfoTile
-            label="Цена"
-            value={game.pricePerPlayer != null ? `${game.pricePerPlayer} ман / чел` : "—"}
+            label={t("games.price")}
+            value={
+              game.pricePerPlayer != null
+                ? t("games.price_per_player", { amount: game.pricePerPlayer })
+                : "—"
+            }
           />
         </div>
 
         {/* Roster card */}
         <div className="bg-surface border border-border rounded-[18px] p-4">
           <div className="flex justify-between items-center">
-            <span className="font-display font-bold text-[15px]">Состав</span>
+            <span className="font-display font-bold text-[15px]">{t("games.roster")}</span>
             <span className="font-display font-extrabold text-[14px] text-primary-soft">
               {filledCount} / {game.totalSpots}
             </span>
@@ -154,13 +138,23 @@ export default async function GameDetailPage({
             {game.participants.slice(0, 7).map((p, i) => (
               <div
                 key={p.id}
-                className="w-[34px] h-[34px] rounded-full border-2 border-surface flex items-center justify-center font-display font-extrabold text-[12px] text-[#06210F]"
-                style={{
-                  ...avatarStyle(p.user.id),
-                  marginLeft: i === 0 ? 0 : -8,
-                }}
+                className="rounded-full border-2 border-surface overflow-hidden"
+                style={{ marginLeft: i === 0 ? 0 : -8 }}
               >
-                {p.userId === userId ? "Ты" : initials(p.user.name)}
+                {p.userId === userId ? (
+                  <div
+                    className="w-[34px] h-[34px] flex items-center justify-center font-display font-extrabold text-[12px] text-[#06210F] bg-primary"
+                  >
+                    {t("games.you_short")}
+                  </div>
+                ) : (
+                  <Avatar
+                    name={p.user.name}
+                    seed={p.user.id}
+                    src={p.user.avatar}
+                    size={34}
+                  />
+                )}
               </div>
             ))}
             {openSlots > 0 && (
@@ -185,36 +179,34 @@ export default async function GameDetailPage({
               className="w-[34px] h-[34px] rounded-[11px] flex items-center justify-center font-display font-black text-[14px] text-warning shrink-0"
               style={{ background: "rgba(242,181,60,.18)" }}
             >
-              {POSITION_ABBR[firstNeeded] ?? "?"}
+              {t(`positions_short.${firstNeeded}`)}
             </div>
             <div className="text-[13.5px] leading-snug text-[#E8D6AE]">
-              Нужен{" "}
-              <b className="text-warning">
-                {t(`positions.${firstNeeded}`).toLowerCase()}
-              </b>
-              . Команде не хватает именно этой позиции.
+              {t("games.needed_note", {
+                position: t(`positions.${firstNeeded}`).toLowerCase(),
+              })}
             </div>
           </div>
         )}
 
         {/* Organizer */}
         <div className="flex items-center gap-3 mt-1">
-          <div
-            className="w-[42px] h-[42px] rounded-full flex items-center justify-center font-display font-extrabold text-[15px] text-[#06210F]"
-            style={avatarStyle(game.organizer.id)}
-          >
-            {initials(game.organizer.name)}
-          </div>
+          <Avatar
+            name={game.organizer.name}
+            seed={game.organizer.id}
+            src={game.organizer.avatar}
+            size={42}
+          />
           <div className="flex-1 min-w-0">
             <div className="font-display font-bold text-[14.5px] truncate">
               {game.organizer.name}
             </div>
             <div className="text-[12.5px] text-text-muted font-semibold mt-0.5 truncate">
-              Организатор
+              {t("games.organizer")}
               {organizerStats.attendanceRate !== null &&
-                ` · явка ${organizerStats.attendanceRate}%`}
+                ` · ${t("games.attendance_pct", { rate: organizerStats.attendanceRate })}`}
               {organizerStats.gamesPlayed > 0 &&
-                ` · ${organizerStats.gamesPlayed} игр`}
+                ` · ${t("games.games_count", { count: organizerStats.gamesPlayed })}`}
             </div>
           </div>
         </div>
@@ -237,7 +229,7 @@ export default async function GameDetailPage({
               <circle cx="11" cy="11" r="7" />
               <path d="M21 21l-4-4" />
             </svg>
-            Найти {t(`positions.${firstNeeded}`).toLowerCase()}а на эту игру
+            {t("games.find_pos", { position: t(`positions.${firstNeeded}`).toLowerCase() })}
           </Link>
         )}
 
@@ -268,7 +260,7 @@ export default async function GameDetailPage({
           />
         ) : isOver ? (
           <div className="h-[58px] rounded-2xl border border-white/10 text-text-muted flex items-center justify-center font-display font-bold text-[14px]">
-            {game.status === "CANCELLED" ? "Игра отменена" : "Игра завершена"}
+            {game.status === "CANCELLED" ? t("games.cancelled_full") : t("games.completed")}
           </div>
         ) : joined ? (
           <JoinLeaveButton
@@ -277,7 +269,7 @@ export default async function GameDetailPage({
             locale={locale}
             disabled={isPast}
             variant="joined"
-            label="✓ Вы в игре · отменить запись"
+            label={t("games.joined_cta")}
           />
         ) : (
           <JoinLeaveButton
@@ -286,7 +278,7 @@ export default async function GameDetailPage({
             locale={locale}
             disabled={isPast || isFull}
             variant="primary"
-            label={isFull ? "Мест нет" : isPast ? "Игра прошла" : "Записаться · занять место"}
+            label={isFull ? t("games.full") : isPast ? t("games.is_past") : t("games.join_cta")}
           />
         )}
       </div>

@@ -5,7 +5,6 @@ import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { AgeForm } from "./AgeForm";
 
 const RANGES: { label: string; mid: number }[] = [
-  { label: "до 18", mid: 17 },
   { label: "18–24", mid: 21 },
   { label: "25–34", mid: 29 },
   { label: "35+", mid: 37 },

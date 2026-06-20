@@ -48,7 +48,7 @@ export function GameCard({ game }: { game: GameCardData }) {
           </div>
         </div>
         <Badge tone={game.mine ? "primary" : "muted"} className="shrink-0">
-          {game.mine ? "Ваша" : game.format}
+          {game.mine ? t("games.your_game") : game.format}
         </Badge>
       </div>
 

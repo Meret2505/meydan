@@ -121,23 +121,24 @@ export default async function TeamDetailPage({
           <div className="pb-1.5">
             <div className="font-display font-extrabold text-[21px]">{team.name}</div>
             <div className="text-[12.5px] text-text-muted font-semibold mt-0.5">
-              {team.district ?? "—"} · {team.members.length} в составе
+              {team.district ?? "—"} ·{" "}
+              {t("teams.members_count", { count: team.members.length })}
             </div>
           </div>
         </div>
 
         {/* Win/loss/points */}
         <div className="flex gap-2.5 mt-[18px]">
-          <Stat value={wins.toString()} label="побед" valueColor="text-primary-soft" />
-          <Stat value={losses.toString()} label="поражений" />
+          <Stat value={wins.toString()} label={t("teams.wins")} valueColor="text-primary-soft" />
+          <Stat value={losses.toString()} label={t("teams.losses")} />
           <Stat
             value={points.toString()}
-            label="очков"
+            label={t("teams.points")}
             valueColor="text-warning"
           />
         </div>
 
-        <div className="font-display font-bold text-[15px] mt-5 mb-3">Состав</div>
+        <div className="font-display font-bold text-[15px] mt-5 mb-3">{t("teams.roster")}</div>
         <div className="flex flex-col gap-2.5">
           {membersWithStats.map((m) => {
             const tier = attendanceTier(m.stats.attendanceRate);
@@ -160,7 +161,7 @@ export default async function TeamDetailPage({
                       {m.user.name}
                       {isViewer && (
                         <span className="text-text-muted font-normal ml-1.5">
-                          (вы)
+                          {t("teams.you_paren")}
                         </span>
                       )}
                     </span>
@@ -169,7 +170,7 @@ export default async function TeamDetailPage({
                         className="px-[7px] py-0.5 rounded-md text-[10px] font-display font-extrabold text-warning"
                         style={{ background: "rgba(242,181,60,.15)" }}
                       >
-                        К
+                        {t("teams.captain_badge")}
                       </span>
                     )}
                   </div>

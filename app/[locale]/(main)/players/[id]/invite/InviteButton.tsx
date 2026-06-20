@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { invitePlayerToGame } from "@/app/actions/invites";
 
 export function InviteButton({
@@ -13,6 +14,7 @@ export function InviteButton({
   locale: string;
 }) {
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations();
   return (
     <button
       type="button"
@@ -22,7 +24,7 @@ export function InviteButton({
       }
       className="h-10 px-4 rounded-lg bg-primary text-primary-text font-display font-extrabold text-[13px] disabled:opacity-50"
     >
-      {isPending ? "..." : "Пригласить"}
+      {isPending ? "..." : t("players.invite")}
     </button>
   );
 }

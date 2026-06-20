@@ -1,34 +1,19 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { attendanceTier } from "@/lib/stats";
+import { Avatar } from "@/components/avatar/Avatar";
 import type { Position, SkillLevel } from "@prisma/client";
 
 export interface PlayerCardData {
   id: string;
   name: string;
+  avatar: string | null;
   position: Position | null;
   skillLevel: SkillLevel;
   district: string | null;
   attendanceRate: number | null;
   gamesPlayed: number;
   isOpenToInvite: boolean;
-}
-
-function hue(seed: string) {
-  let h = 0;
-  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h % 360;
-}
-
-function initials(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .map((s) => s[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?"
-  );
 }
 
 const ATT_COLOR: Record<ReturnType<typeof attendanceTier>, string> = {
@@ -45,20 +30,11 @@ export function PlayerCard({ player }: { player: PlayerCardData }) {
   const attLabel =
     tier === "new"
       ? t("attendance.new_player")
-      : `явка ${player.attendanceRate}%`;
+      : t("players.attendance_pct", { rate: player.attendanceRate });
   return (
     <div className="bg-surface border border-border rounded-[18px] p-3.5">
       <div className="flex items-center gap-3.5">
-        <div
-          className="w-12 h-12 rounded-full flex items-center justify-center font-display font-extrabold text-[17px] text-[#06210F] shrink-0"
-          style={{
-            background: `linear-gradient(140deg, hsl(${hue(player.id)} 70% 55%), hsl(${
-              (hue(player.id) + 30) % 360
-            } 70% 40%))`,
-          }}
-        >
-          {initials(player.name)}
-        </div>
+        <Avatar name={player.name} seed={player.id} src={player.avatar} size={48} />
         <div className="flex-1 min-w-0">
           <div className="font-bold text-[15px] truncate">{player.name}</div>
           <div className="text-[12.5px] text-text-muted mt-0.5 truncate">
@@ -73,7 +49,7 @@ export function PlayerCard({ player }: { player: PlayerCardData }) {
               {attLabel}
             </span>
             <span className="text-[12px] text-[#6e756f]">
-              · {player.gamesPlayed} игр
+              {` · ` + t("games.games_count", { count: player.gamesPlayed })}
             </span>
           </div>
         </div>
@@ -82,11 +58,11 @@ export function PlayerCard({ player }: { player: PlayerCardData }) {
             href={`/${locale}/players/${player.id}`}
             className="h-[38px] px-[15px] rounded-[11px] bg-primary text-primary-text font-display font-extrabold text-[13px] inline-flex items-center"
           >
-            Пригласить
+            {t("players.invite_short")}
           </Link>
         ) : (
           <span className="px-2.5 py-1 rounded-md bg-white/5 text-text-muted text-[11px] font-bold">
-            закрыт
+            {t("players.closed_short")}
           </span>
         )}
       </div>
@@ -95,7 +71,7 @@ export function PlayerCard({ player }: { player: PlayerCardData }) {
         className="mt-3 pt-3 border-t border-white/[0.05] flex items-center justify-between"
       >
         <span className="text-[12.5px] font-bold text-text-muted">
-          Открыть профиль и историю
+          {t("players.open_profile")}
         </span>
         <span className="text-text-muted text-[16px]">›</span>
       </Link>

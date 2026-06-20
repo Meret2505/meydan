@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/Button";
 import { createGame } from "@/app/actions/games";
@@ -54,6 +54,7 @@ export function CreateGameForm({
   labels: Labels;
 }) {
   const locale = useLocale();
+  const t = useTranslations();
   const [useCustom, setUseCustom] = useState(
     fields.length === 0 && !preselectedFieldId,
   );
@@ -117,7 +118,7 @@ export function CreateGameForm({
           <>
             <input
               name="fieldName"
-              placeholder="Поле «Олимп», корт 2"
+              placeholder={t("games.create_field_placeholder")}
               required={useCustom}
               className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
             />
@@ -155,7 +156,7 @@ export function CreateGameForm({
         </div>
       </Field>
 
-      <Field label="Цена с игрока (ман, опц.)">
+      <Field label={t("games.create_price")}>
         <input
           name="pricePerPlayer"
           type="number"
@@ -193,7 +194,7 @@ export function CreateGameForm({
         <textarea
           name="notes"
           rows={3}
-          placeholder="Например: вода с собой, мяч обеспечен"
+          placeholder={t("games.create_notes_placeholder")}
           className="w-full rounded-xl bg-[#13181A] border border-white/10 px-4 py-3 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary resize-none"
         />
       </Field>

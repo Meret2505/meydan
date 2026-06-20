@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 interface FieldPoint {
   id: string;
@@ -55,6 +55,7 @@ export default function FieldMap({
   height?: number;
 }) {
   const locale = useLocale();
+  const t = useTranslations();
   const points = fields
     .filter(
       (f): f is FieldPoint & { latitude: number; longitude: number } =>
@@ -68,7 +69,7 @@ export default function FieldMap({
         style={{ height }}
         className="rounded-2xl bg-surface border border-border flex items-center justify-center text-text-muted text-[13px]"
       >
-        Координаты не указаны
+        {t("fields.no_coords")}
       </div>
     );
   }
@@ -109,7 +110,7 @@ export default function FieldMap({
                     fontSize: 12,
                   }}
                 >
-                  Открыть →
+                  {t("fields.open_map") + " →"}
                 </Link>
               </div>
             </Popup>

@@ -1,10 +1,20 @@
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+
+const SURFACE_KEY: Record<string, string> = {
+  "Искусственная трава": "fields.surface_turf",
+  "Резиновое": "fields.surface_rubber",
+  "Грунт": "fields.surface_dirt",
+};
 
 export interface FieldCardData {
   id: string;
   name: string;
+  nameTm?: string | null;
+  nameRu?: string | null;
   address: string;
+  addressTm?: string | null;
+  addressRu?: string | null;
   district: string;
   surface: string;
   capacity: number;
@@ -13,6 +23,13 @@ export interface FieldCardData {
 
 export function FieldCard({ field }: { field: FieldCardData }) {
   const locale = useLocale();
+  const t = useTranslations();
+  const name =
+    locale === "tm"
+      ? field.nameTm ?? field.name
+      : field.nameRu ?? field.name;
+  const surfaceKey = SURFACE_KEY[field.surface];
+  const surfaceLabel = surfaceKey ? t(surfaceKey as never) : field.surface;
   return (
     <Link
       href={`/${locale}/fields/${field.id}`}
@@ -40,7 +57,7 @@ export function FieldCard({ field }: { field: FieldCardData }) {
       <div className="px-[15px] py-[13px]">
         <div className="flex items-center justify-between">
           <div className="font-display font-bold text-[16px] truncate">
-            {field.name}
+            {name}
           </div>
           <span className="text-text-muted text-[18px] shrink-0">›</span>
         </div>
@@ -60,8 +77,8 @@ export function FieldCard({ field }: { field: FieldCardData }) {
             </svg>
             {field.district}
           </Chip>
-          <Chip>{field.surface}</Chip>
-          <Chip>до {field.capacity}</Chip>
+          <Chip>{surfaceLabel}</Chip>
+          <Chip>{t("fields.capacity_chip", { count: field.capacity })}</Chip>
         </div>
       </div>
     </Link>

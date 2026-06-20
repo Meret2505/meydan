@@ -12,10 +12,10 @@ import { cn } from "@/lib/utils";
 import type { Position, SkillLevel } from "@prisma/client";
 
 const ALL_POSITIONS: Position[] = ["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD"];
-const SKILLS: { value: SkillLevel; label: string }[] = [
-  { value: "BEGINNER", label: "Начинающий" },
-  { value: "INTERMEDIATE", label: "Средний" },
-  { value: "ADVANCED", label: "Опытный" },
+const SKILLS: { value: SkillLevel }[] = [
+  { value: "BEGINNER" },
+  { value: "INTERMEDIATE" },
+  { value: "ADVANCED" },
 ];
 
 export default async function PlayersPage({
@@ -55,6 +55,7 @@ export default async function PlayersPage({
       return {
         id: p.id,
         name: p.name,
+        avatar: p.avatar,
         position: p.position,
         skillLevel: p.skillLevel,
         district: p.district,
@@ -84,14 +85,14 @@ export default async function PlayersPage({
       <StatusBar />
       <div className="px-6 pt-4 flex items-center gap-4">
         {searchParams.back && <BackButton href={searchParams.back} />}
-        <div className="font-display font-extrabold text-[22px]">Игроки рядом</div>
+        <div className="font-display font-extrabold text-[22px]">{t("players.title")}</div>
       </div>
 
       <div className="px-6 pt-4 flex flex-col gap-2.5">
         <div className="flex gap-2 overflow-x-auto scrollbar-none">
           <Chip
             href={`/${locale}/players${queryFor({ position: null })}`}
-            label="Все"
+            label={t("players.all")}
             active={!positionFilter}
           />
           {POSITIONS.map((p) => (
@@ -106,7 +107,7 @@ export default async function PlayersPage({
         <div className="flex gap-2 overflow-x-auto scrollbar-none">
           <Chip
             href={`/${locale}/players${queryFor({ district: null })}`}
-            label="Все районы"
+            label={t("players.all_districts")}
             active={!districtFilter}
           />
           {DISTRICTS.map((d) => (
@@ -121,14 +122,14 @@ export default async function PlayersPage({
         <div className="flex gap-2 overflow-x-auto scrollbar-none">
           <Chip
             href={`/${locale}/players${queryFor({ skill: null })}`}
-            label="Любой уровень"
+            label={t("players.level_any")}
             active={!skillFilter}
           />
           {SKILLS.map((s) => (
             <Chip
               key={s.value}
               href={`/${locale}/players${queryFor({ skill: s.value })}`}
-              label={s.label}
+              label={t(`skills.${s.value}`)}
               active={skillFilter === s.value}
             />
           ))}
@@ -140,7 +141,7 @@ export default async function PlayersPage({
           <EmptyState
             icon={<span className="text-2xl">🔍</span>}
             title={t("empty.no_results")}
-            description="Попробуйте снять фильтры."
+            description={t("players.clear_filters")}
           />
         ) : (
           enriched.map((p) => <PlayerCard key={p.id} player={p} />)

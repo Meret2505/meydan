@@ -49,19 +49,19 @@ export default async function InvitePage({
       <div className="px-6 pt-4 flex items-center gap-4">
         <BackButton href={`/${locale}/players/${id}`} />
         <div className="font-display font-extrabold text-[20px]">
-          Позвать {receiver.name}
+          {t("players.invite_title", { name: receiver.name })}
         </div>
       </div>
 
       {!receiver.isOpenToInvite ? (
         <div className="px-7 pt-10 text-center text-text-muted text-[14px]">
-          Игрок закрыл приглашения.
+          {t("players.closed_to_invites")}
         </div>
       ) : eligible.length === 0 ? (
         <EmptyState
           icon={<span className="text-2xl">📅</span>}
-          title="Нет подходящей игры"
-          description="Создайте игру, чтобы пригласить игрока."
+          title={t("players.no_eligible_game")}
+          description={t("players.no_eligible_game_sub")}
           action={{ label: t("games.create"), href: `/${locale}/games/create` }}
         />
       ) : (
@@ -99,18 +99,18 @@ export default async function InvitePage({
                 </div>
                 <div className="mt-3 flex justify-between items-center">
                   <span className="text-text-muted text-[13px]">
-                    Свободно: <span className="text-text font-bold">{remaining}</span>
+                    {t("players.free_spots") + ": "}<span className="text-text font-bold">{remaining}</span>
                   </span>
                   {alreadyJoined ? (
                     <Link
                       href={`/${locale}/games/${g.id}`}
                       className="text-primary font-bold text-[13px]"
                     >
-                      Уже в игре →
+                      {t("players.already_joined") + " →"}
                     </Link>
                   ) : alreadyInvited ? (
                     <span className="text-text-muted text-[12.5px] font-bold">
-                      Приглашение отправлено
+                      {t("players.invite_sent")}
                     </span>
                   ) : (
                     <InviteButton gameId={g.id} receiverId={id} locale={locale} />

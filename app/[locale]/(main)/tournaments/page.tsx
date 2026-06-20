@@ -6,13 +6,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { tournamentStatus, type TournamentStatus } from "@/lib/tournament-status";
 import { cn } from "@/lib/utils";
 
-const STATUS_LABEL: Record<TournamentStatus, string> = {
-  upcoming: "Скоро",
-  ongoing: "Идёт",
-  ended: "Завершён",
-  cancelled: "Отменён",
-};
-
 const STATUS_TONE: Record<TournamentStatus, string> = {
   upcoming: "bg-white/8 text-text-muted",
   ongoing: "bg-primary/15 text-primary",
@@ -68,31 +61,31 @@ export default async function TournamentsPage({
           href={`/${locale}/tournaments/create`}
           className="h-9 px-3 rounded-lg bg-primary text-primary-text font-display font-extrabold text-[13px] inline-flex items-center"
         >
-          + создать
+          {t("tournaments.create_button")}
         </Link>
       </div>
 
       <div className="px-6 pt-4 flex bg-white/5 rounded-2xl p-1">
-        <TabLink locale={locale} active={tab === "upcoming"} tab="upcoming" label="Скоро" />
-        <TabLink locale={locale} active={tab === "ongoing"} tab="ongoing" label="Идут" />
-        <TabLink locale={locale} active={tab === "ended"} tab="ended" label="Завершены" />
+        <TabLink locale={locale} active={tab === "upcoming"} tab="upcoming" label={t("tournaments.tab_upcoming")} />
+        <TabLink locale={locale} active={tab === "ongoing"} tab="ongoing" label={t("tournaments.tab_ongoing")} />
+        <TabLink locale={locale} active={tab === "ended"} tab="ended" label={t("tournaments.tab_ended")} />
       </div>
 
       <div className="px-6 pt-4 pb-8 flex flex-col gap-2.5">
         {filtered.length === 0 ? (
           <EmptyState
             icon={<span className="text-2xl">🏆</span>}
-            title="Турниров пока нет"
+            title={t("tournaments.empty_title")}
             description={
               tab === "upcoming"
-                ? "Запусти первый — собери команды и распиши матчи."
+                ? t("tournaments.empty_sub_upcoming")
                 : tab === "ongoing"
-                ? "Сейчас ничего не идёт."
-                : "Закончилось — посмотреть нечего."
+                ? t("tournaments.empty_sub_ongoing")
+                : t("tournaments.empty_sub_ended")
             }
             action={
               tab === "upcoming"
-                ? { label: "Создать турнир", href: `/${locale}/tournaments/create` }
+                ? { label: t("tournaments.create_tournament"), href: `/${locale}/tournaments/create` }
                 : undefined
             }
           />
@@ -115,7 +108,7 @@ export default async function TournamentsPage({
                   <div className="text-text-muted text-[12.5px] mt-0.5">
                     {dateFmt.format(tr.startDate)}
                     {tr.endDate ? ` — ${dateFmt.format(tr.endDate)}` : ""} ·{" "}
-                    {tr._count.teams} команд · {tr._count.matches} матчей
+                    {tr._count.teams} {t("tournaments.teams_count")} · {tr._count.matches} {t("tournaments.matches_count")}
                   </div>
                 </div>
                 <span
@@ -124,7 +117,7 @@ export default async function TournamentsPage({
                     STATUS_TONE[s],
                   )}
                 >
-                  {STATUS_LABEL[s]}
+                  {t("tournaments.status_" + s)}
                 </span>
               </Link>
             );
