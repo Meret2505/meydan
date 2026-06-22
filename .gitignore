@@ -31,3 +31,13 @@ prisma/migrations/dev
 .vscode
 .idea
 tsconfig.tsbuildinfo
+
+# Android / TWA (Bubblewrap) — keep twa-manifest.json, never commit secrets/artifacts
+android/*.keystore
+android/KEYSTORE-CREDENTIALS.txt
+android/app/build
+android/build
+android/.gradle
+android/*.aab
+android/*.apk
+android/*.idsig
