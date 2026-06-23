@@ -1,12 +1,20 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { googleSignIn } from "@/app/actions/auth";
 
 export function GoogleSignInButton({ label }: { label: string }) {
   const locale = useLocale();
   const [isPending, startTransition] = useTransition();
+  // Google blocks OAuth in embedded WebViews ("disallowed_useragent"), so the
+  // Capacitor Android shell injects "MeydanAndroid" into the UA and we hide
+  // this button there. Phone login still works inside the shell.
+  const [hidden, setHidden] = useState(false);
+  useEffect(() => {
+    setHidden(navigator.userAgent.includes("MeydanAndroid"));
+  }, []);
+  if (hidden) return null;
 
   return (
     <button

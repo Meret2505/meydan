@@ -32,12 +32,19 @@ prisma/migrations/dev
 .idea
 tsconfig.tsbuildinfo
 
-# Android / TWA (Bubblewrap) — keep twa-manifest.json, never commit secrets/artifacts
-android/*.keystore
-android/KEYSTORE-CREDENTIALS.txt
+# Android (Capacitor) — generated, secrets, and build artifacts
 android/app/build
 android/build
 android/.gradle
-android/*.aab
-android/*.apk
-android/*.idsig
+android/local.properties
+android/app/release
+android/app/debug
+android/captures
+android/**/*.aab
+android/**/*.apk
+android/**/*.idsig
+# auxiliary assets folder (regenerated from public/icons by @capacitor/assets)
+assets/
+
+# Signing keystore + credentials (preserved across Android shell migrations)
+keys/
