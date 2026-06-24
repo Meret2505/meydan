@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: "com.meydan.app",
   appName: "MEÝDAN",
   webDir: "public", // unused at runtime (we load the live URL) but required by the CLI
-  bundledWebRuntime: false,
   android: {
     backgroundColor: "#0B0E0D",
     allowMixedContent: false,
