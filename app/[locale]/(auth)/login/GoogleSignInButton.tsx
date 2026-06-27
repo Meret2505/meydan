@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
-import { googleSignIn } from "@/app/actions/auth";
+import { googleSignIn, googleIdTokenSignIn } from "@/app/actions/auth";
 
 export function GoogleSignInButton({ label }: { label: string }) {
   const locale = useLocale();
@@ -36,23 +36,12 @@ export function GoogleSignInButton({ label }: { label: string }) {
         alert("Не удалось получить токен Google");
         return;
       }
-      // Hand the ID token to NextAuth — Credentials provider does the verify
-      // + upsert and sets the session cookie. We use the standard callback
-      // endpoint so the rest of the auth flow is identical to web.
-      const csrfRes = await fetch("/api/auth/csrf");
-      const { csrfToken } = await csrfRes.json();
-      const form = new FormData();
-      form.set("csrfToken", csrfToken);
-      form.set("idToken", idToken);
-      form.set("callbackUrl", `/${locale}`);
-      const cb = await fetch("/api/auth/callback/google-id-token", {
-        method: "POST",
-        body: form,
-        redirect: "follow",
-      });
-      if (cb.ok || cb.redirected) {
-        window.location.href = `/${locale}`;
-      } else {
+      // Hand the ID token to a server action — it verifies, upserts the user,
+      // sets the session cookie, and redirects. Server actions have their
+      // own CSRF protection so we sidestep NextAuth's cookie-based CSRF
+      // check which doesn't survive Capacitor's WebView fetch boundary.
+      const result = await googleIdTokenSignIn(idToken, locale);
+      if (result && "error" in result) {
         alert("Не удалось войти через Google");
       }
     } catch (e) {

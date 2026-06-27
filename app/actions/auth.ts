@@ -59,3 +59,23 @@ export async function googleSignIn(locale: string) {
   // onboarding to /onboarding/name and lets returning users straight in.
   await signIn("google", { redirectTo: `/${locale}` });
 }
+
+/**
+ * Server action called from the Capacitor Android shell after the native
+ * Google Sign-In SDK returns an ID token. Verifies the token via our
+ * "google-id-token" Credentials provider (lib/auth.ts), sets the session
+ * cookie, and redirects into the app.
+ */
+export async function googleIdTokenSignIn(idToken: string, locale: string) {
+  if (!idToken) return { error: "missing_token" as const };
+  try {
+    await signIn("google-id-token", {
+      idToken,
+      redirect: false,
+    });
+  } catch (e) {
+    if (e instanceof AuthError) return { error: "auth_failed" as const };
+    throw e;
+  }
+  redirect(`/${locale}`);
+}
