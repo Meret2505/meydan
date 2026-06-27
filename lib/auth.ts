@@ -53,6 +53,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // Mobile Chrome drops the PKCE cookie on the Google round-trip even
+      // with SameSite=None. PKCE is only required for *public* clients (no
+      // secret); ours is a confidential web client so omitting it is safe.
+      // `state` + `nonce` still verify the callback hasn't been tampered with.
+      checks: ["state", "nonce"],
     }),
     Credentials({
       name: "Phone",
