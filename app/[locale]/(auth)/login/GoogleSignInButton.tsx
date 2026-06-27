@@ -23,9 +23,12 @@ export function GoogleSignInButton({ label }: { label: string }) {
     }
     try {
       const { SocialLogin } = await import("@capgo/capacitor-social-login");
+      // Default Google scopes (email + profile) are already included by the
+      // native SDK. Passing custom scopes would require modifying the host
+      // Android Activity, which we don't need.
       const res = await SocialLogin.login({
         provider: "google",
-        options: { scopes: ["email", "profile"] },
+        options: {},
       });
       const idToken =
         (res as { result?: { idToken?: string } }).result?.idToken ?? null;
