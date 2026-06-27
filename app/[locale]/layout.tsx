@@ -4,6 +4,7 @@ import { getMessages, getTranslations, unstable_setRequestLocale } from "next-in
 import { notFound } from "next/navigation";
 import { locales } from "@/i18n";
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
+import { AppInit } from "@/components/native/AppInit";
 import "../globals.css";
 
 export async function generateMetadata({
@@ -60,6 +61,7 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>
+          <AppInit googleClientId={process.env.GOOGLE_CLIENT_ID} />
           <OfflineBanner />
           {children}
         </NextIntlClientProvider>

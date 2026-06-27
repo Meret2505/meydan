@@ -4,7 +4,14 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
+import { OAuth2Client } from "google-auth-library";
 import { prisma } from "./prisma";
+
+// Reusable Google ID-token verifier (Capacitor Android shell calls this via
+// the "google-id-token" Credentials provider below). The native Google SDK
+// is configured with serverClientId = GOOGLE_CLIENT_ID, so the ID token's
+// audience is the same web client id we use for the OAuth web flow.
+const googleVerifier = new OAuth2Client();
 
 declare module "next-auth" {
   interface Session {
@@ -42,6 +49,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user?.password) return null;
         const ok = await bcrypt.compare(password, user.password);
         if (!ok) return null;
+        return { id: user.id, name: user.name, email: user.email ?? undefined };
+      },
+    }),
+    Credentials({
+      // Used by the Android (Capacitor) shell. The native Google Sign-In SDK
+      // produces an ID token; we verify it server-side, then upsert the user
+      // and return the same shape Phone/Google providers do.
+      id: "google-id-token",
+      name: "Google",
+      credentials: {
+        idToken: { label: "ID Token", type: "text" },
+      },
+      async authorize(credentials) {
+        const idToken = credentials?.idToken as string | undefined;
+        const audience = process.env.GOOGLE_CLIENT_ID;
+        if (!idToken || !audience) return null;
+        const ticket = await googleVerifier.verifyIdToken({
+          idToken,
+          audience,
+        });
+        const payload = ticket.getPayload();
+        if (!payload?.email_verified || !payload.sub) return null;
+        const email = payload.email ?? undefined;
+        const name = payload.name ?? email ?? "Google user";
+        const avatar = payload.picture ?? undefined;
+        // Find by email or create. (Account-table linking happens through the
+        // standard Google OAuth provider on web — for the native shell we just
+        // need the User row so the phone-based join paths work.)
+        let user = email
+          ? await prisma.user.findFirst({ where: { email } })
+          : null;
+        if (!user) {
+          user = await prisma.user.create({
+            data: { name, email, avatar, locale: "ru" },
+          });
+        }
         return { id: user.id, name: user.name, email: user.email ?? undefined };
       },
     }),
