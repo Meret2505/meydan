@@ -30,6 +30,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   trustHost: true,
   pages: { signIn: "/login" },
+  // Mobile Chrome can drop the default SameSite=Lax PKCE/state cookies during
+  // the Google round-trip on the OAuth redirect, which surfaces as
+  // "InvalidCheck: pkceCodeVerifier value could not be parsed" on the
+  // callback. SameSite=None (with Secure=true, which __Secure- already
+  // requires) is the standard fix for this.
+  cookies: {
+    pkceCodeVerifier: {
+      name: "__Secure-authjs.pkce.code_verifier",
+      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+    },
+    state: {
+      name: "__Secure-authjs.state",
+      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+    },
+    nonce: {
+      name: "__Secure-authjs.nonce",
+      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+    },
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
