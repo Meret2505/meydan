@@ -102,6 +102,10 @@ const withNextIntl = require("next-intl/plugin")("./i18n.ts");
 const nextConfig = {
   reactStrictMode: true,
   images: { remotePatterns: [{ protocol: "https", hostname: "**" }] },
+  // Standalone output bundles only what the server needs into .next/standalone,
+  // so the Docker image is tiny. Harmless on Vercel (it ignores this and uses
+  // its own packaging), required for `node server.js` in the prod container.
+  output: "standalone",
 };
 
 module.exports = withNextIntl(withPWA(nextConfig));

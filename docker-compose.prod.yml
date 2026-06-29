@@ -1,0 +1,75 @@
+# Production stack: Next.js + Postgres + nginx + certbot.
+# Run on the VPS with:
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Env vars come from .env.prod (NOT committed). See .env.prod.example.
+# First-time TLS: see scripts/bootstrap-tls.sh.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-meydan}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-meydan}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # No host port published — only the app reaches it over the internal network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meydan}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # Built from the compose env so this URL is the source of truth here.
+      DATABASE_URL: postgres://${POSTGRES_USER:-meydan}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-meydan}?schema=public&connection_limit=20
+      DIRECT_URL: postgres://${POSTGRES_USER:-meydan}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-meydan}?schema=public
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      STORAGE_BACKEND: local
+      LOCAL_STORAGE_DIR: /app/uploads
+      PUBLIC_STORAGE_BASE_URL: ${NEXTAUTH_URL}/uploads
+    volumes:
+      - uploads:/app/uploads
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
+      - certbot-www:/var/www/certbot
+      - certbot-etc:/etc/letsencrypt
+      - uploads:/var/www/uploads:ro
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - certbot-www:/var/www/certbot
+      - certbot-etc:/etc/letsencrypt
+    # Renew every 12 hours; certbot is a no-op when nothing is due.
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
+
+volumes:
+  db-data:
+  uploads:
+  certbot-www:
+  certbot-etc:

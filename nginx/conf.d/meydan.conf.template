@@ -1,0 +1,58 @@
+# nginx config for meydan. After your domain points at the VPS, run
+# scripts/bootstrap-tls.sh which substitutes ${DOMAIN} and reloads nginx.
+#
+# Architecture:
+#   :80  → ACME challenges + permanent redirect to https
+#   :443 → TLS termination, then reverse proxy to the Next.js app, plus
+#          serving uploaded files directly from the shared volume.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+
+    # Let's Encrypt HTTP-01 challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    # Everything else: redirect to HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include /etc/nginx/snippets/tls.conf;
+
+    client_max_body_size 10m;  # avatars + field photos are <5MB but allow headroom
+
+    # User-uploaded files served straight from disk — faster than going through Node.
+    location /uploads/ {
+        alias /var/www/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # Next.js app
+    location / {
+        proxy_pass http://app:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 60s;
+    }
+}

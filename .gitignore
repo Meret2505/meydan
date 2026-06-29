@@ -48,3 +48,15 @@ assets/
 
 # Signing keystore + credentials (preserved across Android shell migrations)
 keys/
+
+# Convenience copies of latest build output at repo root
+/MEYDAN.aab
+/MEYDAN.apk
+.vercel
+# Block all dotenvs except templates (committed examples are intentional)
+.env*
+!.env.prod.example
+!.env.example
+
+# Database + storage backups (contain user data — never commit)
+backups/

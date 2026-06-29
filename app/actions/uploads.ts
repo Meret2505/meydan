@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { supabaseAdmin } from "@/lib/supabase";
+import { storage, parseObjectUrl } from "@/lib/storage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -37,17 +37,13 @@ export async function uploadAvatar(formData: FormData): Promise<void> {
   const path = `${userId}/${Date.now()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const sb = supabaseAdmin();
-  const { error: upErr } = await sb.storage
-    .from("avatars")
-    .upload(path, buffer, { contentType: file.type, upsert: true });
-  if (upErr) {
-    console.warn("[upload] avatar failed:", upErr.message);
+  let publicUrl: string;
+  try {
+    publicUrl = await storage.put("avatars", path, buffer, file.type);
+  } catch (e) {
+    console.warn("[upload] avatar failed:", (e as Error).message);
     return;
   }
-  const {
-    data: { publicUrl },
-  } = sb.storage.from("avatars").getPublicUrl(path);
 
   await prisma.user.update({
     where: { id: userId },
@@ -85,17 +81,13 @@ export async function uploadFieldPhoto(formData: FormData): Promise<void> {
   const path = `${fieldId}/${Date.now()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const sb = supabaseAdmin();
-  const { error: upErr } = await sb.storage
-    .from("field-photos")
-    .upload(path, buffer, { contentType: file.type, upsert: false });
-  if (upErr) {
-    console.warn("[upload] field photo failed:", upErr.message);
+  let publicUrl: string;
+  try {
+    publicUrl = await storage.put("field-photos", path, buffer, file.type);
+  } catch (e) {
+    console.warn("[upload] field photo failed:", (e as Error).message);
     return;
   }
-  const {
-    data: { publicUrl },
-  } = sb.storage.from("field-photos").getPublicUrl(path);
 
   await prisma.field.update({
     where: { id: fieldId },
@@ -120,18 +112,13 @@ export async function removeFieldPhoto(
   const next = field.photos.filter((p) => p !== photoUrl);
   if (next.length === field.photos.length) return;
 
-  // Try to remove from storage too (path is the suffix after /field-photos/)
-  try {
-    const url = new URL(photoUrl);
-    const marker = "/field-photos/";
-    const idx = url.pathname.indexOf(marker);
-    if (idx !== -1) {
-      const objectPath = url.pathname.slice(idx + marker.length);
-      const sb = supabaseAdmin();
-      await sb.storage.from("field-photos").remove([objectPath]);
+  const parsed = parseObjectUrl(photoUrl);
+  if (parsed) {
+    try {
+      await storage.remove(parsed.bucket, parsed.path);
+    } catch {
+      /* swallow — DB is the source of truth */
     }
-  } catch {
-    /* swallow */
   }
 
   await prisma.field.update({
