@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { uploadAvatar, removeAvatar } from "@/app/actions/uploads";
+import { toProxyUrl } from "@/lib/storage-url";
 
 function initials(name: string) {
   return (
@@ -104,7 +105,7 @@ export function AvatarUploader({
         {/* Overlaid image (real photo or local data-URL preview) */}
         {preview && (
           <img
-            src={preview}
+            src={toProxyUrl(preview) ?? undefined}
             alt={name}
             draggable={false}
             className="absolute inset-0 w-full h-full object-cover"

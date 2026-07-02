@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useLocale } from "next-intl";
 import { uploadFieldPhoto, removeFieldPhoto } from "@/app/actions/uploads";
+import { toProxyUrl } from "@/lib/storage-url";
 
 export function FieldPhotoUploader({
   fieldId,
@@ -64,7 +65,7 @@ export function FieldPhotoUploader({
               className="relative aspect-square rounded-xl overflow-hidden border border-border bg-surface"
             >
               <img
-                src={url}
+                src={toProxyUrl(url) ?? undefined}
                 alt=""
                 className="w-full h-full object-cover"
                 loading="lazy"

@@ -7,6 +7,7 @@ import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
 import { FieldPhotoUploader } from "@/components/fields/FieldPhotoUploader";
+import { toProxyUrl } from "@/lib/storage-url";
 
 function waLink(phone: string) {
   return `https://wa.me/${phone.replace(/[^\d]/g, "")}`;
@@ -67,7 +68,7 @@ export default async function FieldDetailPage({
         {field.photos[0] ? (
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${field.photos[0]})` }}
+            style={{ backgroundImage: `url(${toProxyUrl(field.photos[0])})` }}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#1c7a45] to-[#0f5530]">

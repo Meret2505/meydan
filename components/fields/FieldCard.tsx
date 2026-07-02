@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { toProxyUrl } from "@/lib/storage-url";
 
 const SURFACE_KEY: Record<string, string> = {
   "Искусственная трава": "fields.surface_turf",
@@ -50,7 +51,7 @@ export function FieldCard({ field }: { field: FieldCardData }) {
         {field.photo && (
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${field.photo})` }}
+            style={{ backgroundImage: `url(${toProxyUrl(field.photo)})` }}
           />
         )}
       </div>

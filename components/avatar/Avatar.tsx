@@ -1,3 +1,5 @@
+import { toProxyUrl } from "@/lib/storage-url";
+
 function hue(seed: string) {
   let h = 0;
   for (const c of seed) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -49,7 +51,7 @@ export function Avatar({
       {placeholder}
       {src && (
         <img
-          src={src}
+          src={toProxyUrl(src) ?? undefined}
           alt={name}
           width={size}
           height={size}
