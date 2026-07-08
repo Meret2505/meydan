@@ -137,6 +137,23 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // Client Router Cache retention. Once a tab/page has been rendered, revisiting
+    // it within this window restores the FULLY-rendered screen from memory — no
+    // server request and no loading skeleton. The window is set long (30 min) so a
+    // route only ever shows its skeleton on the FIRST visit of a session; every
+    // switch back to an already-seen tab is instant.
+    //
+    // Trade-off: cached screens can be up to `dynamic` seconds stale. Data still
+    // refreshes on (a) the first visit, (b) any Server Action that calls
+    // revalidatePath, (c) router.refresh(), and (d) an app restart / full reload.
+    // If a live tab must never go stale, pair a shorter value with a
+    // refresh-on-foreground call (see below) instead of lowering this.
+    staleTimes: {
+      dynamic: 1800,
+      static: 3600,
+    },
+  },
   // Restrict the image optimizer to the hosts we actually load from. A wildcard
   // (`hostname: "**"`) turns the optimizer into an open image proxy and is the
   // exact configuration flagged by GHSA-9g9p-9gw9-jx7f (DoS via remotePatterns).

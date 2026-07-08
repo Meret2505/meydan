@@ -1,9 +1,11 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
+import { Suspense } from "react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
 import { StatusBar } from "@/components/ui/StatusBar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Avatar } from "@/components/avatar/Avatar";
@@ -24,25 +26,12 @@ export default async function ProfilePage(
   setRequestLocale(locale);
   const [t, session] = await Promise.all([getTranslations(), getSession()]);
   const userId = session!.user.id;
-  const [user, stats, recent] = await Promise.all([
-    prisma.user.findUnique({ where: { id: userId } }),
-    getPlayerStats(userId),
-    prisma.gameParticipant.findMany({
-      where: { userId, game: { status: "COMPLETED" } },
-      include: {
-        game: {
-          include: { field: { select: { name: true } } },
-        },
-      },
-      orderBy: { joinedAt: "desc" },
-      take: 3,
-    }),
-  ]);
+  // Only the identity fields the header needs are awaited up front; the heavier
+  // stats aggregation and recent-games join stream in via <Suspense> below.
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return null;
 
-  const dateFmt = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
   const positionLabel = user.position ? t(`positions.${user.position}`) : "—";
-  const attendancePct = stats.attendanceRate ?? 0;
 
   return (
     <>
@@ -98,103 +87,10 @@ export default async function ProfilePage(
           </span>
         </div>
 
-        {/* Stats grid */}
-        <div className="flex gap-3 mt-4">
-          <div className="basis-[58%] bg-surface border border-border rounded-[18px] p-4">
-            <div className="text-[12px] text-text-muted font-semibold">
-              {t("profile.attendance")}
-            </div>
-            <div className="font-display font-black text-[38px] text-primary leading-none mt-1.5">
-              {stats.attendanceRate === null ? "—" : stats.attendanceRate}
-              {stats.attendanceRate !== null && (
-                <span className="text-[20px]">%</span>
-              )}
-            </div>
-            <div className="h-1.5 rounded bg-[var(--overlay-strong)] overflow-hidden mt-3">
-              <div
-                className="h-full bg-primary rounded"
-                style={{ width: `${attendancePct}%` }}
-              />
-            </div>
-            <div className="text-[11.5px] text-[#6e756f] mt-2">
-              {t("profile.attendance_detail", {
-                played: stats.gamesPlayed,
-                total: stats.totalJoined,
-              })}
-            </div>
-          </div>
-          <div className="flex-1 flex flex-col gap-2.5">
-            <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
-              <div className="text-[12px] text-text-muted font-semibold">
-                {t("profile.played")}
-              </div>
-              <div className="font-display font-extrabold text-[26px] mt-1">
-                {stats.gamesPlayed}
-              </div>
-            </div>
-            <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
-              <div className="text-[12px] text-text-muted font-semibold">
-                {t("profile.joined_stat")}
-              </div>
-              <div className="font-display font-extrabold text-[26px] mt-1">
-                {stats.totalJoined}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent games */}
-        {recent.length > 0 && (
-          <>
-            <div className="font-display font-bold text-[15px] mt-5 mb-3">
-              {t("profile.recent_games")}
-            </div>
-            <div className="flex flex-col gap-2.5">
-              {recent.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/${locale}/games/${p.gameId}`}
-                  className="flex items-center gap-3 bg-surface border border-border rounded-[14px] px-3.5 py-3"
-                >
-                  <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center font-display font-extrabold text-[13px] ${
-                      p.attended === true
-                        ? "bg-primary/15 text-primary-soft"
-                        : "bg-[var(--overlay)] text-text-soft"
-                    }`}
-                  >
-                    {p.game.scoreHome !== null && p.game.scoreAway !== null
-                      ? `${p.game.scoreHome}:${p.game.scoreAway}`
-                      : "—"}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-display font-bold text-[14px] truncate">
-                      {p.game.field?.name ?? p.game.fieldName ?? "—"}
-                    </div>
-                    <div className="text-[12px] text-text-muted mt-0.5">
-                      {dateFmt.format(p.game.scheduledAt)} · {gameFormat(p.game)}
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[12px] font-bold ${
-                      p.attended === true
-                        ? "text-primary-soft"
-                        : p.attended === false
-                        ? "text-danger"
-                        : "text-text-muted"
-                    }`}
-                  >
-                    {p.attended === true
-                      ? t("profile.came")
-                      : p.attended === false
-                      ? t("profile.absent")
-                      : "—"}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </>
-        )}
+        {/* Stats + recent games stream in; settings below stay put. */}
+        <Suspense fallback={<StatsSkeleton />}>
+          <ProfileStats userId={userId} locale={locale} />
+        </Suspense>
 
         {/* Settings */}
         <div className="font-display font-bold text-[15px] mt-5 mb-3">
@@ -265,5 +161,139 @@ export default async function ProfilePage(
         </div>
       </div>
     </>
+  );
+}
+
+async function ProfileStats({ userId, locale }: { userId: string; locale: string }) {
+  const [t, stats, recent] = await Promise.all([
+    getTranslations(),
+    getPlayerStats(userId),
+    prisma.gameParticipant.findMany({
+      where: { userId, game: { status: "COMPLETED" } },
+      include: {
+        game: {
+          include: { field: { select: { name: true } } },
+        },
+      },
+      orderBy: { joinedAt: "desc" },
+      take: 3,
+    }),
+  ]);
+
+  const dateFmt = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
+  const attendancePct = stats.attendanceRate ?? 0;
+
+  return (
+    <>
+      {/* Stats grid */}
+      <div className="flex gap-3 mt-4">
+        <div className="basis-[58%] bg-surface border border-border rounded-[18px] p-4">
+          <div className="text-[12px] text-text-muted font-semibold">
+            {t("profile.attendance")}
+          </div>
+          <div className="font-display font-black text-[38px] text-primary leading-none mt-1.5">
+            {stats.attendanceRate === null ? "—" : stats.attendanceRate}
+            {stats.attendanceRate !== null && (
+              <span className="text-[20px]">%</span>
+            )}
+          </div>
+          <div className="h-1.5 rounded bg-[var(--overlay-strong)] overflow-hidden mt-3">
+            <div
+              className="h-full bg-primary rounded"
+              style={{ width: `${attendancePct}%` }}
+            />
+          </div>
+          <div className="text-[11.5px] text-[#6e756f] mt-2">
+            {t("profile.attendance_detail", {
+              played: stats.gamesPlayed,
+              total: stats.totalJoined,
+            })}
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col gap-2.5">
+          <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
+            <div className="text-[12px] text-text-muted font-semibold">
+              {t("profile.played")}
+            </div>
+            <div className="font-display font-extrabold text-[26px] mt-1">
+              {stats.gamesPlayed}
+            </div>
+          </div>
+          <div className="flex-1 bg-surface border border-border rounded-[18px] p-3.5">
+            <div className="text-[12px] text-text-muted font-semibold">
+              {t("profile.joined_stat")}
+            </div>
+            <div className="font-display font-extrabold text-[26px] mt-1">
+              {stats.totalJoined}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent games */}
+      {recent.length > 0 && (
+        <>
+          <div className="font-display font-bold text-[15px] mt-5 mb-3">
+            {t("profile.recent_games")}
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {recent.map((p) => (
+              <Link
+                key={p.id}
+                href={`/${locale}/games/${p.gameId}`}
+                className="flex items-center gap-3 bg-surface border border-border rounded-[14px] px-3.5 py-3"
+              >
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center font-display font-extrabold text-[13px] ${
+                    p.attended === true
+                      ? "bg-primary/15 text-primary-soft"
+                      : "bg-[var(--overlay)] text-text-soft"
+                  }`}
+                >
+                  {p.game.scoreHome !== null && p.game.scoreAway !== null
+                    ? `${p.game.scoreHome}:${p.game.scoreAway}`
+                    : "—"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-display font-bold text-[14px] truncate">
+                    {p.game.field?.name ?? p.game.fieldName ?? "—"}
+                  </div>
+                  <div className="text-[12px] text-text-muted mt-0.5">
+                    {dateFmt.format(p.game.scheduledAt)} · {gameFormat(p.game)}
+                  </div>
+                </div>
+                <span
+                  className={`text-[12px] font-bold ${
+                    p.attended === true
+                      ? "text-primary-soft"
+                      : p.attended === false
+                      ? "text-danger"
+                      : "text-text-muted"
+                  }`}
+                >
+                  {p.attended === true
+                    ? t("profile.came")
+                    : p.attended === false
+                    ? t("profile.absent")
+                    : "—"}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="flex gap-3 mt-4">
+      <Skeleton className="basis-[58%] h-[132px] rounded-[18px]" />
+      <div className="flex-1 flex flex-col gap-2.5">
+        <Skeleton className="flex-1 h-[61px] rounded-[18px]" />
+        <Skeleton className="flex-1 h-[61px] rounded-[18px]" />
+      </div>
+    </div>
   );
 }

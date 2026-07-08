@@ -1,10 +1,14 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { RowCardSkeleton } from "@/components/ui/Skeleton";
 import { tournamentStatus, type TournamentStatus } from "@/lib/tournament-status";
 import { cn } from "@/lib/utils";
+
+type Tab = "upcoming" | "ongoing" | "ended";
 
 const STATUS_TONE: Record<TournamentStatus, string> = {
   upcoming: "bg-[var(--overlay-strong)] text-text-muted",
@@ -29,32 +33,12 @@ export default async function TournamentsPage(
   setRequestLocale(locale);
   const t = await getTranslations();
 
-  const tab =
+  const tab: Tab =
     searchParams.tab === "ended"
       ? "ended"
       : searchParams.tab === "ongoing"
       ? "ongoing"
       : "upcoming";
-
-  const tournaments = await prisma.tournament.findMany({
-    include: {
-      _count: { select: { teams: true, matches: true } },
-    },
-    orderBy: { startDate: tab === "ended" ? "desc" : "asc" },
-    take: 80,
-  });
-
-  const filtered = tournaments.filter((tr) => {
-    const s = tournamentStatus(tr);
-    if (tab === "upcoming") return s === "upcoming";
-    if (tab === "ongoing") return s === "ongoing";
-    return s === "ended" || s === "cancelled";
-  });
-
-  const dateFmt = new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-  });
 
   return (
     <>
@@ -79,60 +63,102 @@ export default async function TournamentsPage(
         </div>
       </div>
 
-      <div className="px-6 pt-4 pb-8 flex flex-col gap-2.5">
-        {filtered.length === 0 ? (
-          <EmptyState
-            icon={<span className="text-2xl">🏆</span>}
-            title={t("tournaments.empty_title")}
-            description={
-              tab === "upcoming"
-                ? t("tournaments.empty_sub_upcoming")
-                : tab === "ongoing"
-                ? t("tournaments.empty_sub_ongoing")
-                : t("tournaments.empty_sub_ended")
-            }
-            action={
-              tab === "upcoming"
-                ? { label: t("tournaments.create_tournament"), href: `/${locale}/tournaments/create` }
-                : undefined
-            }
-          />
-        ) : (
-          filtered.map((tr) => {
-            const s = tournamentStatus(tr);
-            return (
-              <Link
-                key={tr.id}
-                href={`/${locale}/tournaments/${tr.id}`}
-                className="flex items-center gap-3 p-4 rounded-2xl bg-surface border border-border active:scale-[0.995] transition-transform"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center font-display font-extrabold text-[20px]">
-                  🏆
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-display font-extrabold text-[16px] truncate">
-                    {tr.name}
-                  </div>
-                  <div className="text-text-muted text-[12.5px] mt-0.5">
-                    {dateFmt.format(tr.startDate)}
-                    {tr.endDate ? ` — ${dateFmt.format(tr.endDate)}` : ""} ·{" "}
-                    {tr._count.teams} {t("tournaments.teams_count")} · {tr._count.matches} {t("tournaments.matches_count")}
-                  </div>
-                </div>
-                <span
-                  className={cn(
-                    "px-2 py-0.5 rounded-full text-[10.5px] font-display font-extrabold uppercase shrink-0",
-                    STATUS_TONE[s],
-                  )}
-                >
-                  {t("tournaments.status_" + s)}
-                </span>
-              </Link>
-            );
-          })
-        )}
-      </div>
+      {/* Only the list query streams; the header and tab bar are already up. */}
+      <Suspense fallback={<ListSkeleton />} key={tab}>
+        <TournamentsList locale={locale} tab={tab} />
+      </Suspense>
     </>
+  );
+}
+
+async function TournamentsList({ locale, tab }: { locale: string; tab: Tab }) {
+  const t = await getTranslations();
+
+  const tournaments = await prisma.tournament.findMany({
+    include: {
+      _count: { select: { teams: true, matches: true } },
+    },
+    orderBy: { startDate: tab === "ended" ? "desc" : "asc" },
+    take: 80,
+  });
+
+  const filtered = tournaments.filter((tr) => {
+    const s = tournamentStatus(tr);
+    if (tab === "upcoming") return s === "upcoming";
+    if (tab === "ongoing") return s === "ongoing";
+    return s === "ended" || s === "cancelled";
+  });
+
+  const dateFmt = new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+  });
+
+  return (
+    <div className="px-6 pt-4 pb-8 flex flex-col gap-2.5">
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={<span className="text-2xl">🏆</span>}
+          title={t("tournaments.empty_title")}
+          description={
+            tab === "upcoming"
+              ? t("tournaments.empty_sub_upcoming")
+              : tab === "ongoing"
+              ? t("tournaments.empty_sub_ongoing")
+              : t("tournaments.empty_sub_ended")
+          }
+          action={
+            tab === "upcoming"
+              ? { label: t("tournaments.create_tournament"), href: `/${locale}/tournaments/create` }
+              : undefined
+          }
+        />
+      ) : (
+        filtered.map((tr) => {
+          const s = tournamentStatus(tr);
+          return (
+            <Link
+              key={tr.id}
+              href={`/${locale}/tournaments/${tr.id}`}
+              className="flex items-center gap-3 p-4 rounded-2xl bg-surface border border-border active:scale-[0.995] transition-transform"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center font-display font-extrabold text-[20px]">
+                🏆
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-display font-extrabold text-[16px] truncate">
+                  {tr.name}
+                </div>
+                <div className="text-text-muted text-[12.5px] mt-0.5">
+                  {dateFmt.format(tr.startDate)}
+                  {tr.endDate ? ` — ${dateFmt.format(tr.endDate)}` : ""} ·{" "}
+                  {tr._count.teams} {t("tournaments.teams_count")} · {tr._count.matches} {t("tournaments.matches_count")}
+                </div>
+              </div>
+              <span
+                className={cn(
+                  "px-2 py-0.5 rounded-full text-[10.5px] font-display font-extrabold uppercase shrink-0",
+                  STATUS_TONE[s],
+                )}
+              >
+                {t("tournaments.status_" + s)}
+              </span>
+            </Link>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <div className="px-6 pt-4 pb-8 flex flex-col gap-2.5">
+      <RowCardSkeleton />
+      <RowCardSkeleton />
+      <RowCardSkeleton />
+      <RowCardSkeleton />
+    </div>
   );
 }
 
@@ -144,7 +170,7 @@ function TabLink({
 }: {
   locale: string;
   active: boolean;
-  tab: "upcoming" | "ongoing" | "ended";
+  tab: Tab;
   label: string;
 }) {
   return (

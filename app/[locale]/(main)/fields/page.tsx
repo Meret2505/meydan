@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
+import { Skeleton, FieldCardSkeleton } from "@/components/ui/Skeleton";
 import { FieldsView, type FieldItem } from "@/components/fields/FieldsView";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
 import { cn } from "@/lib/utils";
@@ -14,10 +16,12 @@ const SURFACE_KEY: Record<string, string> = {
   "Грунт": "fields.surface_dirt",
 };
 
+type FieldsSearchParams = { district?: string; surface?: string; view?: string };
+
 export default async function FieldsPage(
   props: {
     params: Promise<{ locale: string }>;
-    searchParams: Promise<{ district?: string; surface?: string; view?: string }>;
+    searchParams: Promise<FieldsSearchParams>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -28,6 +32,47 @@ export default async function FieldsPage(
   } = params;
 
   setRequestLocale(locale);
+  const t = await getTranslations();
+  const view = searchParams.view === "map" ? "map" : "list";
+
+  // Build the view-toggle href from the raw params (no DB needed) so the header
+  // renders instantly; FieldsContent below validates the filters against the
+  // real district list when it streams in.
+  const toggle = new URLSearchParams();
+  if (searchParams.district) toggle.set("district", searchParams.district);
+  if (searchParams.surface) toggle.set("surface", searchParams.surface);
+  if (view === "list") toggle.set("view", "map");
+  const toggleQs = toggle.toString();
+
+  return (
+    <>
+      <StatusBar />
+      <div className="px-6 pt-4 flex justify-between items-center">
+        <div className="font-display font-extrabold text-[25px]">{t("nav.fields")}</div>
+        <Link
+          href={`/${locale}/fields${toggleQs ? `?${toggleQs}` : ""}`}
+          className="h-9 px-3 rounded-lg bg-[var(--overlay)] border border-border-strong font-display font-bold text-[13px] inline-flex items-center"
+        >
+          {view === "map" ? t("fields.view_list") : t("fields.view_map")}
+        </Link>
+      </div>
+
+      <Suspense fallback={<FieldsSkeleton />}>
+        <FieldsContent locale={locale} searchParams={searchParams} view={view} />
+      </Suspense>
+    </>
+  );
+}
+
+async function FieldsContent({
+  locale,
+  searchParams,
+  view,
+}: {
+  locale: string;
+  searchParams: FieldsSearchParams;
+  view: "map" | "list";
+}) {
   const t = await getTranslations();
   const session = await getSession();
   const userId = session?.user?.id ?? null;
@@ -46,7 +91,6 @@ export default async function FieldsPage(
   const surfaceFilter = (SURFACES as readonly string[]).includes(searchParams.surface ?? "")
     ? (searchParams.surface as string)
     : null;
-  const view = searchParams.view === "map" ? "map" : "list";
 
   const fields = await prisma.field.findMany({
     where: {
@@ -97,17 +141,6 @@ export default async function FieldsPage(
 
   return (
     <>
-      <StatusBar />
-      <div className="px-6 pt-4 flex justify-between items-center">
-        <div className="font-display font-extrabold text-[25px]">{t("nav.fields")}</div>
-        <Link
-          href={`/${locale}/fields${queryFor({ view: view === "map" ? null : "map" })}`}
-          className="h-9 px-3 rounded-lg bg-[var(--overlay)] border border-border-strong font-display font-bold text-[13px] inline-flex items-center"
-        >
-          {view === "map" ? t("fields.view_list") : t("fields.view_map")}
-        </Link>
-      </div>
-
       <div className="px-6 pt-4 flex flex-col gap-2.5">
         <div className="flex gap-2 overflow-x-auto scrollbar-none">
           <Chip
@@ -160,6 +193,31 @@ export default async function FieldsPage(
           <FieldsView fields={items} favoriteIds={favoriteIds} />
         </div>
       )}
+    </>
+  );
+}
+
+function FieldsSkeleton() {
+  return (
+    <>
+      <div className="px-6 pt-4 flex flex-col gap-2.5">
+        <div className="flex gap-2">
+          <Skeleton className="w-16 h-8 rounded-full" />
+          <Skeleton className="w-20 h-8 rounded-full" />
+          <Skeleton className="w-16 h-8 rounded-full" />
+          <Skeleton className="w-24 h-8 rounded-full" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="w-16 h-8 rounded-full" />
+          <Skeleton className="w-24 h-8 rounded-full" />
+          <Skeleton className="w-20 h-8 rounded-full" />
+        </div>
+      </div>
+      <div className="px-6 pt-4 pb-8 flex flex-col gap-3">
+        <FieldCardSkeleton />
+        <FieldCardSkeleton />
+        <FieldCardSkeleton />
+      </div>
     </>
   );
 }

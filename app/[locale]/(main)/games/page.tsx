@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 type Tab = "open" | "mine";
 type Chip = "today" | "five" | "goalie";
+type UserMeta = { name: string; district: string | null } | null;
 
 export default async function GamesPage(
   props: {
@@ -33,14 +34,18 @@ export default async function GamesPage(
 
   const session = await getSession();
   const userId = session!.user.id;
-  const [user, unreadCount, t] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { name: true, district: true },
-    }),
-    prisma.notification.count({ where: { userId, isRead: false } }),
-    getTranslations(),
-  ]);
+  const t = await getTranslations();
+
+  // Fire the per-user reads without awaiting them here so the header, tabs and
+  // chips paint immediately; each result streams into its own <Suspense>
+  // boundary below instead of blocking the whole page on two DB round-trips.
+  const userMetaPromise = prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, district: true },
+  });
+  const unreadPromise = prisma.notification.count({
+    where: { userId, isRead: false },
+  });
 
   return (
     <>
@@ -51,12 +56,9 @@ export default async function GamesPage(
             {t("games.feed_title")}
           </div>
           <div className="flex items-center gap-3">
-            {user?.district && (
-              <div className="text-text-muted text-[13px] font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary" />
-                {user.district}
-              </div>
-            )}
+            <Suspense fallback={null}>
+              <DistrictPill promise={userMetaPromise} />
+            </Suspense>
             <Link
               href={`/${locale}/notifications`}
               aria-label="notifications"
@@ -74,9 +76,9 @@ export default async function GamesPage(
                 <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.5 21a2 2 0 01-3 0" />
               </svg>
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-primary border border-bg" />
-              )}
+              <Suspense fallback={null}>
+                <UnreadDot promise={unreadPromise} />
+              </Suspense>
             </Link>
           </div>
         </div>
@@ -104,7 +106,7 @@ export default async function GamesPage(
           <Suspense fallback={<FeedSkeleton />} key={`${tab}-${chip}`}>
             <Feed
               userId={session!.user.id}
-              district={user?.district ?? null}
+              districtPromise={userMetaPromise}
               tab={tab}
               chip={chip}
               locale={locale}
@@ -189,20 +191,40 @@ function FeedSkeleton() {
   );
 }
 
+async function DistrictPill({ promise }: { promise: Promise<UserMeta> }) {
+  const user = await promise;
+  if (!user?.district) return null;
+  return (
+    <div className="text-text-muted text-[13px] font-semibold flex items-center gap-1.5">
+      <span className="w-2 h-2 rounded-full bg-primary" />
+      {user.district}
+    </div>
+  );
+}
+
+async function UnreadDot({ promise }: { promise: Promise<number> }) {
+  const count = await promise;
+  if (count <= 0) return null;
+  return (
+    <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-primary border border-bg" />
+  );
+}
+
 async function Feed({
   userId,
-  district,
+  districtPromise,
   tab,
   chip,
   locale,
 }: {
   userId: string;
-  district: string | null;
+  districtPromise: Promise<UserMeta>;
   tab: Tab;
   chip: Chip | undefined;
   locale: string;
 }) {
-  const t = await getTranslations();
+  const [t, userMeta] = await Promise.all([getTranslations(), districtPromise]);
+  const district = userMeta?.district ?? null;
 
   const now = new Date();
   const startOfTomorrow = new Date(now);

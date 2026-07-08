@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { cn } from "@/lib/utils";
 
 interface Tab {
@@ -133,24 +133,43 @@ export function BottomNav() {
               key={tab.key}
               href={href}
               prefetch
-              className={cn(
-                "flex-1 flex flex-col items-center gap-1.5 transition-colors",
-                active ? "text-primary" : "text-[#4f5450]",
-              )}
+              className="flex-1 active:opacity-60 transition-opacity"
             >
-              {tab.icon}
-              <span
-                className={cn(
-                  "text-[11px]",
-                  active ? "font-bold" : "font-semibold",
-                )}
-              >
-                {t(tab.key)}
-              </span>
+              <TabContent active={active} icon={tab.icon} label={t(tab.key)} />
             </Link>
           );
         })}
       </div>
     </nav>
+  );
+}
+
+// Lights up the tapped tab immediately via the <Link> pending state, so the bar
+// responds on touch even while the destination is still rendering — the tapped
+// tab turns primary and dips slightly the instant it's pressed.
+function TabContent({
+  active,
+  icon,
+  label,
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  const { pending } = useLinkStatus();
+  const on = active || pending;
+  return (
+    <span
+      className={cn(
+        "flex flex-col items-center gap-1.5 transition-[color,transform] duration-150",
+        on ? "text-primary" : "text-[#4f5450]",
+        pending && "scale-[0.94]",
+      )}
+    >
+      {icon}
+      <span className={cn("text-[11px]", on ? "font-bold" : "font-semibold")}>
+        {label}
+      </span>
+    </span>
   );
 }
