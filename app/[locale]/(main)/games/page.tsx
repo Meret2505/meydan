@@ -4,15 +4,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { GameCardSkeleton } from "@/components/ui/Skeleton";
-import { GameCard, type GameCardData } from "@/components/games/GameCard";
-import { FeedOfflineGuard } from "@/components/games/FeedOffline";
+import { type GameCardData } from "@/components/games/GameCard";
+import { GamesBoard, type GamesData, type Tab, type Chip } from "@/components/games/GamesBoard";
 import { gameFormat } from "@/lib/game-format";
-import { cn } from "@/lib/utils";
 
-type Tab = "open" | "mine";
-type Chip = "today" | "five" | "goalie";
 type UserMeta = { name: string; district: string | null } | null;
 
 export default async function GamesPage(
@@ -29,16 +24,20 @@ export default async function GamesPage(
   } = params;
 
   setRequestLocale(locale);
-  const tab: Tab = searchParams.tab === "mine" ? "mine" : "open";
-  const chip = (searchParams.chip as Chip | undefined) ?? undefined;
+  const initialTab: Tab = searchParams.tab === "mine" ? "mine" : "open";
+  const initialChip = (["today", "five", "goalie"] as const).includes(
+    searchParams.chip as Chip,
+  )
+    ? (searchParams.chip as Chip)
+    : undefined;
 
   const session = await getSession();
   const userId = session!.user.id;
   const t = await getTranslations();
 
-  // Fire the per-user reads without awaiting them here so the header, tabs and
-  // chips paint immediately; each result streams into its own <Suspense>
-  // boundary below instead of blocking the whole page on two DB round-trips.
+  // Per-user reads fire without blocking the shell. Both game sets are fetched
+  // once (gamesPromise) and streamed to the client board, which then switches
+  // tabs/chips in memory — no per-switch server round-trip.
   const userMetaPromise = prisma.user.findUnique({
     where: { id: userId },
     select: { name: true, district: true },
@@ -46,6 +45,7 @@ export default async function GamesPage(
   const unreadPromise = prisma.notification.count({
     where: { userId, isRead: false },
   });
+  const gamesPromise = fetchGames(userId, userMetaPromise);
 
   return (
     <>
@@ -82,38 +82,14 @@ export default async function GamesPage(
             </Link>
           </div>
         </div>
-
-        <div className="flex bg-[var(--overlay)] rounded-2xl p-1 mt-4">
-          <TabLink locale={locale} active={tab === "open"} tab="open" label={t("games.open_games")} />
-          <TabLink locale={locale} active={tab === "mine"} tab="mine" label={t("games.my_games")} />
-        </div>
-
-        <div className="flex gap-2 mt-3.5 overflow-x-auto scrollbar-none">
-          <ChipLink locale={locale} tab={tab} chip="today" active={chip === "today"} label={t("games.today")} />
-          <ChipLink locale={locale} tab={tab} chip="five" active={chip === "five"} label={t("games.chip_five")} />
-          <ChipLink
-            locale={locale}
-            tab={tab}
-            chip="goalie"
-            active={chip === "goalie"}
-            label={t("games.chip_goalie")}
-          />
-        </div>
       </div>
 
-      <div className="px-6 pt-4 pb-6 flex flex-col gap-3.5">
-        <FeedOfflineGuard>
-          <Suspense fallback={<FeedSkeleton />} key={`${tab}-${chip}`}>
-            <Feed
-              userId={session!.user.id}
-              districtPromise={userMetaPromise}
-              tab={tab}
-              chip={chip}
-              locale={locale}
-            />
-          </Suspense>
-        </FeedOfflineGuard>
-      </div>
+      <GamesBoard
+        gamesPromise={gamesPromise}
+        initialTab={initialTab}
+        initialChip={initialChip}
+        locale={locale}
+      />
 
       <Link
         href={`/${locale}/games/create`}
@@ -126,69 +102,64 @@ export default async function GamesPage(
   );
 }
 
-function TabLink({
-  locale,
-  active,
-  tab,
-  label,
-}: {
-  locale: string;
-  active: boolean;
-  tab: Tab;
-  label: string;
-}) {
-  return (
-    <Link
-      href={`/${locale}/games?tab=${tab}`}
-      className={cn(
-        "flex-1 text-center py-2.5 rounded-xl font-display font-bold text-[14px]",
-        active ? "bg-bg text-text shadow" : "text-text-muted",
-      )}
-    >
-      {label}
-    </Link>
-  );
-}
+async function fetchGames(
+  userId: string,
+  districtPromise: Promise<UserMeta>,
+): Promise<GamesData> {
+  const userMeta = await districtPromise;
+  const district = userMeta?.district ?? null;
 
-function ChipLink({
-  locale,
-  tab,
-  chip,
-  active,
-  label,
-}: {
-  locale: string;
-  tab: Tab;
-  chip: Chip;
-  active: boolean;
-  label: string;
-}) {
-  const href = active
-    ? `/${locale}/games?tab=${tab}`
-    : `/${locale}/games?tab=${tab}&chip=${chip}`;
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "px-3 py-2 rounded-full font-bold text-[13px] whitespace-nowrap border",
-        active
-          ? "bg-primary/13 border-primary/35 text-primary"
-          : "bg-[var(--overlay)] border-border text-text/80",
-      )}
-    >
-      {label}
-    </Link>
-  );
-}
+  const now = new Date();
+  const baseWhere = {
+    scheduledAt: { gte: now },
+    status: { in: ["OPEN" as const, "FULL" as const] },
+  };
+  const include = {
+    field: true,
+    organizer: { select: { id: true, name: true } },
+    participants: { include: { user: { select: { id: true, name: true } } } },
+  };
 
-function FeedSkeleton() {
-  return (
-    <>
-      <GameCardSkeleton />
-      <GameCardSkeleton />
-      <GameCardSkeleton />
-    </>
-  );
+  const [openRaw, mineRaw] = await Promise.all([
+    prisma.game.findMany({
+      where: {
+        ...baseWhere,
+        participants: { none: { userId } },
+        organizerId: { not: userId },
+        ...(district ? { OR: [{ field: { district } }, { field: null }] } : {}),
+      },
+      include,
+      orderBy: { scheduledAt: "asc" },
+      take: 50,
+    }),
+    prisma.game.findMany({
+      where: {
+        ...baseWhere,
+        OR: [{ organizerId: userId }, { participants: { some: { userId } } }],
+      },
+      include,
+      orderBy: { scheduledAt: "asc" },
+      take: 50,
+    }),
+  ]);
+
+  const toData = (g: (typeof openRaw)[number], mine: boolean): GameCardData => ({
+    id: g.id,
+    scheduledAt: g.scheduledAt,
+    venue: g.field?.name ?? g.fieldName ?? "—",
+    district: g.field?.district ?? null,
+    format: gameFormat(g),
+    totalSpots: g.totalSpots,
+    joinedCount: g.participants.length,
+    neededPositions: g.neededPositions,
+    participants: g.participants.map((p) => ({ id: p.user.id, name: p.user.name })),
+    mine,
+  });
+
+  return {
+    open: openRaw.map((g) => toData(g, false)),
+    mine: mineRaw.map((g) => toData(g, g.organizerId === userId)),
+  };
 }
 
 async function DistrictPill({ promise }: { promise: Promise<UserMeta> }) {
@@ -207,112 +178,5 @@ async function UnreadDot({ promise }: { promise: Promise<number> }) {
   if (count <= 0) return null;
   return (
     <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-primary border border-bg" />
-  );
-}
-
-async function Feed({
-  userId,
-  districtPromise,
-  tab,
-  chip,
-  locale,
-}: {
-  userId: string;
-  districtPromise: Promise<UserMeta>;
-  tab: Tab;
-  chip: Chip | undefined;
-  locale: string;
-}) {
-  const [t, userMeta] = await Promise.all([getTranslations(), districtPromise]);
-  const district = userMeta?.district ?? null;
-
-  const now = new Date();
-  const startOfTomorrow = new Date(now);
-  startOfTomorrow.setHours(0, 0, 0, 0);
-  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-
-  const baseWhere = {
-    scheduledAt: { gte: now } as { gte: Date; lt?: Date },
-    status: { in: ["OPEN" as const, "FULL" as const] },
-  };
-
-  if (chip === "today") baseWhere.scheduledAt.lt = startOfTomorrow;
-
-  const where =
-    tab === "open"
-      ? {
-          ...baseWhere,
-          participants: { none: { userId } },
-          organizerId: { not: userId },
-          ...(district ? { OR: [{ field: { district } }, { field: null }] } : {}),
-        }
-      : {
-          ...baseWhere,
-          OR: [{ organizerId: userId }, { participants: { some: { userId } } }],
-        };
-
-  const games = await prisma.game.findMany({
-    where,
-    include: {
-      field: true,
-      organizer: { select: { id: true, name: true } },
-      participants: { include: { user: { select: { id: true, name: true } } } },
-    },
-    orderBy: { scheduledAt: "asc" },
-    take: 50,
-  });
-
-  const filtered = games.filter((g) => {
-    if (chip === "five" && g.totalSpots !== 10) return false;
-    if (chip === "goalie" && !g.neededPositions.includes("GOALKEEPER")) return false;
-    return true;
-  });
-
-  if (filtered.length === 0) {
-    return (
-      <EmptyState
-        icon={<BallIcon />}
-        title={t(tab === "open" ? "empty.no_games" : "empty.no_my_games")}
-        description={
-          tab === "open"
-            ? t("games.create_first_sub")
-            : undefined
-        }
-        action={
-          tab === "open"
-            ? { label: t("games.create"), href: `/${locale}/games/create` }
-            : undefined
-        }
-      />
-    );
-  }
-
-  return (
-    <>
-      {filtered.map((g) => {
-        const data: GameCardData = {
-          id: g.id,
-          scheduledAt: g.scheduledAt,
-          venue: g.field?.name ?? g.fieldName ?? "—",
-          district: g.field?.district ?? null,
-          format: gameFormat(g),
-          totalSpots: g.totalSpots,
-          joinedCount: g.participants.length,
-          neededPositions: g.neededPositions,
-          participants: g.participants.map((p) => ({ id: p.user.id, name: p.user.name })),
-          mine: g.organizerId === userId,
-        };
-        return <GameCard key={g.id} game={data} />;
-      })}
-    </>
-  );
-}
-
-function BallIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="w-9 h-9">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 7l4.2 3.1-1.6 5h-5.2L7.8 10z" />
-    </svg>
   );
 }
