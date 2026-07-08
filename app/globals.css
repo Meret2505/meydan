@@ -83,16 +83,3 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
 
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
-
-/* Native-style page transition. The (main)/template.tsx wrapper re-mounts on
-   every navigation, so this fades the new screen in on each route change.
-   Opacity-only on purpose (see template.tsx). */
-@keyframes page-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.page-in { animation: page-in 150ms ease-out; }
-
-@media (prefers-reduced-motion: reduce) {
-  .page-in { animation: none; }
-}

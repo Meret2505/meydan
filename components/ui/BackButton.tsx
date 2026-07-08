@@ -13,10 +13,24 @@ import { useRouter } from "next/navigation";
  */
 export function BackButton({ href }: { href?: string }) {
   const router = useRouter();
+  // Prefer a real history-back so the previous screen — and its scroll position —
+  // is restored from the client Router Cache. A forward `router.push(href)` always
+  // lands at the top of the target and breaks the back stack. The `href` push is
+  // kept only as a fallback for when there's no in-app history to return to (e.g. a
+  // detail page opened cold from a deep link / push notification).
+  const goBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else if (href) {
+      router.push(href);
+    } else {
+      router.back();
+    }
+  };
   return (
     <button
       type="button"
-      onClick={() => (href ? router.push(href) : router.back())}
+      onClick={goBack}
       aria-label="Back"
       className="w-11 h-11 rounded-xl bg-[var(--overlay)] border border-border flex items-center justify-center active:scale-95 transition-transform"
     >
