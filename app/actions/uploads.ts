@@ -1,7 +1,10 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 import { storage, parseObjectUrl } from "@/lib/storage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -27,6 +30,9 @@ async function requireUserId() {
 
 export async function uploadAvatar(formData: FormData): Promise<void> {
   const userId = await requireUserId();
+  // 20 avatar uploads per user per hour — plenty for real use, caps abuse.
+  const limit = await rateLimit(`upload:avatar:${userId}`, 20, 60 * 60_000);
+  if (!limit.allowed) return;
   const file = formData.get("file");
   const locale = String(formData.get("locale") ?? "ru");
   if (!(file instanceof File) || file.size === 0) return;
@@ -34,7 +40,7 @@ export async function uploadAvatar(formData: FormData): Promise<void> {
   if (!ALLOWED_MIME.includes(file.type)) return;
 
   const ext = extFor(file.name, file.type);
-  const path = `${userId}/${Date.now()}.${ext}`;
+  const path = `${userId}/${Date.now()}-${randomUUID()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   let publicUrl: string;
@@ -62,7 +68,10 @@ export async function removeAvatar(locale: string): Promise<void> {
 }
 
 export async function uploadFieldPhoto(formData: FormData): Promise<void> {
-  await requireUserId();
+  const userId = await requireUserId();
+  // Fields are shared/curated — only admins may mutate their photos, otherwise
+  // any logged-in user could deface or wipe any field's gallery.
+  if (!isAdmin(userId)) return;
   const fieldId = String(formData.get("fieldId") ?? "");
   const locale = String(formData.get("locale") ?? "ru");
   const file = formData.get("file");
@@ -78,7 +87,7 @@ export async function uploadFieldPhoto(formData: FormData): Promise<void> {
   if (field.photos.length >= 8) return; // soft cap
 
   const ext = extFor(file.name, file.type);
-  const path = `${fieldId}/${Date.now()}.${ext}`;
+  const path = `${fieldId}/${Date.now()}-${randomUUID()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   let publicUrl: string;
@@ -103,7 +112,8 @@ export async function removeFieldPhoto(
   photoUrl: string,
   locale: string,
 ): Promise<void> {
-  await requireUserId();
+  const userId = await requireUserId();
+  if (!isAdmin(userId)) return;
   const field = await prisma.field.findUnique({
     where: { id: fieldId },
     select: { photos: true },

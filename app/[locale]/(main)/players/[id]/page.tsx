@@ -111,7 +111,7 @@ export default async function PlayerPublicProfile({
             </span>
           </div>
         ) : (
-          <div className="mt-3.5 px-3.5 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-[13.5px] font-bold text-text-muted">
+          <div className="mt-3.5 px-3.5 py-2.5 rounded-2xl bg-[var(--overlay)] border border-border-strong text-[13.5px] font-bold text-text-muted">
             {t("players.closed_to_invites")}
           </div>
         )}
@@ -128,7 +128,7 @@ export default async function PlayerPublicProfile({
                 <span className="text-[20px]">%</span>
               )}
             </div>
-            <div className="h-1.5 rounded bg-white/8 overflow-hidden mt-3">
+            <div className="h-1.5 rounded bg-[var(--overlay-strong)] overflow-hidden mt-3">
               <div
                 className="h-full bg-primary rounded"
                 style={{ width: `${attendancePct}%` }}
@@ -196,7 +196,7 @@ export default async function PlayerPublicProfile({
         className="fixed bottom-20 inset-x-0 z-30 px-6 pt-4 pb-4 flex gap-2.5"
         style={{
           background:
-            "linear-gradient(180deg, rgba(11,14,13,0), #0B0E0D 28%)",
+            "linear-gradient(180deg, transparent, var(--bg) 28%)",
         }}
       >
         <Link
@@ -227,7 +227,7 @@ export default async function PlayerPublicProfile({
             {t("players.invite_to_game")}
           </Link>
         ) : (
-          <div className="flex-[1.3] h-14 rounded-2xl border border-white/10 text-text-muted font-display font-bold text-[14px] flex items-center justify-center">
+          <div className="flex-[1.3] h-14 rounded-2xl border border-border-strong text-text-muted font-display font-bold text-[14px] flex items-center justify-center">
             {t("players.closed_btn")}
           </div>
         )}

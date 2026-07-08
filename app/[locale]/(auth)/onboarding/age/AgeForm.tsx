@@ -47,7 +47,7 @@ export function AgeForm({
                 "h-16 rounded-2xl border flex items-center justify-center font-display font-bold text-[19px]",
                 active
                   ? "bg-primary/8 border-primary text-primary"
-                  : "bg-surface border-white/10 text-text",
+                  : "bg-surface border-border-strong text-text",
               )}
             >
               {r.label}

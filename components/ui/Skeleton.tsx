@@ -4,7 +4,7 @@ export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "bg-white/5 rounded-md animate-pulse",
+        "bg-[var(--overlay)] rounded-md animate-pulse",
         className,
       )}
     />

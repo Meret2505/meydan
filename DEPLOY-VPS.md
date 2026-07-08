@@ -117,7 +117,60 @@ When you're confident the VPS works, point users at it:
 
 ## Backups
 
-The `certbot-etc` and `db-data` and `uploads` volumes are critical. Back them
-up off-server (rsync to another box, S3-compatible storage, etc.) on a daily
-cron. Lose `db-data` = lose all users. Lose `uploads` = avatars 404 but app
-still works.
+The `db-data`, `uploads`, and `certbot-etc` volumes are critical. Lose
+`db-data` = lose every user. Lose `uploads` = avatars and field photos 404
+but the app still works.
+
+### Local nightly snapshots (set up once)
+
+`scripts/backup.sh` dumps Postgres + tars the uploads volume, writes them
+gzipped to `/var/backups/meydan/`, and prunes anything older than 14 days
+(override with `RETENTION_DAYS`).
+
+```bash
+# Wire it into root's crontab — 03:30 UTC nightly
+sudo crontab -e
+# Add:
+30 3 * * * /opt/meydan/scripts/backup.sh >> /var/log/meydan-backup.log 2>&1
+
+# Smoke-test it now (don't wait for the cron to find out it's broken):
+sudo /opt/meydan/scripts/backup.sh
+ls -lh /var/backups/meydan/db/
+```
+
+### Get backups OFF the server (this is what makes them backups)
+
+A local copy on the same disk that holds the live data is not a backup. Pick
+one and run it on the SAME cron, AFTER `backup.sh`:
+
+```bash
+# Option A — rsync to a second box you own
+rsync -az --delete /var/backups/meydan/ user@backup-host:/backups/meydan/
+
+# Option B — restic to Backblaze B2 (encrypted, deduplicated, ~$0.005/GB/mo)
+restic -r b2:meydan-backups:/ backup /var/backups/meydan/
+
+# Option C — rclone to any S3-compatible bucket (R2 / B2 / Wasabi)
+rclone copy /var/backups/meydan/ remote:meydan-backups/
+```
+
+### Restoring from a backup
+
+```bash
+cd /opt/meydan
+
+# Postgres
+gunzip -c /var/backups/meydan/db/meydan-YYYYMMDDTHHMMSSZ.sql.gz \
+  | docker compose -f docker-compose.prod.yml exec -T db \
+    psql -U meydan -d meydan
+
+# Uploads (overwrites the volume)
+docker run --rm \
+  -v meydan_uploads:/data \
+  -v /var/backups/meydan/uploads:/in:ro \
+  alpine sh -c 'cd /data && tar xzf /in/meydan-uploads-YYYYMMDDTHHMMSSZ.tar.gz'
+```
+
+Periodically restore a backup into a throwaway compose stack on your laptop to
+prove the dumps actually load — silent corruption is the failure mode that
+kills startups.

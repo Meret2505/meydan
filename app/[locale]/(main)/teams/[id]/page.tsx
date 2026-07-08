@@ -57,7 +57,14 @@ export default async function TeamDetailPage({
   const viewer = team.members.find((m) => m.userId === viewerId);
   const isCaptain = viewer?.isCaptain === true;
   const isMember = !!viewer;
-  const monogram = team.name.slice(0, 2).toUpperCase();
+  const monogram =
+    team.name
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((s) => s[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "?";
 
   let wins = 0;
   let losses = 0;
@@ -82,7 +89,7 @@ export default async function TeamDetailPage({
     <>
       {/* Pitch-gradient header */}
       <div
-        className="relative h-40 overflow-hidden"
+        className="relative h-[128px] overflow-hidden"
         style={{ background: "linear-gradient(150deg,#1c7a45,#0f5530)" }}
       >
         <div
@@ -96,34 +103,38 @@ export default async function TeamDetailPage({
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg,rgba(11,14,13,.3),rgba(11,14,13,.9))",
+              "linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55))",
           }}
         />
         <div className="absolute top-0 left-0 right-0">
           <StatusBar />
         </div>
-        <div className="absolute top-[52px] left-[22px]">
+        <div className="absolute top-[52px] left-[22px] text-white [&_button]:bg-black/45 [&_button]:border-white/40">
           <BackButton href={`/${locale}/teams`} />
         </div>
       </div>
 
-      <div className="px-6 pb-28 -mt-[44px]">
-        <div className="flex items-end gap-3.5">
-          <div
-            className="w-[72px] h-[72px] rounded-[20px] flex items-center justify-center font-display font-extrabold text-[22px] text-[#06210F]"
-            style={{
-              background: `linear-gradient(140deg, ${teamColor.base}, ${teamColor.edge})`,
-              border: "3px solid #0B0E0D",
-            }}
-          >
-            {monogram}
+      <div className="px-6 pb-28">
+        {/* Logo overlaps the pitch header like a badge; name/subtitle sit cleanly
+            below so they render on the page background in both themes.
+            `relative z-10` forces the badge above the pitch header's own
+            stacking context so it isn't clipped. */}
+        <div
+          className="relative z-10 w-[72px] h-[72px] rounded-[20px] flex items-center justify-center font-display font-extrabold text-[22px] text-[#06210F] -mt-[18px]"
+          style={{
+            background: `linear-gradient(140deg, ${teamColor.base}, ${teamColor.edge})`,
+            border: "3px solid var(--bg)",
+          }}
+        >
+          {monogram}
+        </div>
+        <div className="mt-3">
+          <div className="font-display font-extrabold text-[22px] truncate text-text">
+            {team.name}
           </div>
-          <div className="pb-1.5">
-            <div className="font-display font-extrabold text-[21px]">{team.name}</div>
-            <div className="text-[12.5px] text-text-muted font-semibold mt-0.5">
-              {team.district ?? "—"} ·{" "}
-              {t("teams.members_count", { count: team.members.length })}
-            </div>
+          <div className="text-[13px] text-text-muted font-semibold mt-1 truncate">
+            {team.district ?? "—"} ·{" "}
+            {t("teams.members_count", { count: team.members.length })}
           </div>
         </div>
 
@@ -150,7 +161,7 @@ export default async function TeamDetailPage({
                 className="flex items-center gap-3 bg-surface border border-border rounded-[14px] px-3.5 py-3"
               >
                 <div
-                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center font-display font-extrabold text-[13px] text-[#06210F]"
+                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center font-display font-extrabold text-[13px] text-[#06210F] shrink-0"
                   style={{ background: "linear-gradient(140deg,#1FD16B,#14a955)" }}
                 >
                   {initials(m.user.name)}
@@ -179,7 +190,7 @@ export default async function TeamDetailPage({
                   </div>
                 </div>
                 <span
-                  className="font-display font-extrabold text-[12.5px]"
+                  className="font-display font-extrabold text-[12.5px] shrink-0"
                   style={{ color: ATT_COLOR[tier] }}
                 >
                   {m.stats.attendanceRate === null
@@ -204,7 +215,7 @@ export default async function TeamDetailPage({
         className="fixed bottom-20 inset-x-0 z-30 px-6 pt-4 pb-4"
         style={{
           background:
-            "linear-gradient(180deg, rgba(11,14,13,0), #0B0E0D 28%)",
+            "linear-gradient(180deg, transparent, var(--bg) 28%)",
         }}
       >
         <TeamActions

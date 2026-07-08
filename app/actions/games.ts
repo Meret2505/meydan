@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseScore } from "@/lib/validate";
 import { sendPush } from "@/lib/fcm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -179,8 +180,9 @@ export async function saveResult(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const gameId = String(formData.get("gameId") ?? "");
   const locale = String(formData.get("locale") ?? "ru");
-  const scoreHome = parseInt(String(formData.get("scoreHome") ?? "0"), 10);
-  const scoreAway = parseInt(String(formData.get("scoreAway") ?? "0"), 10);
+  const scoreHome = parseScore(String(formData.get("scoreHome") ?? ""));
+  const scoreAway = parseScore(String(formData.get("scoreAway") ?? ""));
+  if (scoreHome === null || scoreAway === null) return;
 
   const game = await prisma.game.findUnique({
     where: { id: gameId },

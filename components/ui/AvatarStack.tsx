@@ -48,7 +48,7 @@ export function AvatarStack({
       ))}
       {rest > 0 && (
         <div
-          className="rounded-full border-2 border-surface bg-white/8 flex items-center justify-center font-display font-bold text-[11px] text-text-muted"
+          className="rounded-full border-2 border-surface bg-[var(--overlay-strong)] flex items-center justify-center font-display font-bold text-[11px] text-text-muted"
           style={{ width: size, height: size, marginLeft: -8 }}
         >
           +{rest}

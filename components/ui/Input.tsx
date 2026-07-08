@@ -16,13 +16,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {label && (
         <span className="text-[13px] font-semibold text-[#8A938E]">{label}</span>
       )}
-      <div className="flex items-center gap-2.5 h-14 rounded-[15px] bg-[#13181A] border border-white/10 px-4 focus-within:border-primary">
+      <div className="flex items-center gap-2.5 h-14 rounded-[15px] bg-surface border border-border-strong px-4 focus-within:border-primary">
         {prefix && (
           <>
             <span className="font-display font-bold text-[15px] text-[#C7CEC9]">
               {prefix}
             </span>
-            <div className="w-px h-5 bg-white/10" />
+            <div className="w-px h-5 bg-[var(--overlay-strong)]" />
           </>
         )}
         <input

@@ -6,7 +6,7 @@ const styles: Record<Tone, string> = {
   primary: "bg-primary/15 text-primary border-primary/30",
   warning: "bg-warning/15 text-warning border-warning/25",
   danger: "bg-danger/15 text-danger border-danger/30",
-  muted: "bg-white/8 text-text-muted border-white/8",
+  muted: "bg-[var(--overlay-strong)] text-text-muted border-border",
   success: "bg-primary text-primary-text border-transparent",
 };
 

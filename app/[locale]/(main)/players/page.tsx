@@ -167,7 +167,7 @@ function Chip({
         "px-3 py-2 rounded-full whitespace-nowrap border font-bold text-[13px]",
         active
           ? "bg-primary/13 border-primary/35 text-primary"
-          : "bg-white/5 border-white/8 text-text/80",
+          : "bg-[var(--overlay)] border-border text-text/80",
       )}
     >
       {label}

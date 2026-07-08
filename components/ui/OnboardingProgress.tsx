@@ -9,7 +9,7 @@ export function OnboardingProgress({ step, total = 5 }: { step: number; total?: 
             key={i}
             className={cn(
               "flex-1 h-1 rounded-sm",
-              i < step ? "bg-primary" : "bg-white/10",
+              i < step ? "bg-primary" : "bg-[var(--overlay-strong)]",
             )}
           />
         ))}

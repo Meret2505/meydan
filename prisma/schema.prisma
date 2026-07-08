@@ -47,7 +47,7 @@ model User {
   id             String     @id @default(cuid())
   email          String?    @unique
   name           String
-  phone          String?
+  phone          String?    @unique
   password       String?
   avatar         String?
   position       Position?
@@ -68,6 +68,7 @@ model User {
   notifications    Notification[]
   sentInvites      GameInvite[]      @relation("InviteSender")
   receivedInvites  GameInvite[]      @relation("InviteReceiver")
+  favoriteFields   FieldFavorite[]
 
   @@map("users")
 }
@@ -137,9 +138,23 @@ model Field {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
 
-  games Game[]
+  games      Game[]
+  favoritedBy FieldFavorite[]
 
   @@map("fields")
+}
+
+model FieldFavorite {
+  userId    String
+  fieldId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  field Field @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@id([userId, fieldId])
+  @@index([userId])
+  @@map("field_favorites")
 }
 
 model Game {
@@ -276,6 +291,19 @@ model Notification {
 
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+// Fixed-window rate-limit counters. One row per (bucket + subject) key, e.g.
+// "login:ip:1.2.3.4". Postgres-backed so the limit is shared across all
+// serverless instances (Vercel) and the single VPS container alike — no
+// external store required. Rows self-expire via `expiresAt` (see rateLimit()).
+model RateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@map("rate_limits")
 }
 
 model GameInvite {

@@ -93,7 +93,7 @@ export default async function InvitePage({
                       )}
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-white/8 text-text-muted font-display font-bold text-[11px]">
+                  <span className="px-2.5 py-1 rounded-full bg-[var(--overlay-strong)] text-text-muted font-display font-bold text-[11px]">
                     {gameFormat(g)}
                   </span>
                 </div>

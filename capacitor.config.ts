@@ -20,10 +20,9 @@ const config: CapacitorConfig = {
     // Lets the WebView follow Google OAuth round-trips back to our origin.
     // Google OAuth itself opens in a Chrome Custom Tab (see auth flow) since
     // Google blocks OAuth in embedded WebViews.
-    allowNavigation: [
-      "meydan-chi.vercel.app",
-      "*.vercel.app",
-    ],
+    // Keep this tight: a broad wildcard (e.g. "*.vercel.app") would let the
+    // in-app WebView navigate to any Vercel-hosted site. Only our own origin.
+    allowNavigation: ["meydan-chi.vercel.app"],
   },
   plugins: {
     SplashScreen: {
@@ -32,6 +31,16 @@ const config: CapacitorConfig = {
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
       splashImmersive: true,
+    },
+    // Only Google Sign-In is used in the app — excluding the other three keeps
+    // their SDKs out of the DEX, shrinking the APK by several MB.
+    SocialLogin: {
+      providers: {
+        google: true,
+        facebook: false,
+        apple: false,
+        twitter: false,
+      },
     },
   },
 };

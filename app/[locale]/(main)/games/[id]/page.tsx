@@ -61,19 +61,19 @@ export default async function GameDetailPage({
               "repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 52px)",
           }}
         />
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 border-white/35" />
-        <div className="absolute inset-x-0 top-1/2 h-[2px] bg-white/35" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 border-border-strong" />
+        <div className="absolute inset-x-0 top-1/2 h-[2px] bg-[var(--overlay-strong)]" />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg,rgba(11,14,13,.35),rgba(11,14,13,0) 35%,rgba(11,14,13,.9))",
+              "linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0) 35%, rgba(0,0,0,.9))",
           }}
         />
         <div className="absolute top-0 left-0 right-0">
           <StatusBar />
         </div>
-        <div className="absolute top-12 left-[22px]">
+        <div className="absolute top-12 left-[22px] text-white [&_button]:bg-black/45 [&_button]:border-white/40">
           <BackButton href={`/${locale}/games`} />
         </div>
         <div className="absolute left-6 right-6 bottom-[18px]">
@@ -131,7 +131,7 @@ export default async function GameDetailPage({
               {filledCount} / {game.totalSpots}
             </span>
           </div>
-          <div className="mt-3 h-[7px] rounded bg-white/8 overflow-hidden">
+          <div className="mt-3 h-[7px] rounded bg-[var(--overlay-strong)] overflow-hidden">
             <div className="h-full bg-primary rounded" style={{ width: `${fillPct}%` }} />
           </div>
           <div className="mt-3.5 flex items-center">
@@ -162,7 +162,7 @@ export default async function GameDetailPage({
                 className="w-[34px] h-[34px] rounded-full flex items-center justify-center font-bold text-[13px] text-text-muted"
                 style={{
                   marginLeft: -8,
-                  background: "#0B0E0D",
+                  background: "var(--bg)",
                   border: "1.5px dashed rgba(255,255,255,.2)",
                 }}
               >
@@ -215,7 +215,7 @@ export default async function GameDetailPage({
         {isOrganizer && !isPast && firstNeeded && !isOver && (
           <Link
             href={`/${locale}/players?back=/${locale}/games/${game.id}&position=${firstNeeded}`}
-            className="w-full h-[50px] mt-1 rounded-[14px] border border-white/15 bg-transparent text-text font-sans font-bold text-[14.5px] flex items-center justify-center gap-2"
+            className="w-full h-[50px] mt-1 rounded-[14px] border border-border-strong bg-transparent text-text font-sans font-bold text-[14.5px] flex items-center justify-center gap-2"
           >
             <svg
               width="17"
@@ -248,7 +248,7 @@ export default async function GameDetailPage({
         className="fixed bottom-20 inset-x-0 z-30 px-6 pt-4 pb-4"
         style={{
           background:
-            "linear-gradient(180deg, rgba(11,14,13,0), #0B0E0D 28%)",
+            "linear-gradient(180deg, transparent, var(--bg) 28%)",
         }}
       >
         {isOrganizer ? (
@@ -259,7 +259,7 @@ export default async function GameDetailPage({
             isCompleted={game.status === "COMPLETED"}
           />
         ) : isOver ? (
-          <div className="h-[58px] rounded-2xl border border-white/10 text-text-muted flex items-center justify-center font-display font-bold text-[14px]">
+          <div className="h-[58px] rounded-2xl border border-border-strong text-text-muted flex items-center justify-center font-display font-bold text-[14px]">
             {game.status === "CANCELLED" ? t("games.cancelled_full") : t("games.completed")}
           </div>
         ) : joined ? (

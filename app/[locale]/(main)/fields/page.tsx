@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { FieldCard, type FieldCardData } from "@/components/fields/FieldCard";
+import { FieldsView, type FieldItem } from "@/components/fields/FieldsView";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,8 @@ export default async function FieldsPage({
 }) {
   unstable_setRequestLocale(locale);
   const t = await getTranslations();
+  const session = await getSession();
+  const userId = session?.user?.id ?? null;
 
   const districtRows = await prisma.field.findMany({
     where: { isActive: true },
@@ -62,19 +64,25 @@ export default async function FieldsPage({
     return s ? `?${s}` : "";
   };
 
-  const cards: FieldCardData[] = fields.map((f) => ({
+  const items: FieldItem[] = fields.map((f) => ({
     id: f.id,
     name: f.name,
     nameTm: f.nameTm,
     nameRu: f.nameRu,
-    address: f.address,
-    addressTm: f.addressTm,
-    addressRu: f.addressRu,
     district: f.district,
     surface: f.surface,
     capacity: f.capacity,
     photo: f.photos[0] ?? null,
   }));
+
+  const favoriteIds = userId
+    ? (
+        await prisma.fieldFavorite.findMany({
+          where: { userId },
+          select: { fieldId: true },
+        })
+      ).map((f) => f.fieldId)
+    : [];
 
   const pickName = (f: (typeof fields)[number]) =>
     locale === "tm" ? f.nameTm ?? f.name : f.nameRu ?? f.name;
@@ -88,7 +96,7 @@ export default async function FieldsPage({
         <div className="font-display font-extrabold text-[25px]">{t("nav.fields")}</div>
         <Link
           href={`/${locale}/fields${queryFor({ view: view === "map" ? null : "map" })}`}
-          className="h-9 px-3 rounded-lg bg-white/5 border border-white/10 font-display font-bold text-[13px] inline-flex items-center"
+          className="h-9 px-3 rounded-lg bg-[var(--overlay)] border border-border-strong font-display font-bold text-[13px] inline-flex items-center"
         >
           {view === "map" ? t("fields.view_list") : t("fields.view_map")}
         </Link>
@@ -142,16 +150,8 @@ export default async function FieldsPage({
           />
         </div>
       ) : (
-        <div className="px-6 pt-4 pb-8 flex flex-col gap-2.5">
-          {cards.length === 0 ? (
-            <EmptyState
-              icon={<span className="text-2xl">📍</span>}
-              title={t("empty.no_results")}
-              description={t("fields.no_results_sub")}
-            />
-          ) : (
-            cards.map((c) => <FieldCard key={c.id} field={c} />)
-          )}
+        <div className="px-6 pt-4 pb-8">
+          <FieldsView fields={items} favoriteIds={favoriteIds} />
         </div>
       )}
     </>
@@ -174,7 +174,7 @@ function Chip({
         "px-3 py-2 rounded-full whitespace-nowrap border font-bold text-[13px]",
         active
           ? "bg-primary/13 border-primary/35 text-primary"
-          : "bg-white/5 border-white/8 text-text/80",
+          : "bg-[var(--overlay)] border-border text-text/80",
       )}
     >
       {label}

@@ -7,9 +7,9 @@ import { tournamentStatus, type TournamentStatus } from "@/lib/tournament-status
 import { cn } from "@/lib/utils";
 
 const STATUS_TONE: Record<TournamentStatus, string> = {
-  upcoming: "bg-white/8 text-text-muted",
+  upcoming: "bg-[var(--overlay-strong)] text-text-muted",
   ongoing: "bg-primary/15 text-primary",
-  ended: "bg-white/5 text-text-muted",
+  ended: "bg-[var(--overlay)] text-text-muted",
   cancelled: "bg-danger/15 text-danger",
 };
 
@@ -65,10 +65,12 @@ export default async function TournamentsPage({
         </Link>
       </div>
 
-      <div className="px-6 pt-4 flex bg-white/5 rounded-2xl p-1">
-        <TabLink locale={locale} active={tab === "upcoming"} tab="upcoming" label={t("tournaments.tab_upcoming")} />
-        <TabLink locale={locale} active={tab === "ongoing"} tab="ongoing" label={t("tournaments.tab_ongoing")} />
-        <TabLink locale={locale} active={tab === "ended"} tab="ended" label={t("tournaments.tab_ended")} />
+      <div className="px-6 pt-4">
+        <div className="flex bg-[var(--overlay)] rounded-2xl p-1">
+          <TabLink locale={locale} active={tab === "upcoming"} tab="upcoming" label={t("tournaments.tab_upcoming")} />
+          <TabLink locale={locale} active={tab === "ongoing"} tab="ongoing" label={t("tournaments.tab_ongoing")} />
+          <TabLink locale={locale} active={tab === "ended"} tab="ended" label={t("tournaments.tab_ended")} />
+        </div>
       </div>
 
       <div className="px-6 pt-4 pb-8 flex flex-col gap-2.5">

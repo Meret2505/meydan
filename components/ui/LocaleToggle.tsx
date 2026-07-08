@@ -24,7 +24,7 @@ export function LocaleToggle() {
   }
 
   return (
-    <div className="flex bg-white/5 border border-white/8 rounded-full p-[3px] font-display font-bold text-[12px]">
+    <div className="flex bg-[var(--overlay)] border border-border rounded-full p-[3px] font-display font-bold text-[12px]">
       {(["ru", "tm"] as const).map((loc) => {
         const active = current === loc;
         return (

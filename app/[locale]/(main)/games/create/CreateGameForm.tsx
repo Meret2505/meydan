@@ -82,7 +82,7 @@ export function CreateGameForm({
           name="scheduledAt"
           defaultValue={defaultScheduled()}
           required
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         />
       </Field>
 
@@ -94,7 +94,7 @@ export function CreateGameForm({
               value={selectedFieldId}
               onChange={(e) => setSelectedFieldId(e.target.value)}
               required
-              className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+              className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
             >
               <option value="">—</option>
               {fields.map((f) => (
@@ -120,7 +120,7 @@ export function CreateGameForm({
               name="fieldName"
               placeholder={t("games.create_field_placeholder")}
               required={useCustom}
-              className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+              className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
             />
             {fields.length > 0 && (
               <button
@@ -140,7 +140,7 @@ export function CreateGameForm({
           {[6, 8, 10, 12, 14].map((n) => (
             <label
               key={n}
-              className="flex-1 h-12 rounded-xl bg-[#13181A] border border-white/10 flex items-center justify-center font-display font-extrabold text-[15px] cursor-pointer has-[input:checked]:bg-primary/10 has-[input:checked]:border-primary has-[input:checked]:text-primary"
+              className="flex-1 h-12 rounded-xl bg-surface border border-border-strong flex items-center justify-center font-display font-extrabold text-[15px] cursor-pointer has-[input:checked]:bg-primary/10 has-[input:checked]:border-primary has-[input:checked]:text-primary"
             >
               <input
                 type="radio"
@@ -163,7 +163,7 @@ export function CreateGameForm({
           min={0}
           max={500}
           placeholder="25"
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         />
       </Field>
 
@@ -180,7 +180,7 @@ export function CreateGameForm({
                   "h-12 rounded-xl border flex items-center justify-center font-display font-bold text-[14px]",
                   active
                     ? "bg-warning/12 border-warning/40 text-warning"
-                    : "bg-surface border-white/10 text-text-muted",
+                    : "bg-surface border-border-strong text-text-muted",
                 )}
               >
                 {p.label}
@@ -195,7 +195,7 @@ export function CreateGameForm({
           name="notes"
           rows={3}
           placeholder={t("games.create_notes_placeholder")}
-          className="w-full rounded-xl bg-[#13181A] border border-white/10 px-4 py-3 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary resize-none"
+          className="w-full rounded-xl bg-surface border border-border-strong px-4 py-3 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary resize-none"
         />
       </Field>
 

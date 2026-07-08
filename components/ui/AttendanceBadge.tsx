@@ -6,7 +6,7 @@ const tones: Record<ReturnType<typeof attendanceTier>, string> = {
   reliable: "bg-primary/15 text-primary",
   ok: "bg-warning/15 text-warning",
   poor: "bg-danger/15 text-danger",
-  new: "bg-white/8 text-text-muted",
+  new: "bg-[var(--overlay-strong)] text-text-muted",
 };
 
 export function AttendanceBadge({

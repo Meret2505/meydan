@@ -54,7 +54,7 @@ export default async function GamesPage({
             <Link
               href={`/${locale}/notifications`}
               aria-label="notifications"
-              className="relative w-10 h-10 rounded-xl bg-white/5 border border-white/8 flex items-center justify-center text-text-muted"
+              className="relative w-10 h-10 rounded-xl bg-[var(--overlay)] border border-border flex items-center justify-center text-text-muted"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -75,7 +75,7 @@ export default async function GamesPage({
           </div>
         </div>
 
-        <div className="flex bg-white/5 rounded-2xl p-1 mt-4">
+        <div className="flex bg-[var(--overlay)] rounded-2xl p-1 mt-4">
           <TabLink locale={locale} active={tab === "open"} tab="open" label={t("games.open_games")} />
           <TabLink locale={locale} active={tab === "mine"} tab="mine" label={t("games.my_games")} />
         </div>
@@ -165,7 +165,7 @@ function ChipLink({
         "px-3 py-2 rounded-full font-bold text-[13px] whitespace-nowrap border",
         active
           ? "bg-primary/13 border-primary/35 text-primary"
-          : "bg-white/5 border-white/8 text-text/80",
+          : "bg-[var(--overlay)] border-border text-text/80",
       )}
     >
       {label}

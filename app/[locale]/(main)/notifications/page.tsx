@@ -82,7 +82,7 @@ export default async function NotificationsPage({
                 href={href}
                 className="flex items-start gap-3 px-[15px] py-3.5 rounded-2xl border transition-colors"
                 style={{
-                  background: unread ? "rgba(31,209,107,.05)" : "#13181A",
+                  background: unread ? "rgba(31,209,107,.05)" : "var(--surface)",
                   borderColor: unread ? "rgba(31,209,107,.16)" : "rgba(255,255,255,.06)",
                 }}
               >

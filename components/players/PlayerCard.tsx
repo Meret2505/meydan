@@ -61,14 +61,14 @@ export function PlayerCard({ player }: { player: PlayerCardData }) {
             {t("players.invite_short")}
           </Link>
         ) : (
-          <span className="px-2.5 py-1 rounded-md bg-white/5 text-text-muted text-[11px] font-bold">
+          <span className="px-2.5 py-1 rounded-md bg-[var(--overlay)] text-text-muted text-[11px] font-bold">
             {t("players.closed_short")}
           </span>
         )}
       </div>
       <Link
         href={`/${locale}/players/${player.id}`}
-        className="mt-3 pt-3 border-t border-white/[0.05] flex items-center justify-between"
+        className="mt-3 pt-3 border-t border-border flex items-center justify-between"
       >
         <span className="text-[12.5px] font-bold text-text-muted">
           {t("players.open_profile")}

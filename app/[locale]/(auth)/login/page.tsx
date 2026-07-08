@@ -41,7 +41,7 @@ function Login() {
         <GoogleSignInButton label={t("auth.google")} />
         <Link
           href={{ pathname: "/login/phone" }}
-          className="h-[58px] rounded-lg border border-white/15 text-text font-sans font-semibold text-[16px] flex items-center justify-center"
+          className="h-[58px] rounded-lg border border-border-strong text-text font-sans font-semibold text-[16px] flex items-center justify-center"
         >
           {t("auth.phone")}
         </Link>

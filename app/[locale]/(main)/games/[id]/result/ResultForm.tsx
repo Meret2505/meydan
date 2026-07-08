@@ -66,14 +66,14 @@ function ScoreStepper({
         <button
           type="button"
           onClick={() => onChange(Math.max(0, value - 1))}
-          className="w-8 h-8 rounded-[9px] bg-white/[0.06] flex items-center justify-center font-bold text-[18px]"
+          className="w-8 h-8 rounded-[9px] bg-[var(--overlay)] flex items-center justify-center font-bold text-[18px]"
         >
           −
         </button>
         <button
           type="button"
           onClick={() => onChange(Math.min(99, value + 1))}
-          className="w-8 h-8 rounded-[9px] bg-white/[0.06] flex items-center justify-center font-bold text-[18px]"
+          className="w-8 h-8 rounded-[9px] bg-[var(--overlay)] flex items-center justify-center font-bold text-[18px]"
         >
           +
         </button>
@@ -175,7 +175,7 @@ export function ResultForm({
                 className={`w-[26px] h-[26px] rounded-lg flex items-center justify-center font-black text-[14px] transition-colors ${
                   came
                     ? "bg-primary text-primary-text border-[1.5px] border-primary"
-                    : "bg-transparent text-transparent border-[1.5px] border-white/15"
+                    : "bg-transparent text-transparent border-[1.5px] border-border-strong"
                 }`}
               >
                 ✓
@@ -189,7 +189,7 @@ export function ResultForm({
         className="fixed bottom-20 inset-x-0 px-6 pt-4 pb-4 z-30"
         style={{
           background:
-            "linear-gradient(180deg, rgba(11,14,13,0), #0B0E0D 28%)",
+            "linear-gradient(180deg, transparent, var(--bg) 28%)",
         }}
       >
         <Submit label={t("games.save_result")} />

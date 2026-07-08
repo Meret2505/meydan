@@ -62,13 +62,17 @@ export function FieldPhotoUploader({
           {photos.map((url) => (
             <div
               key={url}
-              className="relative aspect-square rounded-xl overflow-hidden border border-border bg-surface"
+              className="relative aspect-square rounded-xl overflow-hidden border border-border"
+              style={{ background: "linear-gradient(150deg,#1c7a45,#0f5530)" }}
             >
               <img
                 src={toProxyUrl(url) ?? undefined}
                 alt=""
                 className="w-full h-full object-cover"
                 loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.style.visibility = "hidden";
+                }}
               />
               <button
                 type="button"
@@ -93,7 +97,7 @@ export function FieldPhotoUploader({
         type="button"
         disabled={busy || atCap}
         onClick={() => fileRef.current?.click()}
-        className="h-11 rounded-xl border border-white/15 text-text-soft font-display font-bold text-[13px] flex items-center justify-center gap-2 disabled:opacity-50"
+        className="h-11 rounded-xl border border-border-strong text-text-soft font-display font-bold text-[13px] flex items-center justify-center gap-2 disabled:opacity-50"
       >
         <svg
           width="16"

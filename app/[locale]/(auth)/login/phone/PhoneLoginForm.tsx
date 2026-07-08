@@ -50,11 +50,11 @@ export function PhoneLoginForm({ labels }: { labels: Labels }) {
           <span className="text-[13px] font-semibold text-[#8A938E]">
             {labels.phone}
           </span>
-          <div className="flex items-center gap-2.5 h-14 rounded-[15px] bg-[#13181A] border border-white/10 px-4 focus-within:border-primary">
+          <div className="flex items-center gap-2.5 h-14 rounded-[15px] bg-surface border border-border-strong px-4 focus-within:border-primary">
             <span className="font-display font-bold text-[15px] text-[#C7CEC9]">
               +993
             </span>
-            <div className="w-px h-5 bg-white/10" />
+            <div className="w-px h-5 bg-[var(--overlay-strong)]" />
             <input
               name="phone"
               value={phone}
@@ -79,7 +79,7 @@ export function PhoneLoginForm({ labels }: { labels: Labels }) {
             required
             minLength={6}
             autoComplete="current-password"
-            className="h-14 rounded-[15px] bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[16px] outline-none focus:border-primary"
+            className="h-14 rounded-[15px] bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[16px] outline-none focus:border-primary"
           />
         </div>
 
@@ -89,6 +89,8 @@ export function PhoneLoginForm({ labels }: { labels: Labels }) {
               ? t("errors.wrong_password")
               : error === "invalid_input"
               ? t("errors.invalid_input")
+              : error === "rate_limited"
+              ? t("errors.rate_limited")
               : t("errors.auth_failed")}
           </p>
         )}

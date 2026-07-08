@@ -2,6 +2,8 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { normalizePhone } from "@/lib/phone";
+import { parseAge } from "@/lib/validate";
 import { redirect } from "next/navigation";
 import type { Position } from "@prisma/client";
 
@@ -9,13 +11,6 @@ async function requireUserId() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   return session.user.id;
-}
-
-function normalizePhone(input: string) {
-  const digits = input.replace(/\D/g, "");
-  if (digits.length === 8) return `+993${digits}`;
-  if (digits.startsWith("993")) return `+${digits}`;
-  return `+${digits}`;
 }
 
 export async function saveName(formData: FormData): Promise<void> {
@@ -31,8 +26,17 @@ export async function savePhone(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const raw = String(formData.get("phone") ?? "").trim();
   const locale = String(formData.get("locale") ?? "ru");
-  if (raw.replace(/\D/g, "").length < 8) return;
   const phone = normalizePhone(raw);
+  if (!phone) return;
+
+  // Don't let a user claim a phone already bound to someone else (would let an
+  // attacker squat a victim's number and break the victim's phone login).
+  const holder = await prisma.user.findUnique({
+    where: { phone },
+    select: { id: true },
+  });
+  if (holder && holder.id !== userId) return;
+
   await prisma.user.update({ where: { id: userId }, data: { phone } });
   redirect(`/${locale}/onboarding/position`);
 }
@@ -60,7 +64,7 @@ export async function saveAge(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const ageStr = String(formData.get("age") ?? "").trim();
   const locale = String(formData.get("locale") ?? "ru");
-  const age = ageStr ? parseInt(ageStr, 10) : null;
+  const age = parseAge(ageStr);
   await prisma.user.update({
     where: { id: userId },
     data: { age, locale },

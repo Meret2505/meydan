@@ -12,7 +12,7 @@ const styles: Record<Variant, string> = {
   primary:
     "bg-primary text-primary-text font-display font-extrabold border border-transparent active:scale-[0.99]",
   secondary:
-    "bg-transparent border border-white/15 text-text font-sans font-semibold",
+    "bg-transparent border border-border-strong text-text font-sans font-semibold",
   ghost: "bg-transparent text-text-muted font-sans font-semibold",
   light:
     "bg-[#F2F5F3] text-[#0B0E0D] font-sans font-bold border border-transparent",

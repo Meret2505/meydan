@@ -47,14 +47,14 @@ export function ProfileEditForm({
           name="name"
           defaultValue={user.name}
           required
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         />
       </Field>
       <Field label={t("profile.district")}>
         <select
           name="district"
           defaultValue={user.district ?? ""}
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         >
           <option value="">—</option>
           {districts.map((d) => (
@@ -68,7 +68,7 @@ export function ProfileEditForm({
         <select
           name="position"
           defaultValue={user.position ?? ""}
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         >
           <option value="">—</option>
           {positions.map((p) => (
@@ -82,7 +82,7 @@ export function ProfileEditForm({
         <select
           name="skillLevel"
           defaultValue={user.skillLevel}
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         >
           {SKILL_LEVELS.map((s) => (
             <option key={s} value={s}>
@@ -98,7 +98,7 @@ export function ProfileEditForm({
           min={10}
           max={80}
           defaultValue={user.age ?? ""}
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         />
       </Field>
       <label className="flex items-center justify-between rounded-xl bg-surface border border-border px-4 h-14">

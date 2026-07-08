@@ -27,7 +27,7 @@ export function NameForm({ initial, nextLabel }: { initial: string; nextLabel: s
         defaultValue={initial}
         required
         autoFocus
-        className="w-full h-14 rounded-[15px] bg-[#13181A] border border-white/10 px-4 text-text font-sans font-bold text-[17px] text-center outline-none focus:border-primary"
+        className="w-full h-14 rounded-[15px] bg-surface border border-border-strong px-4 text-text font-sans font-bold text-[17px] text-center outline-none focus:border-primary"
       />
       <div className="flex-1" />
       <div className="pb-12">

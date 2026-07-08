@@ -14,7 +14,14 @@ export interface TeamCardData {
 export function TeamCard({ team }: { team: TeamCardData }) {
   const locale = useLocale();
   const t = useTranslations();
-  const monogram = team.name.slice(0, 2).toUpperCase();
+  const monogram =
+    team.name
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((s) => s[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "?";
   return (
     <Link
       href={`/${locale}/teams/${team.id}`}

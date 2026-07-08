@@ -2,6 +2,7 @@
 
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseAge } from "@/lib/validate";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Position, SkillLevel } from "@prisma/client";
@@ -28,7 +29,7 @@ export async function updateProfile(formData: FormData): Promise<void> {
   const skillLevel = SKILLS.includes(skillRaw as SkillLevel)
     ? (skillRaw as SkillLevel)
     : "BEGINNER";
-  const age = ageStr ? parseInt(ageStr, 10) : null;
+  const age = parseAge(ageStr);
 
   await prisma.user.update({
     where: { id: session.user.id },

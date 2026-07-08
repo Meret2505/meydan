@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 import { sendPush } from "@/lib/fcm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -19,6 +20,10 @@ export async function invitePlayerToGame(
 ): Promise<void> {
   const senderId = await requireUserId();
   if (senderId === receiverId) return;
+
+  // Cap invite spam: 40 invites per sender per hour.
+  const limit = await rateLimit(`invite:${senderId}`, 40, 60 * 60_000);
+  if (!limit.allowed) return;
 
   const game = await prisma.game.findUnique({
     where: { id: gameId },

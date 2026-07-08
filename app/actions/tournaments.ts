@@ -69,7 +69,7 @@ export async function unregisterTeamFromTournament(
 }
 
 export async function recordMatchResult(formData: FormData): Promise<void> {
-  await requireUserId();
+  const userId = await requireUserId();
   const tournamentId = String(formData.get("tournamentId") ?? "");
   const locale = String(formData.get("locale") ?? "ru");
   const homeTeamId = String(formData.get("homeTeamId") ?? "");
@@ -78,13 +78,29 @@ export async function recordMatchResult(formData: FormData): Promise<void> {
   const scoreAway = parseInt(String(formData.get("scoreAway") ?? "-1"), 10);
   const round = String(formData.get("round") ?? "").trim() || null;
 
+  // Reject non-numeric / out-of-range scores (parseInt("abc") -> NaN, and NaN
+  // comparisons are always false, so guard explicitly). Cap keeps a single
+  // fat-fingered or malicious entry from storing absurd standings.
   if (
     !homeTeamId ||
     !awayTeamId ||
     homeTeamId === awayTeamId ||
+    !Number.isInteger(scoreHome) ||
+    !Number.isInteger(scoreAway) ||
     scoreHome < 0 ||
-    scoreAway < 0
+    scoreAway < 0 ||
+    scoreHome > 999 ||
+    scoreAway > 999
   )
+    return;
+
+  // Only the tournament creator may record results. Without this check any
+  // authenticated user could POST fabricated scores into any tournament.
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { creatorId: true, cancelled: true },
+  });
+  if (!tournament || tournament.cancelled || tournament.creatorId !== userId)
     return;
 
   const reg = await prisma.tournamentTeam.findMany({

@@ -69,10 +69,10 @@ export function ContactSheet({
         style={{ background: "rgba(5,7,6,.6)" }}
       />
       <div
-        className="relative px-6 pb-9 pt-2.5 rounded-t-[26px] border-t border-white/[0.08]"
+        className="relative px-6 pb-9 pt-2.5 rounded-t-[26px] border-t border-border"
         style={{ background: "#14191A" }}
       >
-        <div className="w-10 h-1 rounded mx-auto bg-white/20 mb-5" />
+        <div className="w-10 h-1 rounded mx-auto bg-[var(--overlay-strong)] mb-5" />
         <div className="flex items-center gap-3 mb-5">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center font-display font-extrabold text-[16px] text-[#06210F]"

@@ -35,7 +35,7 @@ export function RecordResultForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="h-10 rounded-lg border border-white/15 text-text font-display font-bold text-[13px]"
+        className="h-10 rounded-lg border border-border-strong text-text font-display font-bold text-[13px]"
       >
         {t("tournaments.add_result")}
       </button>
@@ -102,7 +102,7 @@ export function RecordResultForm({
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="flex-1 h-10 rounded-lg border border-white/10 text-text-muted font-display font-bold text-[13px]"
+          className="flex-1 h-10 rounded-lg border border-border-strong text-text-muted font-display font-bold text-[13px]"
         >
           {t("common.cancel")}
         </button>

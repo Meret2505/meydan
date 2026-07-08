@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Avatar } from "@/components/avatar/Avatar";
 import { gameFormat } from "@/lib/game-format";
 import { LogoutButton } from "./LogoutButton";
@@ -65,13 +66,13 @@ export default async function ProfilePage({
           className={`mt-3.5 flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl ${
             user.isOpenToInvite
               ? "bg-primary/10 border border-primary/30"
-              : "bg-white/5 border border-white/10"
+              : "bg-[var(--overlay)] border border-border-strong"
           }`}
         >
           <div className="relative w-[34px] h-5 rounded-full shrink-0">
             <div
               className={`absolute inset-0 rounded-full transition-colors ${
-                user.isOpenToInvite ? "bg-primary" : "bg-white/15"
+                user.isOpenToInvite ? "bg-primary" : "bg-[var(--overlay-strong)]"
               }`}
             />
             <div
@@ -103,7 +104,7 @@ export default async function ProfilePage({
                 <span className="text-[20px]">%</span>
               )}
             </div>
-            <div className="h-1.5 rounded bg-white/8 overflow-hidden mt-3">
+            <div className="h-1.5 rounded bg-[var(--overlay-strong)] overflow-hidden mt-3">
               <div
                 className="h-full bg-primary rounded"
                 style={{ width: `${attendancePct}%` }}
@@ -153,7 +154,7 @@ export default async function ProfilePage({
                     className={`w-9 h-9 rounded-xl flex items-center justify-center font-display font-extrabold text-[13px] ${
                       p.attended === true
                         ? "bg-primary/15 text-primary-soft"
-                        : "bg-white/5 text-text-soft"
+                        : "bg-[var(--overlay)] text-text-soft"
                     }`}
                   >
                     {p.game.scoreHome !== null && p.game.scoreAway !== null
@@ -194,16 +195,36 @@ export default async function ProfilePage({
           {t("profile.settings")}
         </div>
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.04]">
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border">
             <svg
               width="19"
               height="19"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8A938E"
+              stroke="currentColor"
               strokeWidth="1.9"
               strokeLinecap="round"
               strokeLinejoin="round"
+              className="text-text-muted"
+            >
+              <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z" />
+            </svg>
+            <span className="flex-1 font-semibold text-[14.5px]">
+              {t("profile.theme")}
+            </span>
+            <ThemeToggle />
+          </div>
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-border">
+            <svg
+              width="19"
+              height="19"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-text-muted"
             >
               <circle cx="12" cy="12" r="9" />
               <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
@@ -215,7 +236,7 @@ export default async function ProfilePage({
           </div>
           <Link
             href={`/${locale}/profile/edit`}
-            className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.04]"
+            className="flex items-center gap-3 px-4 py-3.5 border-b border-border"
           >
             <svg
               width="19"

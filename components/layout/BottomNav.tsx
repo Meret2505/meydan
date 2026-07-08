@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -110,11 +111,18 @@ export function BottomNav() {
   const locale = useLocale();
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Warm the RSC cache for every tab as soon as the shell mounts so the first
+  // tap on any tab swaps in instantly instead of waiting for a server round-trip.
+  useEffect(() => {
+    for (const tab of TABS) router.prefetch(`/${locale}${tab.href}`);
+  }, [locale, router]);
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 border-t border-white/[0.06]"
-      style={{ background: "#0E1312" }}
+      className="fixed bottom-0 inset-x-0 z-40 border-t border-border"
+      style={{ background: "var(--nav-bg)" }}
     >
       <div className="max-w-md mx-auto flex pt-3 pb-[max(env(safe-area-inset-bottom),12px)]">
         {TABS.map((tab) => {
@@ -124,6 +132,7 @@ export function BottomNav() {
             <Link
               key={tab.key}
               href={href}
+              prefetch
               className={cn(
                 "flex-1 flex flex-col items-center gap-1.5 transition-colors",
                 active ? "text-primary" : "text-[#4f5450]",

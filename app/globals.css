@@ -2,11 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root, :root.dark {
   /* Brand greys (matches prototype exactly) */
   --bg: #0B0E0D;
   --surface: #13181A;
   --surface-2: #1B2123;
+  --nav-bg: #0E1312;
 
   /* Brand green family */
   --primary: #1FD16B;
@@ -26,6 +27,8 @@
   /* Lines / surfaces */
   --border:     rgba(255,255,255,.08);
   --border-strong: rgba(255,255,255,.12);
+  --overlay:    rgba(255,255,255,.05);
+  --overlay-strong: rgba(255,255,255,.08);
 
   /* Spacing scale (matches spec) */
   --space-1: 4px;
@@ -40,6 +43,31 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+}
+
+:root.light {
+  --bg: #F5F7F5;
+  --surface: #FFFFFF;
+  --surface-2: #EDF1EE;
+  --nav-bg: #FFFFFF;
+
+  /* Brand greens stay the same — they're readable on both backgrounds */
+  --primary: #14A85A;
+  --primary-text: #FFFFFF;
+  --primary-soft: #0D8A47;
+
+  --warning: #C48A15;
+  --danger:  #C13548;
+
+  --text:       #0B1410;
+  --text-soft:  #2E3A34;
+  --text-muted: #626E67;
+  --text-faint: #97A19A;
+
+  --border:     rgba(11,20,16,.10);
+  --border-strong: rgba(11,20,16,.16);
+  --overlay:    rgba(11,20,16,.05);
+  --overlay-strong: rgba(11,20,16,.08);
 }
 
 html, body {

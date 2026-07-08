@@ -13,7 +13,7 @@ export function ProgressBar({
   const tone =
     pct >= 100 ? "bg-warning" : pct >= 70 ? "bg-primary" : "bg-primary";
   return (
-    <div className={cn("h-[7px] rounded bg-white/8 overflow-hidden", className)}>
+    <div className={cn("h-[7px] rounded bg-[var(--overlay-strong)] overflow-hidden", className)}>
       <div className={cn("h-full rounded", tone)} style={{ width: `${pct}%` }} />
     </div>
   );

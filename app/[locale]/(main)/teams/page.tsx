@@ -59,6 +59,14 @@ export default async function TeamsPage({
           <div className="flex flex-col gap-3">
             {myTeams.map((team, i) => {
               const captain = team.members[0]?.user.name;
+              const monogram =
+                team.name
+                  .split(/\s+/)
+                  .filter(Boolean)
+                  .map((s) => s[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase() || "?";
               return (
                 <Link
                   key={team.id}
@@ -69,7 +77,7 @@ export default async function TeamsPage({
                     className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center font-display font-extrabold text-[16px] text-[#06210F] shrink-0"
                     style={{ background: teamGradient(team.color) }}
                   >
-                    {team.name.slice(0, 2).toUpperCase()}
+                    {monogram}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-display font-bold text-[16px] truncate">
@@ -117,7 +125,7 @@ export default async function TeamsPage({
                 <Link
                   key={team.id}
                   href={`/${locale}/teams/${team.id}`}
-                  className="flex items-center gap-3 px-4 py-[13px] border-b border-white/[0.04] last:border-0"
+                  className="flex items-center gap-3 px-4 py-[13px] border-b border-border last:border-0"
                 >
                   <span className="font-display font-extrabold text-[14px] text-text-muted w-4">
                     {i + 1}

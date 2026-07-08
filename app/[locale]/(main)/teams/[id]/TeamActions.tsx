@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
@@ -18,31 +19,40 @@ export function TeamActions({
   isCaptain: boolean;
 }) {
   const t = useTranslations();
-  const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   if (isCaptain) {
     return (
-      <>
+      <div className="flex flex-col items-center gap-3">
+        {/* Primary action: grow the team. */}
+        <Link
+          href={`/${locale}/players`}
+          className="w-full h-12 rounded-xl bg-primary text-primary-text font-display font-extrabold text-[15px] flex items-center justify-center"
+        >
+          {t("teams.find_players")}
+        </Link>
+        {/* Destructive action tucked away as a text link so it stops being
+            the visual anchor of the page. Confirm dialog still gates it. */}
         <button
           type="button"
-          onClick={() => setOpen(true)}
-          className="w-full h-12 rounded-xl border border-danger/40 text-danger font-display font-bold text-[14px]"
+          onClick={() => setConfirmOpen(true)}
+          className="text-[12.5px] font-semibold text-danger"
         >
           {t("teams.disband")}
         </button>
         <ConfirmDialog
-          open={open}
+          open={confirmOpen}
           title={t("teams.disband_confirm_title")}
           description={t("teams.disband_confirm_desc")}
           confirmLabel={t("teams.disband")}
           cancelLabel={t("common.back")}
           destructive
           isPending={isPending}
-          onCancel={() => setOpen(false)}
+          onCancel={() => setConfirmOpen(false)}
           onConfirm={() => startTransition(() => disbandTeam(teamId, locale))}
         />
-      </>
+      </div>
     );
   }
 

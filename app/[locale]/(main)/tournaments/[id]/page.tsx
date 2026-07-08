@@ -117,7 +117,7 @@ export default async function TournamentDetail({
                 <Link
                   key={tt.id}
                   href={`/${locale}/teams/${tt.team.id}`}
-                  className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[12.5px] font-display font-bold"
+                  className="px-3 py-1.5 rounded-full bg-[var(--overlay)] border border-border-strong text-[12.5px] font-display font-bold"
                 >
                   {tt.team.name}{" "}
                   <span className="text-text-muted font-sans font-semibold">

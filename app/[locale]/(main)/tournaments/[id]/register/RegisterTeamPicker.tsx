@@ -83,7 +83,7 @@ export function RegisterTeamPicker({
                 )}
               >
                 <div
-                  className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center font-display font-extrabold text-[15px] text-[#06210F]"
+                  className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center font-display font-extrabold text-[15px] text-[#06210F] shrink-0"
                   style={{ background: teamGradient(team.color) }}
                 >
                   {monogram(team.name)}
@@ -98,7 +98,7 @@ export function RegisterTeamPicker({
                   </div>
                 </div>
                 {active && (
-                  <span className="text-primary font-display font-extrabold text-[17px]">
+                  <span className="text-primary font-display font-extrabold text-[17px] shrink-0">
                     ✓
                   </span>
                 )}

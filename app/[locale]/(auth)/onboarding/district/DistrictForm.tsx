@@ -44,10 +44,10 @@ export function DistrictForm({
                 "flex items-center gap-3 h-[58px] rounded-[15px] px-4 border text-left",
                 active
                   ? "bg-primary/8 border-primary"
-                  : "bg-surface border-white/10",
+                  : "bg-surface border-border-strong",
               )}
             >
-              <span className={cn("w-2.5 h-2.5 rounded-full", active ? "bg-primary" : "bg-white/15")} />
+              <span className={cn("w-2.5 h-2.5 rounded-full", active ? "bg-primary" : "bg-[var(--overlay-strong)]")} />
               <span className="flex-1 font-sans font-semibold text-[16px]">{d}</span>
               {active && <span className="text-primary font-extrabold text-[17px]">✓</span>}
             </button>

@@ -98,14 +98,63 @@ const withPWA = require("next-pwa")({
 
 const withNextIntl = require("next-intl/plugin")("./i18n.ts");
 
+// Content-Security-Policy. Scripts/styles need 'unsafe-inline' because Next's
+// App Router injects inline bootstrap scripts and we don't run a nonce
+// middleware; everything else is locked to same-origin plus the few external
+// hosts the app actually talks to (OSM tiles for Leaflet, Google avatar CDN,
+// Google Fonts). Tighten script-src to a nonce later if we add nonce plumbing.
+const csp = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com data:",
+  "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://lh3.googleusercontent.com",
+  "connect-src 'self' https://*.tile.openstreetmap.org",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "upgrade-insecure-requests",
+].join("; ");
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(self), interest-cohort=()",
+  },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: { remotePatterns: [{ protocol: "https", hostname: "**" }] },
+  // Restrict the image optimizer to the hosts we actually load from. A wildcard
+  // (`hostname: "**"`) turns the optimizer into an open image proxy and is the
+  // exact configuration flagged by GHSA-9g9p-9gw9-jx7f (DoS via remotePatterns).
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "**.supabase.co" },
+      { protocol: "https", hostname: "meydan-chi.vercel.app" },
+      { protocol: "https", hostname: "yakyn.biz" },
+    ],
+  },
   // Standalone output bundles only what the server needs into .next/standalone,
   // so the Docker image is tiny. Harmless on Vercel (it ignores this and uses
   // its own packaging), required for `node server.js` in the prod container.
   output: "standalone",
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
 };
 
 module.exports = withNextIntl(withPWA(nextConfig));

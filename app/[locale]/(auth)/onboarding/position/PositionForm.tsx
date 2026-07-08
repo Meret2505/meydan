@@ -47,7 +47,7 @@ export function PositionForm({
                 "rounded-[20px] p-5 border text-left flex flex-col gap-3.5 min-h-[130px]",
                 active
                   ? "border-primary bg-primary/8"
-                  : "border-white/10 bg-surface",
+                  : "border-border-strong bg-surface",
               )}
             >
               <div
@@ -55,7 +55,7 @@ export function PositionForm({
                   "w-[46px] h-[46px] rounded-xl border flex items-center justify-center font-display font-extrabold text-[15px]",
                   active
                     ? "bg-primary/15 border-primary text-primary"
-                    : "bg-white/5 border-white/10 text-text-muted",
+                    : "bg-[var(--overlay)] border-border-strong text-text-muted",
                 )}
               >
                 {p.abbr}

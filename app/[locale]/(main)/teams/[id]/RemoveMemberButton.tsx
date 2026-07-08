@@ -30,7 +30,7 @@ export function RemoveMemberButton({
           setOpen(true);
         }}
         aria-label="remove"
-        className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-text-muted shrink-0"
+        className="w-8 h-8 rounded-lg bg-[var(--overlay)] border border-border-strong text-text-muted shrink-0"
       >
         ✕
       </button>

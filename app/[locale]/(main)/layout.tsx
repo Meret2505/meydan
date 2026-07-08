@@ -4,8 +4,6 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { FcmRegister } from "@/components/FcmRegister";
 
-export const dynamic = "force-dynamic";
-
 export default async function MainLayout({
   children,
   params: { locale },
@@ -21,7 +19,12 @@ export default async function MainLayout({
   if (!session.user.onboardingComplete) redirect(`/${locale}/onboarding/name`);
 
   return (
-    <div className="min-h-dvh pb-20">
+    <div
+      className="min-h-dvh"
+      style={{
+        paddingBottom: "calc(80px + env(safe-area-inset-bottom))",
+      }}
+    >
       {children}
       <BottomNav />
       <FcmRegister />

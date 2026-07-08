@@ -26,7 +26,7 @@ export function CreateTournamentForm() {
           required
           minLength={2}
           placeholder={t("tournaments.name_placeholder")}
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[16px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[16px] outline-none focus:border-primary"
         />
       </Field>
       <Field label={t("tournaments.start_label")}>
@@ -34,14 +34,14 @@ export function CreateTournamentForm() {
           type="date"
           name="startDate"
           required
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         />
       </Field>
       <Field label={t("tournaments.end_label")}>
         <input
           type="date"
           name="endDate"
-          className="w-full h-12 rounded-xl bg-[#13181A] border border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-12 rounded-xl bg-surface border border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         />
       </Field>
       <Field label={t("tournaments.description_label")}>
@@ -49,7 +49,7 @@ export function CreateTournamentForm() {
           name="description"
           rows={3}
           placeholder={t("tournaments.description_placeholder")}
-          className="w-full rounded-xl bg-[#13181A] border border-white/10 px-4 py-3 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary resize-none"
+          className="w-full rounded-xl bg-surface border border-border-strong px-4 py-3 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary resize-none"
         />
       </Field>
       <Submit label={t("tournaments.create")} />

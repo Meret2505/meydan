@@ -42,7 +42,7 @@ export function CreateTeamForm({
   const color = getTeamColor(colorKey);
 
   return (
-    <form action={createTeam} className="px-7 pt-6 pb-8 flex flex-col gap-5">
+    <form action={createTeam} className="px-6 pt-6 pb-28 flex flex-col gap-5">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="color" value={colorKey} />
 
@@ -81,7 +81,7 @@ export function CreateTeamForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Berzeňňi United"
-          className="w-full h-14 rounded-[15px] bg-[#13181A] border-[1.5px] border-white/10 px-4 text-text font-sans font-bold text-[16px] outline-none focus:border-primary"
+          className="w-full h-14 rounded-[15px] bg-surface border-[1.5px] border-border-strong px-4 text-text font-sans font-bold text-[16px] outline-none focus:border-primary"
         />
       </Field>
 
@@ -89,7 +89,7 @@ export function CreateTeamForm({
         <select
           name="district"
           defaultValue=""
-          className="w-full h-14 rounded-[15px] bg-[#13181A] border-[1.5px] border-white/10 px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
+          className="w-full h-14 rounded-[15px] bg-surface border-[1.5px] border-border-strong px-4 text-text font-sans font-semibold text-[15px] outline-none focus:border-primary"
         >
           <option value="">—</option>
           {districts.map((d) => (

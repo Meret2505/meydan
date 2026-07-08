@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { isAdmin } from "@/lib/authz";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
@@ -46,7 +47,7 @@ export default async function FieldDetailPage({
     auth(),
   ]);
   if (!field) notFound();
-  const canEditPhotos = !!session?.user?.id;
+  const canEditPhotos = isAdmin(session?.user?.id);
 
   const isTm = locale === "tm";
   const name = isTm ? field.nameTm ?? field.name : field.nameRu ?? field.name;
@@ -79,14 +80,14 @@ export default async function FieldDetailPage({
                   "repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 52px)",
               }}
             />
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 border-white/30" />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 border-border-strong" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-bg/40 via-transparent to-bg" />
         <div className="absolute top-0 left-0 right-0">
           <StatusBar />
         </div>
-        <div className="absolute top-12 left-6">
+        <div className="absolute top-12 left-6 text-white [&_button]:bg-black/45 [&_button]:border-white/40">
           <BackButton href={`/${locale}/fields`} />
         </div>
         <div className="absolute left-6 right-6 bottom-4">
@@ -155,7 +156,7 @@ export default async function FieldDetailPage({
               {attributes.map((a) => (
                 <span
                   key={a.code}
-                  className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[12.5px] font-semibold text-text/90"
+                  className="px-3 py-1.5 rounded-full bg-[var(--overlay)] border border-border-strong text-[12.5px] font-semibold text-text/90"
                 >
                   {isTm ? a.tm : a.ru}
                 </span>
@@ -214,7 +215,7 @@ export default async function FieldDetailPage({
               href={waLink(phoneContacts[0].value)}
               target="_blank"
               rel="noreferrer"
-              className="flex-1 h-12 rounded-xl bg-white/5 border border-white/10 text-text font-display font-bold text-[14px] flex items-center justify-center gap-2"
+              className="flex-1 h-12 rounded-xl bg-[var(--overlay)] border border-border-strong text-text font-display font-bold text-[14px] flex items-center justify-center gap-2"
             >
               <span>💬</span>
               {t("fields.whatsapp")}
@@ -246,7 +247,7 @@ export default async function FieldDetailPage({
 
         <Link
           href={`/${locale}/games/create?fieldId=${field.id}`}
-          className="h-12 rounded-xl border border-white/15 text-text font-display font-bold text-[14px] flex items-center justify-center"
+          className="h-12 rounded-xl border border-border-strong text-text font-display font-bold text-[14px] flex items-center justify-center"
         >
           {t("fields.start_game_here")}
         </Link>
