@@ -30,7 +30,7 @@ export function PlayerCard({ player }: { player: PlayerCardData }) {
   const attLabel =
     tier === "new"
       ? t("attendance.new_player")
-      : t("players.attendance_pct", { rate: player.attendanceRate });
+      : t("players.attendance_pct", { rate: player.attendanceRate ?? 0 });
   return (
     <div className="bg-surface border border-border rounded-[18px] p-3.5">
       <div className="flex items-center gap-3.5">

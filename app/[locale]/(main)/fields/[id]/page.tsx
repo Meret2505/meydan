@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { isAdmin } from "@/lib/authz";
@@ -32,12 +32,19 @@ const DAYS: (keyof Hours)[] = [
   "sunday",
 ];
 
-export default async function FieldDetailPage({
-  params: { locale, id },
-}: {
-  params: { locale: string; id: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function FieldDetailPage(
+  props: {
+    params: Promise<{ locale: string; id: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale,
+    id
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const [field, session] = await Promise.all([
     prisma.field.findUnique({

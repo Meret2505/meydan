@@ -1,12 +1,18 @@
 import { useTranslations } from "next-intl";
-import { unstable_setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/navigation";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 
-export default function LoginPage({ params: { locale } }: { params: { locale: string } }) {
-  unstable_setRequestLocale(locale);
+export default async function LoginPage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   return <Login />;
 }
 

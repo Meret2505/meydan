@@ -1,4 +1,4 @@
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -10,12 +10,18 @@ import { Avatar } from "@/components/avatar/Avatar";
 import { gameFormat } from "@/lib/game-format";
 import { LogoutButton } from "./LogoutButton";
 
-export default async function ProfilePage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function ProfilePage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const [t, session] = await Promise.all([getTranslations(), getSession()]);
   const userId = session!.user.id;
   const [user, stats, recent] = await Promise.all([

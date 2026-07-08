@@ -1,11 +1,17 @@
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
 import { NameForm } from "./NameForm";
 
-export default async function NamePage({ params: { locale } }: { params: { locale: string } }) {
-  unstable_setRequestLocale(locale);
+export default async function NamePage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const user = await prisma.user.findUnique({

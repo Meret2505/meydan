@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -13,14 +13,20 @@ const STATUS_TONE: Record<TournamentStatus, string> = {
   cancelled: "bg-danger/15 text-danger",
 };
 
-export default async function TournamentsPage({
-  params: { locale },
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams: { tab?: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function TournamentsPage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams: Promise<{ tab?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
 
   const tab =

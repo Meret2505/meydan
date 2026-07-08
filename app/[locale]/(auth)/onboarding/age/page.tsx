@@ -1,4 +1,4 @@
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { OnboardingHeader } from "@/components/onboarding/OnboardingHeader";
@@ -10,8 +10,14 @@ const RANGES: { label: string; mid: number }[] = [
   { label: "35+", mid: 37 },
 ];
 
-export default async function AgePage({ params: { locale } }: { params: { locale: string } }) {
-  unstable_setRequestLocale(locale);
+export default async function AgePage(props: { params: Promise<{ locale: string }> }) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const user = await prisma.user.findUnique({

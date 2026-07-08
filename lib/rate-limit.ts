@@ -53,8 +53,8 @@ export async function rateLimit(
  * real client is the first hop in X-Forwarded-For. Falls back to a constant so
  * a missing header degrades to a shared (stricter) bucket rather than no limit.
  */
-export function clientIp(): string {
-  const h = headers();
+export async function clientIp(): Promise<string> {
+  const h = await headers();
   const xff = h.get("x-forwarded-for");
   if (xff) return xff.split(",")[0].trim();
   return h.get("x-real-ip")?.trim() || "unknown";

@@ -29,7 +29,7 @@ export async function phoneLoginOrSignup(formData: FormData) {
 
   // Throttle brute force / mass signup: 10 attempts per IP per 10 min, and 5
   // per phone per 15 min (tighter, since a targeted attack fixes the phone).
-  const ip = clientIp();
+  const ip = await clientIp();
   const [ipLimit, phoneLimit] = await Promise.all([
     rateLimit(`login:ip:${ip}`, 10, 10 * 60_000),
     rateLimit(`login:phone:${phone}`, 5, 15 * 60_000),

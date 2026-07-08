@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
@@ -14,14 +14,20 @@ import { cn } from "@/lib/utils";
 type Tab = "open" | "mine";
 type Chip = "today" | "five" | "goalie";
 
-export default async function GamesPage({
-  params: { locale },
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams: { tab?: string; chip?: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function GamesPage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams: Promise<{ tab?: string; chip?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const tab: Tab = searchParams.tab === "mine" ? "mine" : "open";
   const chip = (searchParams.chip as Chip | undefined) ?? undefined;
 

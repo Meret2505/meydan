@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
@@ -18,14 +18,20 @@ const SKILLS: { value: SkillLevel }[] = [
   { value: "ADVANCED" },
 ];
 
-export default async function PlayersPage({
-  params: { locale },
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams: { position?: string; district?: string; skill?: string; back?: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function PlayersPage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams: Promise<{ position?: string; district?: string; skill?: string; back?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
 

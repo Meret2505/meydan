@@ -1,14 +1,20 @@
-import { unstable_setRequestLocale, getTranslations } from "next-intl/server";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { PhoneLoginForm } from "./PhoneLoginForm";
 
-export default async function PhoneLoginPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function PhoneLoginPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   return (
     <div className="min-h-dvh flex flex-col">

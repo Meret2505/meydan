@@ -1,17 +1,26 @@
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { unstable_setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { FcmRegister } from "@/components/FcmRegister";
 
-export default async function MainLayout({
-  children,
-  params: { locale },
-}: {
-  children: React.ReactNode;
-  params: { locale: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function MainLayout(
+  props: {
+    children: React.ReactNode;
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  const {
+    children
+  } = props;
+
+  setRequestLocale(locale);
   const session = await getSession();
   if (!session?.user?.id) redirect(`/${locale}/login`);
   // onboardingComplete is resolved by the auth callbacks (cached in the JWT),

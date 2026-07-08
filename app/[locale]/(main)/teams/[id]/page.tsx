@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlayerStats, attendanceTier } from "@/lib/stats";
@@ -11,14 +11,12 @@ import { RemoveMemberButton } from "./RemoveMemberButton";
 import { getTeamColor } from "@/lib/team-color";
 
 function initials(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .map((s) => s[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?"
-  );
+  return (name
+    .split(/\s+/)
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "?");
 }
 
 const ATT_COLOR: Record<ReturnType<typeof attendanceTier>, string> = {
@@ -28,12 +26,19 @@ const ATT_COLOR: Record<ReturnType<typeof attendanceTier>, string> = {
   new: "#8A938E",
 };
 
-export default async function TeamDetailPage({
-  params: { locale, id },
-}: {
-  params: { locale: string; id: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function TeamDetailPage(
+  props: {
+    params: Promise<{ locale: string; id: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale,
+    id
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const viewerId = session!.user.id;

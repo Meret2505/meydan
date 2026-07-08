@@ -33,10 +33,8 @@ const ALLOWED_CONTENT_TYPES = new Set([
 
 const FETCH_TIMEOUT_MS = 8000;
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: { path: string[] } },
-) {
+export async function GET(_req: NextRequest, props: { params: Promise<{ path: string[] }> }) {
+  const params = await props.params;
   const [bucket, ...rest] = params.path;
   if (!bucket || rest.length === 0) {
     return new Response("not found", { status: 404 });

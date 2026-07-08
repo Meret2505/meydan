@@ -1,14 +1,20 @@
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { CreateTournamentForm } from "./CreateTournamentForm";
 
-export default async function CreateTournamentPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function CreateTournamentPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   return (
     <>

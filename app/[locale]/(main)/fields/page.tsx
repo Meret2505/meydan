@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
@@ -14,14 +14,20 @@ const SURFACE_KEY: Record<string, string> = {
   "Грунт": "fields.surface_dirt",
 };
 
-export default async function FieldsPage({
-  params: { locale },
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams: { district?: string; surface?: string; view?: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function FieldsPage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams: Promise<{ district?: string; surface?: string; view?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await getSession();
   const userId = session?.user?.id ?? null;

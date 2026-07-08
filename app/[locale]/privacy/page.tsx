@@ -1,4 +1,4 @@
-import { unstable_setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { locales } from "@/i18n";
 
 export function generateStaticParams() {
@@ -9,12 +9,18 @@ export const metadata = {
   title: "Политика конфиденциальности — MEÝDAN",
 };
 
-export default function PrivacyPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function PrivacyPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   return (
     <main className="mx-auto max-w-[680px] px-6 py-10 text-text">
       <h1 className="font-display font-extrabold text-[26px] tracking-tight">

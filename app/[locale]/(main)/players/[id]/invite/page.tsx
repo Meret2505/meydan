@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
@@ -10,12 +10,19 @@ import { formatGameDateTime } from "@/lib/date";
 import { gameFormat } from "@/lib/game-format";
 import { InviteButton } from "./InviteButton";
 
-export default async function InvitePage({
-  params: { locale, id },
-}: {
-  params: { locale: string; id: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function InvitePage(
+  props: {
+    params: Promise<{ locale: string; id: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale,
+    id
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const senderId = session!.user.id;

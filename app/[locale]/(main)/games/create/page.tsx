@@ -1,17 +1,23 @@
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { CreateGameForm } from "./CreateGameForm";
 
-export default async function CreateGamePage({
-  params: { locale },
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams: { fieldId?: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function CreateGamePage(
+  props: {
+    params: Promise<{ locale: string }>;
+    searchParams: Promise<{ fieldId?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
 
   const fieldRows = await prisma.field.findMany({

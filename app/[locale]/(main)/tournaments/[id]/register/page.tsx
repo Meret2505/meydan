@@ -1,17 +1,24 @@
 import { notFound, redirect } from "next/navigation";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
 import { BackButton } from "@/components/ui/BackButton";
 import { RegisterTeamPicker } from "./RegisterTeamPicker";
 
-export default async function TournamentRegisterPage({
-  params: { locale, id },
-}: {
-  params: { locale: string; id: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function TournamentRegisterPage(
+  props: {
+    params: Promise<{ locale: string; id: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale,
+    id
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const userId = session!.user.id;

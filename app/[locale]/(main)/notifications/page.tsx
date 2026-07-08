@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StatusBar } from "@/components/ui/StatusBar";
@@ -32,12 +32,18 @@ const TYPE_STYLE: Record<NotificationType, { icon: string; bg: string; color: st
   TEAM_INVITE: { icon: "★", bg: "rgba(155,143,224,.16)", color: "#B3A8EC" },
 };
 
-export default async function NotificationsPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function NotificationsPage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const userId = session!.user.id;

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
@@ -15,22 +15,27 @@ function hue(seed: string) {
   return h % 360;
 }
 function initials(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .map((s) => s[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?"
-  );
+  return (name
+    .split(/\s+/)
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "?");
 }
 
-export default async function PlayerPublicProfile({
-  params: { locale, id },
-}: {
-  params: { locale: string; id: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function PlayerPublicProfile(
+  props: {
+    params: Promise<{ locale: string; id: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale,
+    id
+  } = params;
+
+  setRequestLocale(locale);
   const t = await getTranslations();
   const session = await auth();
   const viewerId = session!.user.id;

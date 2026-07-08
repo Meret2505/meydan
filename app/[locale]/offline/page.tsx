@@ -1,4 +1,4 @@
-import { unstable_setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { locales } from "@/i18n";
 
 export function generateStaticParams() {
@@ -8,12 +8,18 @@ export function generateStaticParams() {
 // The service worker falls back to this page (rendered at build time) when the
 // device is offline and the requested document can't be fetched. Keep it tiny
 // and self-contained — no network, no client JS dependencies.
-export default function OfflinePage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  unstable_setRequestLocale(locale);
+export default async function OfflinePage(
+  props: {
+    params: Promise<{ locale: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    locale
+  } = params;
+
+  setRequestLocale(locale);
   const tm = locale === "tm";
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center px-8 text-center text-text">
