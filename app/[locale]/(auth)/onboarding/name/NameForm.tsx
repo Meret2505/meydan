@@ -8,7 +8,7 @@ import { saveName } from "@/app/actions/onboarding";
 function Submit({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" loading={pending}>
       {label}
     </Button>
   );

@@ -13,7 +13,7 @@ type Item = { value: Position; label: string; abbr: string; sub: string };
 function Submit({ label, disabled }: { label: string; disabled: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending || disabled}>
+    <Button type="submit" loading={pending} disabled={disabled}>
       {label}
     </Button>
   );
