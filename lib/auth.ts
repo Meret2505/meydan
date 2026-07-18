@@ -4,14 +4,8 @@ import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import { OAuth2Client } from "google-auth-library";
 import { prisma } from "./prisma";
-
-// Reusable Google ID-token verifier (Capacitor Android shell calls this via
-// the "google-id-token" Credentials provider below). The native Google SDK
-// is configured with serverClientId = GOOGLE_CLIENT_ID, so the ID token's
-// audience is the same web client id we use for the OAuth web flow.
-const googleVerifier = new OAuth2Client();
+import { verifyGoogleIdToken } from "./services/google-auth";
 
 declare module "next-auth" {
   interface Session {
@@ -87,29 +81,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         const idToken = credentials?.idToken as string | undefined;
-        const audience = process.env.GOOGLE_CLIENT_ID;
-        if (!idToken || !audience) return null;
-        const ticket = await googleVerifier.verifyIdToken({
-          idToken,
-          audience,
-        });
-        const payload = ticket.getPayload();
-        if (!payload?.email_verified || !payload.sub) return null;
-        const email = payload.email ?? undefined;
-        const name = payload.name ?? email ?? "Google user";
-        const avatar = payload.picture ?? undefined;
-        // Find by email or create. (Account-table linking happens through the
-        // standard Google OAuth provider on web — for the native shell we just
-        // need the User row so the phone-based join paths work.)
-        let user = email
-          ? await prisma.user.findFirst({ where: { email } })
-          : null;
-        if (!user) {
-          user = await prisma.user.create({
-            data: { name, email, avatar, locale: "ru" },
-          });
-        }
-        return { id: user.id, name: user.name, email: user.email ?? undefined };
+        if (!idToken) return null;
+        // Verification and user upsert live in lib/services/google-auth.ts so
+        // this provider and the mobile API route behave identically.
+        const result = await verifyGoogleIdToken(idToken);
+        if (!result.ok) return null;
+        return {
+          id: result.userId,
+          name: result.name,
+          email: result.email ?? undefined,
+        };
       },
     }),
   ],

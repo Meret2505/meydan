@@ -1,4 +1,4 @@
-import type { ZodType } from "zod";
+import type { TypeOf, ZodTypeAny } from "zod";
 import { badRequest } from "./errors";
 
 /**
@@ -9,10 +9,10 @@ import { badRequest } from "./errors";
  * paths, and no client here needs field-level errors — the Android forms
  * validate locally before submitting.
  */
-export async function parseJson<T>(
+export async function parseJson<S extends ZodTypeAny>(
   request: Request,
-  schema: ZodType<T>,
-): Promise<T> {
+  schema: S,
+): Promise<TypeOf<S>> {
   let raw: unknown;
   try {
     raw = await request.json();
@@ -28,7 +28,10 @@ export async function parseJson<T>(
 }
 
 /** Parses and validates URL search params against a schema. */
-export function parseQuery<T>(request: Request, schema: ZodType<T>): T {
+export function parseQuery<S extends ZodTypeAny>(
+  request: Request,
+  schema: S,
+): TypeOf<S> {
   const params = Object.fromEntries(new URL(request.url).searchParams);
   const result = schema.safeParse(params);
   if (!result.success) {

@@ -20,6 +20,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
+      // Next's build-time client-bundle marker; has no resolvable entry
+      // outside Next's bundler. See tests/stubs/server-only.ts.
+      "server-only": path.resolve(__dirname, "tests/stubs/server-only.ts"),
     },
   },
 });
