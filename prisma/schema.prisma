@@ -69,6 +69,7 @@ model User {
   sentInvites      GameInvite[]      @relation("InviteSender")
   receivedInvites  GameInvite[]      @relation("InviteReceiver")
   favoriteFields   FieldFavorite[]
+  refreshTokens    RefreshToken[]
 
   @@map("users")
 }
@@ -138,7 +139,7 @@ model Field {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
 
-  games      Game[]
+  games       Game[]
   favoritedBy FieldFavorite[]
 
   @@map("fields")
@@ -175,9 +176,9 @@ model Game {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  field        Field?           @relation(fields: [fieldId], references: [id])
-  organizer    User             @relation("Organizer", fields: [organizerId], references: [id])
-  team         Team?            @relation(fields: [teamId], references: [id])
+  field        Field?            @relation(fields: [fieldId], references: [id])
+  organizer    User              @relation("Organizer", fields: [organizerId], references: [id])
+  team         Team?             @relation(fields: [teamId], references: [id])
   participants GameParticipant[]
   invites      GameInvite[]
 
@@ -304,6 +305,32 @@ model RateLimit {
 
   @@index([expiresAt])
   @@map("rate_limits")
+}
+
+/// Refresh tokens for the native mobile clients. The web app keeps using
+/// NextAuth's cookie session and never touches this table.
+///
+/// Only the SHA-256 hash of the token is stored, so a database leak yields
+/// nothing usable. Tokens rotate on every refresh: the old row is marked
+/// revoked and a new one issued in the same family. Presenting an already
+/// rotated token means it leaked, so the whole family is revoked at once.
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  /// Groups every token descended from one login, so a detected reuse can
+  /// revoke the entire chain rather than just the replayed token.
+  familyId  String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
 }
 
 model GameInvite {

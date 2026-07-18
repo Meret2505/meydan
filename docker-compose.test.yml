@@ -1,0 +1,24 @@
+# Throwaway Postgres for the test suite. Runs on 5433 so it never collides
+# with a local dev Postgres on the default port.
+#
+#   docker compose -f docker-compose.test.yml up -d
+#   npx prisma migrate deploy   # with DATABASE_URL from .env.test
+#   npm test
+services:
+  test-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: meydan_test
+      POSTGRES_PASSWORD: meydan_test
+      POSTGRES_DB: meydan_test
+    ports:
+      - "5433:5432"
+    # tmpfs keeps the whole database in RAM: fast, and wiped on every restart,
+    # so a stale test database can never leak into a later run.
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meydan_test -d meydan_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
