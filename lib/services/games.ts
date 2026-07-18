@@ -1,0 +1,160 @@
+import { prisma } from "@/lib/prisma";
+import { sendPush } from "@/lib/fcm";
+
+/**
+ * Game membership operations, extracted from app/actions/games.ts so the web
+ * actions and the mobile API share one implementation.
+ *
+ * The transactional invariants here are the ones most worth preserving:
+ * capacity is re-read inside the transaction, the OPEN/FULL transition is
+ * derived from the real participant count, and the in-app notification is
+ * committed before any push is attempted.
+ */
+
+export type JoinError = "not_found" | "not_joinable" | "game_full";
+
+export type JoinResult =
+  | { ok: true; alreadyJoined: boolean }
+  | { ok: false; error: JoinError };
+
+export type LeaveError = "not_found" | "organizer_cannot_leave" | "game_over";
+
+export type LeaveResult = { ok: true } | { ok: false; error: LeaveError };
+
+/**
+ * Adds the user to a game.
+ *
+ * Idempotent: joining twice succeeds and reports `alreadyJoined`, rather than
+ * erroring, so a retried request after a dropped response does the right thing.
+ */
+export async function joinGame(gameId: string, userId: string): Promise<JoinResult> {
+  const outcome = await prisma.$transaction(async (tx) => {
+    // Lock the game row for the duration of the transaction.
+    //
+    // Without this the capacity check is unsafe: under Postgres' default READ
+    // COMMITTED isolation, two different users joining a 5-of-6 game both read
+    // 5, both pass the check, and both insert — leaving 7 players with 6
+    // spots. The lock makes concurrent joins for the same game serialize, so
+    // the second one sees the first one's row.
+    //
+    // Locking by game id also means joins to *different* games never contend.
+    const locked = await tx.$queryRaw<
+      { id: string }[]
+    >`SELECT id FROM games WHERE id = ${gameId} FOR UPDATE`;
+    if (locked.length === 0) return { ok: false as const, error: "not_found" as const };
+
+    const game = await tx.game.findUnique({
+      where: { id: gameId },
+      include: { _count: { select: { participants: true } } },
+    });
+    if (!game) return { ok: false as const, error: "not_found" as const };
+    if (game.status !== "OPEN" && game.status !== "FULL") {
+      return { ok: false as const, error: "not_joinable" as const };
+    }
+
+    const already = await tx.gameParticipant.findUnique({
+      where: { gameId_userId: { gameId, userId } },
+      select: { id: true },
+    });
+
+    // Only a *new* joiner is subject to the capacity check; someone already in
+    // the game is not taking another spot.
+    if (!already && game._count.participants >= game.totalSpots) {
+      return { ok: false as const, error: "game_full" as const };
+    }
+
+    await tx.gameParticipant.upsert({
+      where: { gameId_userId: { gameId, userId } },
+      create: { gameId, userId },
+      update: {},
+    });
+
+    // Re-count rather than assuming the upsert inserted a row. The previous
+    // implementation used `_count + 1` unconditionally, so an existing
+    // participant re-joining a 5-of-6 game flipped it to FULL and locked out
+    // the last real spot.
+    const filled = await tx.gameParticipant.count({ where: { gameId } });
+    if (filled >= game.totalSpots && game.status !== "FULL") {
+      await tx.game.update({ where: { id: gameId }, data: { status: "FULL" } });
+    }
+
+    // Notify the organizer, unless they are the one joining their own game.
+    // Committed inside the transaction so the in-app notification can never be
+    // lost, independently of whether the push below succeeds.
+    if (!already && game.organizerId !== userId) {
+      await tx.notification.create({
+        data: {
+          userId: game.organizerId,
+          type: "PLAYER_JOINED",
+          title: "Новый игрок",
+          body: "Игрок записался на твою игру.",
+          data: { gameId },
+        },
+      });
+      return {
+        ok: true as const,
+        alreadyJoined: false,
+        notifyOrganizerId: game.organizerId,
+      };
+    }
+
+    return { ok: true as const, alreadyJoined: !!already, notifyOrganizerId: null };
+  });
+
+  if (!outcome.ok) return outcome;
+
+  if (outcome.notifyOrganizerId) {
+    await pushToOrganizer(outcome.notifyOrganizerId, gameId);
+  }
+  return { ok: true, alreadyJoined: outcome.alreadyJoined };
+}
+
+/**
+ * Best-effort push to the organizer. Runs after the transaction commits: the
+ * database is the source of truth for notifications, and a Firebase outage
+ * must never roll back a successful join.
+ */
+async function pushToOrganizer(organizerId: string, gameId: string): Promise<void> {
+  const organizer = await prisma.user.findUnique({
+    where: { id: organizerId },
+    select: { fcmToken: true, locale: true },
+  });
+  if (!organizer?.fcmToken) return;
+
+  const ru = organizer.locale !== "tm";
+  await sendPush(
+    organizer.fcmToken,
+    ru ? "Новый игрок" : "Täze oýunçy",
+    ru ? "Игрок записался на твою игру." : "Oýunçy oýnuňa ýazyldy.",
+    { gameId, url: `/${organizer.locale}/games/${gameId}` },
+  );
+}
+
+/**
+ * Removes the user from a game.
+ *
+ * The organizer cannot leave their own game — there is no hand-off mechanism,
+ * so an organizer-less game would be unmanageable.
+ */
+export async function leaveGame(gameId: string, userId: string): Promise<LeaveResult> {
+  return prisma.$transaction(async (tx) => {
+    const game = await tx.game.findUnique({ where: { id: gameId } });
+    if (!game) return { ok: false as const, error: "not_found" as const };
+    if (game.organizerId === userId) {
+      return { ok: false as const, error: "organizer_cannot_leave" as const };
+    }
+    // Leaving a finished game would delete the participation row and with it
+    // the recorded attendance, silently rewriting history. The web UI hides
+    // the button in this state; the API has to enforce it.
+    if (game.status === "COMPLETED" || game.status === "CANCELLED") {
+      return { ok: false as const, error: "game_over" as const };
+    }
+
+    await tx.gameParticipant.deleteMany({ where: { gameId, userId } });
+
+    if (game.status === "FULL") {
+      await tx.game.update({ where: { id: gameId }, data: { status: "OPEN" } });
+    }
+    return { ok: true as const };
+  });
+}

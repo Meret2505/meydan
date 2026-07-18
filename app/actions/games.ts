@@ -4,6 +4,10 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseScore } from "@/lib/validate";
 import { sendPush } from "@/lib/fcm";
+import {
+  joinGame as joinGameService,
+  leaveGame as leaveGameService,
+} from "@/lib/services/games";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { Position } from "@prisma/client";
@@ -55,59 +59,15 @@ export async function createGame(formData: FormData): Promise<void> {
   redirect(`/${locale}/games/${game.id}`);
 }
 
+/**
+ * Join/leave delegate to lib/services/games.ts so the mobile API runs the same
+ * transaction. A failed attempt (full, cancelled, organizer leaving) still
+ * resolves silently here and simply re-renders, as it always has — surfacing
+ * the reason would mean changing the client components, which is out of scope.
+ */
 export async function joinGame(gameId: string, locale: string): Promise<void> {
   const userId = await requireUserId();
-
-  const organizerId = await prisma.$transaction(async (tx) => {
-    const game = await tx.game.findUnique({
-      where: { id: gameId },
-      include: { _count: { select: { participants: true } } },
-    });
-    if (!game) return null;
-    if (game.status !== "OPEN" && game.status !== "FULL") return null;
-    if (game._count.participants >= game.totalSpots) return null;
-
-    await tx.gameParticipant.upsert({
-      where: { gameId_userId: { gameId, userId } },
-      create: { gameId, userId },
-      update: {},
-    });
-
-    const newCount = game._count.participants + 1;
-    if (newCount >= game.totalSpots) {
-      await tx.game.update({ where: { id: gameId }, data: { status: "FULL" } });
-    }
-
-    if (game.organizerId !== userId) {
-      await tx.notification.create({
-        data: {
-          userId: game.organizerId,
-          type: "PLAYER_JOINED",
-          title: "Новый игрок",
-          body: "Игрок записался на твою игру.",
-          data: { gameId },
-        },
-      });
-      return game.organizerId;
-    }
-    return null;
-  });
-
-  if (organizerId) {
-    const organizer = await prisma.user.findUnique({
-      where: { id: organizerId },
-      select: { fcmToken: true, locale: true },
-    });
-    if (organizer?.fcmToken) {
-      const ru = organizer.locale !== "tm";
-      await sendPush(
-        organizer.fcmToken,
-        ru ? "Новый игрок" : "Täze oýunçy",
-        ru ? "Игрок записался на твою игру." : "Oýunçy oýnuňa ýazyldy.",
-        { gameId, url: `/${organizer.locale}/games/${gameId}` },
-      );
-    }
-  }
+  await joinGameService(gameId, userId);
 
   revalidatePath(`/${locale}/games`);
   revalidatePath(`/${locale}/games/${gameId}`);
@@ -115,18 +75,7 @@ export async function joinGame(gameId: string, locale: string): Promise<void> {
 
 export async function leaveGame(gameId: string, locale: string): Promise<void> {
   const userId = await requireUserId();
-
-  await prisma.$transaction(async (tx) => {
-    const game = await tx.game.findUnique({ where: { id: gameId } });
-    if (!game) return;
-    if (game.organizerId === userId) return;
-
-    await tx.gameParticipant.deleteMany({ where: { gameId, userId } });
-
-    if (game.status === "FULL") {
-      await tx.game.update({ where: { id: gameId }, data: { status: "OPEN" } });
-    }
-  });
+  await leaveGameService(gameId, userId);
 
   revalidatePath(`/${locale}/games`);
   revalidatePath(`/${locale}/games/${gameId}`);

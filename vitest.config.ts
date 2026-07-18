@@ -9,6 +9,11 @@ export default defineConfig({
     environment: "node",
     include: ["lib/**/*.test.ts", "app/api/**/*.test.ts", "tests/**/*.test.ts"],
     setupFiles: ["tests/setup.ts"],
+    // Integration files truncate shared tables between tests, so running two
+    // of them at once makes each one's fixtures vanish mid-test. The suite is
+    // only a few seconds long, so serialising files is cheaper than giving
+    // each one its own database schema.
+    fileParallelism: false,
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
