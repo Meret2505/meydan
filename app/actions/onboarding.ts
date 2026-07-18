@@ -1,11 +1,17 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { normalizePhone } from "@/lib/phone";
-import { parseAge } from "@/lib/validate";
+import { updateOnboardingProfile } from "@/lib/services/onboarding";
 import { redirect } from "next/navigation";
-import type { Position } from "@prisma/client";
+
+/**
+ * Onboarding wizard steps.
+ *
+ * Validation and persistence live in lib/services/onboarding.ts so the mobile
+ * PATCH /me endpoint applies exactly the same rules. Each action here reads
+ * FormData, delegates, and advances to the next step — a rejected patch writes
+ * nothing and simply does not redirect, which is the pre-existing behaviour.
+ */
 
 async function requireUserId() {
   const session = await auth();
@@ -15,64 +21,60 @@ async function requireUserId() {
 
 export async function saveName(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  const name = String(formData.get("name") ?? "").trim();
   const locale = String(formData.get("locale") ?? "ru");
-  if (!name) return;
-  await prisma.user.update({ where: { id: userId }, data: { name } });
+  const result = await updateOnboardingProfile(userId, {
+    name: String(formData.get("name") ?? ""),
+  });
+  if (!result.ok) return;
   redirect(`/${locale}/onboarding/phone`);
 }
 
 export async function savePhone(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  const raw = String(formData.get("phone") ?? "").trim();
   const locale = String(formData.get("locale") ?? "ru");
-  const phone = normalizePhone(raw);
-  if (!phone) return;
-
-  // Don't let a user claim a phone already bound to someone else (would let an
-  // attacker squat a victim's number and break the victim's phone login).
-  const holder = await prisma.user.findUnique({
-    where: { phone },
-    select: { id: true },
+  const result = await updateOnboardingProfile(userId, {
+    phone: String(formData.get("phone") ?? ""),
   });
-  if (holder && holder.id !== userId) return;
-
-  await prisma.user.update({ where: { id: userId }, data: { phone } });
+  if (!result.ok) return;
   redirect(`/${locale}/onboarding/position`);
 }
 
 export async function savePosition(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  const position = String(formData.get("position") ?? "") as Position;
   const locale = String(formData.get("locale") ?? "ru");
-  const valid: Position[] = ["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD"];
-  if (!valid.includes(position)) return;
-  await prisma.user.update({ where: { id: userId }, data: { position } });
+  const result = await updateOnboardingProfile(userId, {
+    position: String(formData.get("position") ?? ""),
+  });
+  if (!result.ok) return;
   redirect(`/${locale}/onboarding/district`);
 }
 
 export async function saveDistrict(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  const district = String(formData.get("district") ?? "").trim();
   const locale = String(formData.get("locale") ?? "ru");
-  if (!district) return;
-  await prisma.user.update({ where: { id: userId }, data: { district } });
+  const result = await updateOnboardingProfile(userId, {
+    district: String(formData.get("district") ?? ""),
+  });
+  if (!result.ok) return;
   redirect(`/${locale}/onboarding/age`);
 }
 
 export async function saveAge(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  const ageStr = String(formData.get("age") ?? "").trim();
   const locale = String(formData.get("locale") ?? "ru");
-  const age = parseAge(ageStr);
-  await prisma.user.update({
-    where: { id: userId },
-    data: { age, locale },
+  await updateOnboardingProfile(userId, {
+    age: String(formData.get("age") ?? ""),
+    locale,
   });
   redirect(`/${locale}/games`);
 }
 
 export async function skipAge(locale: string) {
-  await requireUserId();
+  const userId = await requireUserId();
+  // Skipping must still persist the language choice. Previously this action
+  // wrote nothing at all, so a user who picked Turkmen and then skipped the
+  // age step silently kept the default Russian — which is the locale the
+  // server later uses for their push notifications.
+  await updateOnboardingProfile(userId, { locale });
   redirect(`/${locale}/games`);
 }
