@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Minimal launch theme. Everything visual is decided in Compose
+  (core/designsystem/Theme.kt); this only controls the window background
+  before the first frame, so it uses the dark brand background to avoid a
+  white flash on cold start.
+-->
+<resources>
+    <style name="Theme.Meydan" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/launch_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

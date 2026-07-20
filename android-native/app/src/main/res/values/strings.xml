@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Default (Russian) strings. The app's default locale is "ru", matching
+  i18n.ts on the web, so the unqualified values/ directory holds Russian and
+  values-tk/ holds Turkmen.
+
+  Note "tk", not "tm": tk is the ISO 639-1 language code for Turkmen, while
+  the web app's "tm" is the country code for Turkmenistan and is not a valid
+  Android resource qualifier. The API keeps speaking "tm"; the client maps
+  between the two in one place.
+-->
+<resources>
+    <string name="app_name">MEÝDAN</string>
+</resources>

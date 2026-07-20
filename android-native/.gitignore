@@ -1,0 +1,18 @@
+# Android build outputs
+.gradle/
+build/
+app/build/
+captures/
+
+# Local SDK location — machine-specific, must not be committed
+local.properties
+
+# IDE
+.idea/
+*.iml
+
+# Keystore stays in the repo root ../keys (already gitignored there); never
+# duplicate or export it into this module.
+
+# Kotlin compiler session cache
+.kotlin/

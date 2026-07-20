@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares the languages the app ships, so Android 13+ shows MEÝDAN in the
+  system per-app language picker and AppCompatDelegate.setApplicationLocales
+  has a supported set to switch between.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="ru" />
+    <locale android:name="tk" />
+</locale-config>

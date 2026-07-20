@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the bg token in app/globals.css so the cold-start window
+         background is continuous with the first composed frame. -->
+    <color name="launch_background">#0B0E0D</color>
+</resources>
