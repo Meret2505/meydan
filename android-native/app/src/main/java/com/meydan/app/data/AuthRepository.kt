@@ -3,6 +3,7 @@ package com.meydan.app.data
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.TokenStore
+import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.GoogleAuthRequest
 import com.meydan.app.core.network.dto.MeResponse
@@ -21,8 +22,11 @@ import com.meydan.app.core.network.dto.UserDto
 class AuthRepository(
     private val api: MeydanApi,
     private val tokenStore: TokenStore,
+    private val userCache: UserCache,
 ) {
     suspend fun hasSession(): Boolean = tokenStore.hasSession()
+
+    suspend fun cachedUser(): UserDto? = userCache.current()
 
     suspend fun phoneLogin(
         phone: String,
@@ -42,7 +46,12 @@ class AuthRepository(
         return result
     }
 
-    suspend fun getMe(): ApiResult<MeResponse> = apiCall { api.getMe() }
+    /** Fetches the profile and refreshes the offline cache on success. */
+    suspend fun getMe(): ApiResult<MeResponse> {
+        val result = apiCall { api.getMe() }
+        if (result is ApiResult.Success) userCache.save(result.data.user)
+        return result
+    }
 
     /**
      * Applies a profile patch. When onboarding completes the server returns a
@@ -53,20 +62,23 @@ class AuthRepository(
         val result = apiCall { api.patchMe(patch) }
         if (result is ApiResult.Success) {
             result.data.accessToken?.let { tokenStore.updateAccessToken(it) }
+            userCache.save(result.data.user)
         }
         return result
     }
 
-    /** Revokes the refresh token server-side (best effort), then clears local storage. */
+    /** Revokes the refresh token server-side (best effort), then clears local state. */
     suspend fun logout() {
         val refresh = tokenStore.refreshToken()
         if (refresh != null) {
             runCatching { api.logout(RefreshRequest(refresh)) }
         }
         tokenStore.clear()
+        userCache.clear()
     }
 
     private suspend fun persist(session: SessionDto) {
         tokenStore.save(session.accessToken, session.refreshToken)
+        userCache.save(session.user)
     }
 }

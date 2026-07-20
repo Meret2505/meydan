@@ -2,13 +2,57 @@
 <!--
   Default (Russian) strings. The app's default locale is "ru", matching
   i18n.ts on the web, so the unqualified values/ directory holds Russian and
-  values-tk/ holds Turkmen.
+  values-tk/ holds Turkmen. Strings are ported verbatim from messages/ru.json;
+  the two must not drift.
 
   Note "tk", not "tm": tk is the ISO 639-1 language code for Turkmen, while
   the web app's "tm" is the country code for Turkmenistan and is not a valid
   Android resource qualifier. The API keeps speaking "tm"; the client maps
-  between the two in one place.
+  between the two in one place (LocaleMapper).
 -->
 <resources>
-    <string name="app_name">MEÝDAN</string>
+    <string name="app_name" translatable="false">MEÝDAN</string>
+
+    <!-- auth -->
+    <string name="auth_tagline">Найди открытую игру рядом. Приходи и играй.</string>
+    <string name="auth_google">Войти через Google</string>
+    <string name="auth_phone">Войти по номеру телефона</string>
+    <string name="auth_phone_title">Вход по номеру</string>
+    <string name="auth_phone_sub">Без SMS — просто номер и пароль.</string>
+    <string name="auth_phone_label">Номер телефона</string>
+    <string name="auth_password_label">Пароль</string>
+    <string name="auth_login">Войти</string>
+    <string name="auth_logout">Выйти</string>
+    <string name="auth_terms">Продолжая, вы принимаете условия использования и политику конфиденциальности</string>
+    <string name="auth_phone_placeholder" translatable="false">65 12 34 56</string>
+
+    <!-- onboarding -->
+    <string name="onboarding_name_title">Как тебя зовут?</string>
+    <string name="onboarding_name_sub">Имя из Google можно изменить.</string>
+    <string name="onboarding_phone_title">Твой номер</string>
+    <string name="onboarding_phone_sub">Чтобы тебя могли позвать в игру. Номер не виден другим — только по кнопке «показать контакт».</string>
+    <string name="onboarding_private_hint">Приватно. SMS-подтверждение не требуется.</string>
+    <string name="onboarding_position_title">Твоя позиция</string>
+    <string name="onboarding_position_sub">На какой позиции ты обычно играешь?</string>
+    <string name="onboarding_district_title">Твой район</string>
+    <string name="onboarding_district_sub">Покажем игры рядом с тобой.</string>
+    <string name="onboarding_age_title">Возраст</string>
+    <string name="onboarding_age_sub">Опционально — поможет подобрать ровесников.</string>
+    <string name="onboarding_finish">Готово — к играм</string>
+    <string name="onboarding_age_under">до 18</string>
+
+    <!-- errors -->
+    <string name="error_wrong_password">Неверный пароль</string>
+    <string name="error_invalid_input">Заполните оба поля (минимум 6 символов)</string>
+    <string name="error_auth_failed">Не удалось войти</string>
+    <string name="error_rate_limited">Слишком много попыток. Попробуйте позже.</string>
+    <string name="error_offline_title">Нет соединения</string>
+    <string name="error_generic_title">Что-то пошло не так</string>
+    <string name="error_try_again">Попробовать снова</string>
+
+    <!-- common -->
+    <string name="common_back">Назад</string>
+    <string name="common_next">Далее</string>
+    <string name="common_skip">Пропустить</string>
+    <string name="common_loading">Загрузка…</string>
 </resources>

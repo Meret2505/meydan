@@ -28,6 +28,16 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
+        // The OAuth *web* client ID (public by design, safe to embed). Used as
+        // Credential Manager's serverClientId so the minted ID token's audience
+        // is the web client — exactly what the server's google-auth service
+        // already verifies for the web app.
+        buildConfigField(
+            "String",
+            "GOOGLE_SERVER_CLIENT_ID",
+            "\"103988773087-ifdijskkcmm3fpioirhbhb981pkfhsio.apps.googleusercontent.com\"",
+        )
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -85,6 +95,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
 

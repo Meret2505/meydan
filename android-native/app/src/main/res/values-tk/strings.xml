@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Turkmen. The API calls this locale "tm"; Android resources require the
+     ISO 639-1 code "tk" — LocaleMapper converts at the network boundary.
+     Ported verbatim from messages/tm.json. -->
+<resources>
+    <!-- auth -->
+    <string name="auth_tagline">Golaýdaky açyk oýny tap. Gel-de oýna.</string>
+    <string name="auth_google">Google bilen gir</string>
+    <string name="auth_phone">Telefon belgi bilen gir</string>
+    <string name="auth_phone_title">Telefon bilen giriş</string>
+    <string name="auth_phone_sub">SMS ýok — diňe belgi we parol.</string>
+    <string name="auth_phone_label">Telefon belgisi</string>
+    <string name="auth_password_label">Parol</string>
+    <string name="auth_login">Gir</string>
+    <string name="auth_logout">Çykmak</string>
+    <string name="auth_terms">Dowam etmek bilen ulanyş şertlerini we gizlinlik syýasatyny kabul edýärsiňiz</string>
+
+    <!-- onboarding -->
+    <string name="onboarding_name_title">Adyň näme?</string>
+    <string name="onboarding_name_sub">Google adyňy üýtgedip bilersiň.</string>
+    <string name="onboarding_phone_title">Telefon belgiň</string>
+    <string name="onboarding_phone_sub">Seni oýna çagyrmak üçin. Belgini başgalar görmeýär — diňe «kontakt görkezmek» düwmesi arkaly.</string>
+    <string name="onboarding_private_hint">Gizlin. SMS tassyklama gerek däl.</string>
+    <string name="onboarding_position_title">Pozisiýaň</string>
+    <string name="onboarding_position_sub">Adatça haýsy pozisiýada oýnaýarsyň?</string>
+    <string name="onboarding_district_title">Etrabyň</string>
+    <string name="onboarding_district_sub">Golaýdaky oýunlary görkezeris.</string>
+    <string name="onboarding_age_title">Ýaşyň</string>
+    <string name="onboarding_age_sub">Hökman däl — deň-duşlaryňy tapmaga kömek eder.</string>
+    <string name="onboarding_finish">Taýýar — oýunlara</string>
+    <string name="onboarding_age_under">18-e çenli</string>
+
+    <!-- errors -->
+    <string name="error_wrong_password">Parol nädogry</string>
+    <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>
+    <string name="error_auth_failed">Girip bolmady</string>
+    <string name="error_rate_limited">Örän köp synanyşyk. Soňrak synanyşyň.</string>
+    <string name="error_offline_title">Birikme ýok</string>
+    <string name="error_generic_title">Bir zat ýalňyş geçdi</string>
+    <string name="error_try_again">Täzeden synanyşmak</string>
+
+    <!-- common -->
+    <string name="common_back">Yza</string>
+    <string name="common_next">Indiki</string>
+    <string name="common_skip">Geç</string>
+    <string name="common_loading">Ýüklenýär…</string>
+</resources>

@@ -2,6 +2,7 @@ package com.meydan.app.core.di
 
 import android.content.Context
 import com.meydan.app.core.datastore.TokenStore
+import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.NetworkModule
 import com.meydan.app.data.AuthRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,6 +20,7 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     val tokenStore = TokenStore(appContext)
+    val userCache = UserCache(appContext)
 
     /**
      * Emits when the session becomes unrecoverable (refresh failed). The root
@@ -37,5 +39,6 @@ class AppContainer(context: Context) {
     val authRepository = AuthRepository(
         api = networkModule.meydanApi,
         tokenStore = tokenStore,
+        userCache = userCache,
     )
 }
