@@ -1,4 +1,4 @@
-package com.meydan.app.feature.auth
+package com.meydan.app.core.designsystem
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

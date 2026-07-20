@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
 import com.meydan.app.feature.auth.LoginViewModel
@@ -52,10 +53,21 @@ fun MeydanApp(container: AppContainer) {
     var startDestination by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(container) {
         val repo = container.authRepository
-        startDestination = when {
+        val start = when {
             !repo.hasSession() -> Routes.LOGIN
             repo.cachedUser()?.onboardingComplete != true -> Routes.ONBOARDING
             else -> Routes.HOME
+        }
+        startDestination = start
+
+        // The cache can lag the server (e.g. onboarding finished or reset on
+        // another install). Refresh /me in the background — it also updates the
+        // cache — and correct the route if the completion flag disagrees.
+        if (start != Routes.LOGIN) {
+            val me = (repo.getMe() as? ApiResult.Success)?.data
+            if (me != null && !me.user.onboardingComplete && start == Routes.HOME) {
+                navController.navigate(Routes.ONBOARDING) { popUpTo(0) { inclusive = true } }
+            }
         }
     }
 

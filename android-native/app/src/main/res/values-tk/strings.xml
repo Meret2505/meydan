@@ -30,6 +30,12 @@
     <string name="onboarding_finish">Taýýar — oýunlara</string>
     <string name="onboarding_age_under">18-e çenli</string>
 
+    <!-- positions -->
+    <string name="position_goalkeeper">Derwezeban</string>
+    <string name="position_defender">Goragçy</string>
+    <string name="position_midfielder">Ýarym goragçy</string>
+    <string name="position_forward">Hüjümçi</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Parol nädogry</string>
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>
