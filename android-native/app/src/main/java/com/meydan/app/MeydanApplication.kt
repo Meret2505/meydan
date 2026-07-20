@@ -1,12 +1,18 @@
 package com.meydan.app
 
 import android.app.Application
+import com.meydan.app.core.di.AppContainer
 
 /**
- * Application entry point.
- *
- * Currently bare; it exists so dependency-injection setup and the FCM
- * registration hook have a home when they land, without needing a manifest
- * change at that point.
+ * Application entry point. Owns the single [AppContainer], from which
+ * everything else is constructed.
  */
-class MeydanApplication : Application()
+class MeydanApplication : Application() {
+    lateinit var container: AppContainer
+        private set
+
+    override fun onCreate() {
+        super.onCreate()
+        container = AppContainer(this)
+    }
+}

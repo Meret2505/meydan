@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 /**
@@ -47,6 +48,9 @@ android {
             // certificate fingerprint matches the one Google Cloud Console
             // already trusts and Google Sign-In works during development.
             signingConfigs.findByName("upload")?.let { signingConfig = it }
+            // Points at the dev machine via `adb reverse tcp:3000 tcp:3000`, so
+            // a phone or emulator reaches the Next.js dev server on localhost.
+            buildConfigField("String", "API_BASE_URL", "\"http://localhost:3000/\"")
         }
         release {
             signingConfigs.findByName("upload")?.let { signingConfig = it }
@@ -56,6 +60,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Production backend. A later VPS move is a one-line change here.
+            buildConfigField("String", "API_BASE_URL", "\"https://meydan-chi.vercel.app/\"")
         }
     }
 
@@ -89,10 +95,28 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.android)
+
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+
+    implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
+
+    implementation(libs.coil.compose)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
