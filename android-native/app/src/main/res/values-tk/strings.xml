@@ -36,6 +36,22 @@
     <string name="position_midfielder">Ýarym goragçy</string>
     <string name="position_forward">Hüjümçi</string>
 
+    <!-- games feed -->
+    <string name="games_feed_title">Golaýdaky oýunlar</string>
+    <string name="games_open">Açyk oýunlar</string>
+    <string name="games_mine">Meniň oýunlarym</string>
+    <string name="games_today">Şu gün</string>
+    <string name="games_tomorrow">Ertir</string>
+    <string name="games_chip_goalie">Derwezeçi gerek</string>
+    <string name="games_full">Ýer ýok</string>
+    <string name="games_spots">%1$d/%2$d oýunçy</string>
+    <string name="games_needed">%1$s gerek</string>
+    <string name="games_your_game">Siziňki</string>
+    <string name="games_create_first_sub">Birinjisini döret — we öz etrabyňdan oýunçylary çagyr.</string>
+    <string name="empty_no_games">Golaýda oýun ýok. Ilkinjini dör!</string>
+    <string name="empty_no_my_games">Heniz hiç oýna ýazylmadyňyz.</string>
+    <string name="offline_banner">Birikme ýok — saklanan oýunlar görkezilýär.</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Parol nädogry</string>
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>

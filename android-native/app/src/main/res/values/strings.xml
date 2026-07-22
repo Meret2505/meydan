@@ -47,6 +47,23 @@
     <string name="position_midfielder">Полузащитник</string>
     <string name="position_forward">Нападающий</string>
 
+    <!-- games feed -->
+    <string name="games_feed_title">Игры рядом</string>
+    <string name="games_open">Открытые игры</string>
+    <string name="games_mine">Мои игры</string>
+    <string name="games_today">Сегодня</string>
+    <string name="games_tomorrow">Завтра</string>
+    <string name="games_chip_five" translatable="false">5×5</string>
+    <string name="games_chip_goalie">Нужен вратарь</string>
+    <string name="games_full">Мест нет</string>
+    <string name="games_spots">%1$d/%2$d игроков</string>
+    <string name="games_needed">Нужен %1$s</string>
+    <string name="games_your_game">Ваша</string>
+    <string name="games_create_first_sub">Создай первую — и позови игроков из своего района.</string>
+    <string name="empty_no_games">Рядом пока нет игр. Создай первую!</string>
+    <string name="empty_no_my_games">Ты ещё не записался ни на одну игру.</string>
+    <string name="offline_banner">Нет соединения — показаны сохранённые игры.</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Неверный пароль</string>
     <string name="error_invalid_input">Заполните оба поля (минимум 6 символов)</string>

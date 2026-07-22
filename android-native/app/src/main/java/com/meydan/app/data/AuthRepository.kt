@@ -2,6 +2,7 @@ package com.meydan.app.data
 
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
+import com.meydan.app.core.datastore.FeedCache
 import com.meydan.app.core.datastore.TokenStore
 import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.MeydanApi
@@ -23,6 +24,7 @@ class AuthRepository(
     private val api: MeydanApi,
     private val tokenStore: TokenStore,
     private val userCache: UserCache,
+    private val feedCache: FeedCache,
 ) {
     suspend fun hasSession(): Boolean = tokenStore.hasSession()
 
@@ -73,8 +75,18 @@ class AuthRepository(
         if (refresh != null) {
             runCatching { api.logout(RefreshRequest(refresh)) }
         }
+        clearLocalSession()
+    }
+
+    /**
+     * Wipes everything scoped to the signed-in user. Also called when a
+     * refresh finally fails (forced logout), so a later account on this device
+     * can never see the previous user's cached profile or feed.
+     */
+    suspend fun clearLocalSession() {
         tokenStore.clear()
         userCache.clear()
+        feedCache.clear()
     }
 
     private suspend fun persist(session: SessionDto) {

@@ -18,7 +18,7 @@ import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
 import com.meydan.app.feature.auth.LoginViewModel
 import com.meydan.app.feature.auth.PhoneLoginScreen
-import com.meydan.app.feature.home.HomeScreen
+import com.meydan.app.feature.games.GamesScreen
 import com.meydan.app.feature.onboarding.OnboardingFlow
 
 /** Route names, referenced from navigation calls only. */
@@ -41,9 +41,11 @@ fun MeydanApp(container: AppContainer) {
     val navController = rememberNavController()
 
     // The authenticator emits when a refresh finally fails; wherever the user
-    // is, return to login with a clean back stack.
+    // is, wipe the dead session's local data and return to login with a clean
+    // back stack. (The authenticator already cleared the tokens themselves.)
     LaunchedEffect(container) {
         container.sessionExpired.collect {
+            container.authRepository.clearLocalSession()
             navController.navigate(Routes.LOGIN) {
                 popUpTo(0) { inclusive = true }
             }
@@ -108,13 +110,16 @@ fun MeydanApp(container: AppContainer) {
             )
         }
         composable(Routes.HOME) {
-            HomeScreen(
+            GamesScreen(
                 container = container,
                 onLoggedOut = {
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
+                // Game detail arrives in the next phase; the card is inert
+                // until then.
+                onGameClick = {},
             )
         }
     }
