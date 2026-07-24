@@ -2,6 +2,7 @@ package com.meydan.app.core.network
 
 import com.meydan.app.BuildConfig
 import com.meydan.app.core.datastore.TokenStore
+import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -32,9 +33,22 @@ class NetworkModule(
 
     private val baseUrl = BuildConfig.API_BASE_URL
 
+    /**
+     * OkHttp's 10s defaults are too aggressive for the target market's mobile
+     * networks: a slow-but-succeeding request reads as "offline" and the UI
+     * shows a connection error over a response that was actually coming. These
+     * looser timeouts let a genuinely slow request finish while still bounding
+     * a truly dead connection.
+     */
+    private fun OkHttpClient.Builder.withTimeouts() = apply {
+        connectTimeout(20, TimeUnit.SECONDS)
+        readTimeout(30, TimeUnit.SECONDS)
+        writeTimeout(20, TimeUnit.SECONDS)
+    }
+
     // Bare client for refresh — no interceptor, no authenticator, so a failed
     // refresh cannot recurse.
-    private val authClient = OkHttpClient.Builder().build()
+    private val authClient = OkHttpClient.Builder().withTimeouts().build()
 
     private val authRetrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
@@ -45,6 +59,7 @@ class NetworkModule(
     val authApi: AuthApi = authRetrofit.create(AuthApi::class.java)
 
     private val apiClient = OkHttpClient.Builder()
+        .withTimeouts()
         .addInterceptor(AuthInterceptor(tokenStore))
         .authenticator(TokenAuthenticator(tokenStore, authApi, onRefreshFailed))
         .build()
