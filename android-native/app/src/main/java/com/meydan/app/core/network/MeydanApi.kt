@@ -6,6 +6,8 @@ import com.meydan.app.core.network.dto.FavoriteResponse
 import com.meydan.app.core.network.dto.FieldsResponse
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.GamesFeedDto
+import com.meydan.app.core.network.dto.TeamsResponse
+import com.meydan.app.core.network.dto.TournamentsResponse
 import com.meydan.app.core.network.dto.GoogleAuthRequest
 import com.meydan.app.core.network.dto.MeResponse
 import com.meydan.app.core.network.dto.PhoneAuthRequest
@@ -71,6 +73,12 @@ interface MeydanApi {
 
     @HTTP(method = "DELETE", path = "api/v1/fields/{id}/favorite")
     suspend fun unfavoriteField(@Path("id") id: String): Response<ApiResponse<FavoriteResponse>>
+
+    @GET("api/v1/teams")
+    suspend fun getTeams(): Response<ApiResponse<TeamsResponse>>
+
+    @GET("api/v1/tournaments")
+    suspend fun getTournaments(): Response<ApiResponse<TournamentsResponse>>
 
     @GET("api/v1/notifications/unread-count")
     suspend fun unreadCount(): Response<ApiResponse<UnreadCountDto>>

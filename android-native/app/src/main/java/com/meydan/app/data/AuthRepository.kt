@@ -4,7 +4,9 @@ import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.FeedCache
 import com.meydan.app.core.datastore.FieldsCache
+import com.meydan.app.core.datastore.TeamsCache
 import com.meydan.app.core.datastore.TokenStore
+import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.GoogleAuthRequest
@@ -27,6 +29,8 @@ class AuthRepository(
     private val userCache: UserCache,
     private val feedCache: FeedCache,
     private val fieldsCache: FieldsCache,
+    private val teamsCache: TeamsCache,
+    private val tournamentsCache: TournamentsCache,
 ) {
     suspend fun hasSession(): Boolean = tokenStore.hasSession()
 
@@ -90,6 +94,8 @@ class AuthRepository(
         userCache.clear()
         feedCache.clear()
         fieldsCache.clear()
+        teamsCache.clear()
+        tournamentsCache.clear()
     }
 
     private suspend fun persist(session: SessionDto) {

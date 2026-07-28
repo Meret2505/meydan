@@ -63,9 +63,29 @@
     <string name="fields_surface_rubber">Rezin</string>
     <string name="fields_surface_dirt">Toprak</string>
 
-    <!-- coming soon (sections without a mobile API yet) -->
-    <string name="coming_soon_title">Basym</string>
-    <string name="coming_soon_sub">Bu bölüm ýakyn wagtda programmada peýda bolar.</string>
+    <!-- teams -->
+    <string name="teams_my_teams">Meniň toparlarym</string>
+    <string name="teams_city_teams">Şäheriň toparlary</string>
+    <string name="teams_not_in_team">Siz heniz hiç bir toparda däl.</string>
+    <string name="teams_members_count">%1$d düzümde</string>
+    <string name="teams_captain_short">kap. %1$s</string>
+    <string name="teams_ranking">reýtingde</string>
+    <string name="teams_matches_hint">San — geçirilen oýunlar</string>
+
+    <!-- tournaments -->
+    <string name="tournaments_tab_upcoming">Tiz wagtda</string>
+    <string name="tournaments_tab_ongoing">Dowam edýär</string>
+    <string name="tournaments_tab_ended">Tamamlandy</string>
+    <string name="tournaments_status_upcoming">tiz wagtda</string>
+    <string name="tournaments_status_ongoing">dowam edýär</string>
+    <string name="tournaments_status_ended">tamamlandy</string>
+    <string name="tournaments_status_cancelled">ýatyryldy</string>
+    <string name="tournaments_teams_count">komanda</string>
+    <string name="tournaments_matches_count">oýun</string>
+    <string name="tournaments_empty_title">Heniz turnir ýok</string>
+    <string name="tournaments_empty_upcoming">Ilkinjini başla — komandalary ýygna we oýunlary belle.</string>
+    <string name="tournaments_empty_ongoing">Häzir hiç zat dowam etmeýär.</string>
+    <string name="tournaments_empty_ended">Tamamlandy — görmäge zat ýok.</string>
 
     <!-- games feed -->
     <string name="games_feed_title">Golaýdaky oýunlar</string>

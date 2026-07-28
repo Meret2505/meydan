@@ -4,10 +4,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.EmojiEvents
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,10 +16,11 @@ import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import com.meydan.app.R
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.common.ComingSoonScreen
 import com.meydan.app.feature.fields.FieldsScreen
 import com.meydan.app.feature.games.GamesScreen
 import com.meydan.app.feature.profile.ProfileScreen
+import com.meydan.app.feature.teams.TeamsScreen
+import com.meydan.app.feature.tournaments.TournamentsScreen
 import com.meydan.app.navigation.BottomNav
 import com.meydan.app.navigation.MainTab
 
@@ -57,15 +54,9 @@ fun MainScaffold(
                     container = container,
                     onGameClick = onGameClick,
                 )
-                MainTab.TEAMS -> ComingSoonScreen(
-                    icon = Icons.Outlined.Groups,
-                    titleRes = R.string.nav_teams,
-                )
+                MainTab.TEAMS -> TeamsScreen(container = container)
                 MainTab.FIELDS -> FieldsScreen(container = container)
-                MainTab.TOURNAMENTS -> ComingSoonScreen(
-                    icon = Icons.Outlined.EmojiEvents,
-                    titleRes = R.string.nav_tournaments,
-                )
+                MainTab.TOURNAMENTS -> TournamentsScreen(container = container)
                 MainTab.PROFILE -> ProfileScreen(
                     container = container,
                     onLoggedOut = onLoggedOut,

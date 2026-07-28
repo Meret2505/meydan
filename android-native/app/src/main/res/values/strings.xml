@@ -74,9 +74,29 @@
     <string name="fields_surface_rubber">Резиновое</string>
     <string name="fields_surface_dirt">Грунт</string>
 
-    <!-- coming soon (sections without a mobile API yet) -->
-    <string name="coming_soon_title">Скоро</string>
-    <string name="coming_soon_sub">Этот раздел появится в приложении в ближайшее время.</string>
+    <!-- teams -->
+    <string name="teams_my_teams">Мои команды</string>
+    <string name="teams_city_teams">Команды города</string>
+    <string name="teams_not_in_team">Вы пока не состоите в команде.</string>
+    <string name="teams_members_count">%1$d в составе</string>
+    <string name="teams_captain_short">кап. %1$s</string>
+    <string name="teams_ranking">в рейтинге</string>
+    <string name="teams_matches_hint">Число — сыгранных матчей</string>
+
+    <!-- tournaments -->
+    <string name="tournaments_tab_upcoming">Скоро</string>
+    <string name="tournaments_tab_ongoing">Идут</string>
+    <string name="tournaments_tab_ended">Завершены</string>
+    <string name="tournaments_status_upcoming">скоро</string>
+    <string name="tournaments_status_ongoing">идёт</string>
+    <string name="tournaments_status_ended">завершён</string>
+    <string name="tournaments_status_cancelled">отменён</string>
+    <string name="tournaments_teams_count">команд</string>
+    <string name="tournaments_matches_count">матчей</string>
+    <string name="tournaments_empty_title">Турниров пока нет</string>
+    <string name="tournaments_empty_upcoming">Запусти первый — собери команды и распиши матчи.</string>
+    <string name="tournaments_empty_ongoing">Сейчас ничего не идёт.</string>
+    <string name="tournaments_empty_ended">Закончилось — посмотреть нечего.</string>
 
     <!-- games feed -->
     <string name="games_feed_title">Игры рядом</string>

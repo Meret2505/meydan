@@ -3,12 +3,16 @@ package com.meydan.app.core.di
 import android.content.Context
 import com.meydan.app.core.datastore.FeedCache
 import com.meydan.app.core.datastore.FieldsCache
+import com.meydan.app.core.datastore.TeamsCache
 import com.meydan.app.core.datastore.TokenStore
+import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.NetworkModule
 import com.meydan.app.data.AuthRepository
 import com.meydan.app.data.FieldsRepository
 import com.meydan.app.data.GamesRepository
+import com.meydan.app.data.TeamsRepository
+import com.meydan.app.data.TournamentsRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -27,6 +31,8 @@ class AppContainer(context: Context) {
     val userCache = UserCache(appContext)
     val feedCache = FeedCache(appContext)
     val fieldsCache = FieldsCache(appContext)
+    val teamsCache = TeamsCache(appContext)
+    val tournamentsCache = TournamentsCache(appContext)
 
     /**
      * Emits when the session becomes unrecoverable (refresh failed). The root
@@ -48,6 +54,8 @@ class AppContainer(context: Context) {
         userCache = userCache,
         feedCache = feedCache,
         fieldsCache = fieldsCache,
+        teamsCache = teamsCache,
+        tournamentsCache = tournamentsCache,
     )
 
     val gamesRepository = GamesRepository(
@@ -58,5 +66,15 @@ class AppContainer(context: Context) {
     val fieldsRepository = FieldsRepository(
         api = networkModule.meydanApi,
         fieldsCache = fieldsCache,
+    )
+
+    val teamsRepository = TeamsRepository(
+        api = networkModule.meydanApi,
+        teamsCache = teamsCache,
+    )
+
+    val tournamentsRepository = TournamentsRepository(
+        api = networkModule.meydanApi,
+        tournamentsCache = tournamentsCache,
     )
 }
