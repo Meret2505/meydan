@@ -18,7 +18,7 @@ import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
 import com.meydan.app.feature.auth.LoginViewModel
 import com.meydan.app.feature.auth.PhoneLoginScreen
-import com.meydan.app.feature.games.GamesScreen
+import com.meydan.app.feature.main.MainScaffold
 import com.meydan.app.feature.onboarding.OnboardingFlow
 
 /** Route names, referenced from navigation calls only. */
@@ -110,14 +110,14 @@ fun MeydanApp(container: AppContainer) {
             )
         }
         composable(Routes.HOME) {
-            GamesScreen(
+            MainScaffold(
                 container = container,
                 onLoggedOut = {
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                // Game detail arrives in the next phase; the card is inert
+                // Game detail arrives in a later phase; the card is inert
                 // until then.
                 onGameClick = {},
             )

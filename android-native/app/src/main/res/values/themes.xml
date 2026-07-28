@@ -4,9 +4,13 @@
   (core/designsystem/Theme.kt); this only controls the window background
   before the first frame, so it uses the dark brand background to avoid a
   white flash on cold start.
+
+  Parent is an AppCompat theme (not framework Material) because MainActivity is
+  an AppCompatActivity — required for the per-app language switch
+  (AppCompatDelegate.setApplicationLocales) on the Profile screen.
 -->
 <resources>
-    <style name="Theme.Meydan" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.Meydan" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/launch_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

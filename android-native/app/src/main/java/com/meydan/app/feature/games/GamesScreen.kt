@@ -64,25 +64,22 @@ import java.util.Locale
 @Composable
 fun GamesScreen(
     container: AppContainer,
-    onLoggedOut: () -> Unit,
     onGameClick: (String) -> Unit,
 ) {
     val viewModel: GamesViewModel = viewModel {
-        GamesViewModel(container.gamesRepository, container.authRepository)
+        GamesViewModel(container.gamesRepository)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    if (state.loggedOut) {
-        LaunchedEffect(Unit) { onLoggedOut() }
-        return
-    }
-
+    // Logout lives in the Profile tab now; a forced logout (session expiry) is
+    // still handled centrally by MeydanApp's sessionExpired collector.
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // Only the top inset — the bottom nav owns the bottom inset.
             .systemBarsPadding(),
     ) {
-        FeedHeader(unread = state.unread, onLogout = viewModel::logout)
+        FeedHeader(unread = state.unread)
         TabRow(tab = state.tab, onSelect = viewModel::selectTab)
         ChipRow(chip = state.chip, onToggle = viewModel::toggleChip)
 
@@ -128,13 +125,12 @@ fun GamesScreen(
 }
 
 @Composable
-private fun FeedHeader(unread: Int, onLogout: () -> Unit) {
-    var menuOpen by remember { mutableStateOf(false) }
+private fun FeedHeader(unread: Int) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 12.dp, top = 16.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 16.dp),
     ) {
         Text(
             text = stringResource(R.string.games_feed_title),
@@ -164,21 +160,6 @@ private fun FeedHeader(unread: Int, onLogout: () -> Unit) {
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
-            }
-        }
-        Box {
-            IconButton(onClick = { menuOpen = true }) {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.auth_logout)) },
-                    onClick = { menuOpen = false; onLogout() },
-                )
             }
         }
     }

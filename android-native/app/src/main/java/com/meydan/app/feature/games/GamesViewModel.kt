@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.network.dto.GameCardDto
-import com.meydan.app.data.AuthRepository
 import com.meydan.app.data.GamesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
  */
 class GamesViewModel(
     private val gamesRepository: GamesRepository,
-    private val authRepository: AuthRepository,
 ) : ViewModel() {
 
     enum class Tab { OPEN, MINE }
@@ -37,7 +35,6 @@ class GamesViewModel(
         val refreshing: Boolean = false,
         val offline: Boolean = false,
         val unread: Int = 0,
-        val loggedOut: Boolean = false,
     ) {
         val visible: List<GameCardDto>
             get() = applyChip(if (tab == Tab.OPEN) open else mine, chip)
@@ -76,13 +73,6 @@ class GamesViewModel(
     fun pullRefresh() {
         _state.update { it.copy(refreshing = true) }
         viewModelScope.launch { refresh(initial = false) }
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            authRepository.logout()
-            _state.update { it.copy(loggedOut = true) }
-        }
     }
 
     private suspend fun refresh(initial: Boolean) {

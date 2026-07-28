@@ -1,9 +1,9 @@
 package com.meydan.app
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -11,7 +11,10 @@ import androidx.compose.ui.Modifier
 import com.meydan.app.core.designsystem.MeydanTheme
 import com.meydan.app.navigation.MeydanApp
 
-class MainActivity : ComponentActivity() {
+// AppCompatActivity (not ComponentActivity) so AppCompatDelegate can drive the
+// per-app language switch. It is still a ComponentActivity underneath, so
+// enableEdgeToEdge() and setContent { } work unchanged.
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)

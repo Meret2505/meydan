@@ -36,6 +36,27 @@
     <string name="position_midfielder">Ýarym goragçy</string>
     <string name="position_forward">Hüjümçi</string>
 
+    <!-- bottom navigation -->
+    <string name="nav_games">Oýunlar</string>
+    <string name="nav_teams">Komandalar</string>
+    <string name="nav_fields">Meýdançalar</string>
+    <string name="nav_tournaments">Turnirler</string>
+    <string name="nav_profile">Profil</string>
+
+    <!-- profile -->
+    <string name="profile_open_invites">Oýunlara çakylyga açyk</string>
+    <string name="profile_closed_invites">Çakylyklardan ýapyk</string>
+    <string name="profile_settings">Sazlamalar</string>
+    <string name="profile_language">Interfeýs dili</string>
+    <string name="profile_logout_full">Hasapdan çyk</string>
+    <string name="profile_played">Oýnaldy</string>
+    <string name="profile_joined_stat">Ýazyldy</string>
+    <string name="profile_attendance">Gatnaşyk</string>
+
+    <!-- coming soon (sections without a mobile API yet) -->
+    <string name="coming_soon_title">Basym</string>
+    <string name="coming_soon_sub">Bu bölüm ýakyn wagtda programmada peýda bolar.</string>
+
     <!-- games feed -->
     <string name="games_feed_title">Golaýdaky oýunlar</string>
     <string name="games_open">Açyk oýunlar</string>

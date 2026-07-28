@@ -47,6 +47,27 @@
     <string name="position_midfielder">Полузащитник</string>
     <string name="position_forward">Нападающий</string>
 
+    <!-- bottom navigation -->
+    <string name="nav_games">Игры</string>
+    <string name="nav_teams">Команды</string>
+    <string name="nav_fields">Поля</string>
+    <string name="nav_tournaments">Турниры</string>
+    <string name="nav_profile">Профиль</string>
+
+    <!-- profile -->
+    <string name="profile_open_invites">Открыт к приглашению в игры</string>
+    <string name="profile_closed_invites">Закрыт от приглашений</string>
+    <string name="profile_settings">Настройки</string>
+    <string name="profile_language">Язык интерфейса</string>
+    <string name="profile_logout_full">Выйти из аккаунта</string>
+    <string name="profile_played">Сыграно</string>
+    <string name="profile_joined_stat">Записан</string>
+    <string name="profile_attendance">Посещаемость</string>
+
+    <!-- coming soon (sections without a mobile API yet) -->
+    <string name="coming_soon_title">Скоро</string>
+    <string name="coming_soon_sub">Этот раздел появится в приложении в ближайшее время.</string>
+
     <!-- games feed -->
     <string name="games_feed_title">Игры рядом</string>
     <string name="games_open">Открытые игры</string>
