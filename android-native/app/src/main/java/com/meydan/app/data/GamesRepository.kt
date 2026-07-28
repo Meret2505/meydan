@@ -4,6 +4,7 @@ import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.FeedCache
 import com.meydan.app.core.network.MeydanApi
+import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.GamesFeedDto
 
 /**
@@ -24,6 +25,17 @@ class GamesRepository(
         if (result is ApiResult.Success) feedCache.save(result.data)
         return result
     }
+
+    suspend fun gameDetail(id: String): ApiResult<GameDetailDto> =
+        apiCall { api.getGame(id) }
+
+    /** Join returns the updated detail (roster, counts, joined flag). */
+    suspend fun joinGame(id: String): ApiResult<GameDetailDto> =
+        apiCall { api.joinGame(id) }
+
+    /** Leave returns the updated detail. Organizers cannot leave (403). */
+    suspend fun leaveGame(id: String): ApiResult<GameDetailDto> =
+        apiCall { api.leaveGame(id) }
 
     suspend fun unreadCount(): ApiResult<Int> =
         when (val result = apiCall { api.unreadCount() }) {

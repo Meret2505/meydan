@@ -115,6 +115,32 @@
     <string name="empty_no_my_games">Ты ещё не записался ни на одну игру.</string>
     <string name="offline_banner">Нет соединения — показаны сохранённые игры.</string>
 
+    <!-- game detail -->
+    <string name="games_when">Когда</string>
+    <string name="games_price">Цена</string>
+    <string name="games_price_per_player">%1$d ман / чел</string>
+    <string name="games_roster">Состав</string>
+    <string name="games_organizer">Организатор</string>
+    <string name="games_you_short">Ты</string>
+    <string name="games_joined_banner">Вы в игре! %1$s %2$s, %3$s.</string>
+    <string name="games_needed_note">Нужен %1$s. Команде не хватает именно этой позиции.</string>
+    <string name="games_attendance_pct">явка %1$d%%</string>
+    <string name="games_games_count">%1$d игр</string>
+    <string name="games_join_cta">Записаться · занять место</string>
+    <string name="games_joined_cta">✓ Вы в игре · отменить запись</string>
+    <string name="games_is_past">Игра прошла</string>
+    <string name="games_completed">Игра завершена</string>
+    <string name="games_cancelled_full">Игра отменена</string>
+    <string name="games_banner_over">ИГРА ЗАВЕРШЕНА</string>
+    <string name="games_banner_yours">ВАША ИГРА</string>
+    <string name="games_banner_open">ОТКРЫТАЯ ИГРА</string>
+    <string name="games_show_contact">Показать контакт организатора</string>
+    <string name="games_join_failed">Не удалось записаться. Попробуй ещё раз</string>
+    <string name="pos_short_goalkeeper">ВРТ</string>
+    <string name="pos_short_defender">ЗАЩ</string>
+    <string name="pos_short_midfielder">ПЗ</string>
+    <string name="pos_short_forward">НАП</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Неверный пароль</string>
     <string name="error_invalid_input">Заполните оба поля (минимум 6 символов)</string>

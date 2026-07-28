@@ -18,6 +18,7 @@ import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
 import com.meydan.app.feature.auth.LoginViewModel
 import com.meydan.app.feature.auth.PhoneLoginScreen
+import com.meydan.app.feature.gamedetail.GameDetailScreen
 import com.meydan.app.feature.main.MainScaffold
 import com.meydan.app.feature.onboarding.OnboardingFlow
 
@@ -27,6 +28,8 @@ object Routes {
     const val LOGIN_PHONE = "login/phone"
     const val ONBOARDING = "onboarding"
     const val HOME = "home"
+    const val GAME_DETAIL = "game/{gameId}"
+    fun gameDetail(id: String) = "game/$id"
 }
 
 /**
@@ -117,9 +120,15 @@ fun MeydanApp(container: AppContainer) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                // Game detail arrives in a later phase; the card is inert
-                // until then.
-                onGameClick = {},
+                onGameClick = { gameId -> navController.navigate(Routes.gameDetail(gameId)) },
+            )
+        }
+        composable(Routes.GAME_DETAIL) { entry ->
+            val gameId = entry.arguments?.getString("gameId").orEmpty()
+            GameDetailScreen(
+                container = container,
+                gameId = gameId,
+                onBack = { navController.popBackStack() },
             )
         }
     }

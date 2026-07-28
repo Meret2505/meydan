@@ -103,6 +103,32 @@
     <string name="empty_no_my_games">Heniz hiç oýna ýazylmadyňyz.</string>
     <string name="offline_banner">Birikme ýok — saklanan oýunlar görkezilýär.</string>
 
+    <!-- game detail -->
+    <string name="games_when">Haçan</string>
+    <string name="games_price">Bahasy</string>
+    <string name="games_price_per_player">%1$d man / adam</string>
+    <string name="games_roster">Düzüm</string>
+    <string name="games_organizer">Guramaçy</string>
+    <string name="games_you_short">Sen</string>
+    <string name="games_joined_banner">Siz oýunda! %1$s %2$s, %3$s.</string>
+    <string name="games_needed_note">%1$s gerek. Topara hut şu pozisiýa ýetenok.</string>
+    <string name="games_attendance_pct">gatnaşyk %1$d%%</string>
+    <string name="games_games_count">%1$d oýun</string>
+    <string name="games_join_cta">Ýazyl · ýer eýele</string>
+    <string name="games_joined_cta">✓ Siz oýunda · ýazgyny ýatyr</string>
+    <string name="games_is_past">Oýun geçdi</string>
+    <string name="games_completed">Oýun tamamlandy</string>
+    <string name="games_cancelled_full">Oýun ýatyryldy</string>
+    <string name="games_banner_over">OÝUN TAMAMLANDY</string>
+    <string name="games_banner_yours">SIZIŇ OÝNUŇYZ</string>
+    <string name="games_banner_open">AÇYK OÝUN</string>
+    <string name="games_show_contact">Guramaçynyň kontaktyny görkez</string>
+    <string name="games_join_failed">Ýazylyp bolmady. Täzeden synanyşyň</string>
+    <string name="pos_short_goalkeeper">DRW</string>
+    <string name="pos_short_defender">GOR</string>
+    <string name="pos_short_midfielder">OÝÇ</string>
+    <string name="pos_short_forward">HÜJ</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Parol nädogry</string>
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>
