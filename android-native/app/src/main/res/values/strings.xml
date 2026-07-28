@@ -64,6 +64,16 @@
     <string name="profile_joined_stat">Записан</string>
     <string name="profile_attendance">Посещаемость</string>
 
+    <!-- fields -->
+    <string name="fields_search_placeholder">Поиск поля или района</string>
+    <string name="fields_favorites">Избранное</string>
+    <string name="fields_capacity_chip">до %1$d</string>
+    <string name="fields_no_results">Ничего не найдено</string>
+    <string name="fields_no_results_sub">Снимите фильтры или загляните позже.</string>
+    <string name="fields_surface_turf">Искусственная трава</string>
+    <string name="fields_surface_rubber">Резиновое</string>
+    <string name="fields_surface_dirt">Грунт</string>
+
     <!-- coming soon (sections without a mobile API yet) -->
     <string name="coming_soon_title">Скоро</string>
     <string name="coming_soon_sub">Этот раздел появится в приложении в ближайшее время.</string>

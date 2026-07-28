@@ -21,6 +21,7 @@ import androidx.core.os.LocaleListCompat
 import com.meydan.app.R
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.common.ComingSoonScreen
+import com.meydan.app.feature.fields.FieldsScreen
 import com.meydan.app.feature.games.GamesScreen
 import com.meydan.app.feature.profile.ProfileScreen
 import com.meydan.app.navigation.BottomNav
@@ -60,10 +61,7 @@ fun MainScaffold(
                     icon = Icons.Outlined.Groups,
                     titleRes = R.string.nav_teams,
                 )
-                MainTab.FIELDS -> ComingSoonScreen(
-                    icon = Icons.Outlined.Place,
-                    titleRes = R.string.nav_fields,
-                )
+                MainTab.FIELDS -> FieldsScreen(container = container)
                 MainTab.TOURNAMENTS -> ComingSoonScreen(
                     icon = Icons.Outlined.EmojiEvents,
                     titleRes = R.string.nav_tournaments,

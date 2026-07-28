@@ -2,6 +2,8 @@ package com.meydan.app.core.network
 
 import com.meydan.app.core.network.dto.ApiResponse
 import com.meydan.app.core.network.dto.FcmTokenRequest
+import com.meydan.app.core.network.dto.FavoriteResponse
+import com.meydan.app.core.network.dto.FieldsResponse
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.GamesFeedDto
 import com.meydan.app.core.network.dto.GoogleAuthRequest
@@ -60,6 +62,15 @@ interface MeydanApi {
     // DELETE with no body needs the @HTTP form to keep Retrofit happy.
     @HTTP(method = "DELETE", path = "api/v1/games/{id}/join")
     suspend fun leaveGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
+
+    @GET("api/v1/fields")
+    suspend fun getFields(): Response<ApiResponse<FieldsResponse>>
+
+    @POST("api/v1/fields/{id}/favorite")
+    suspend fun favoriteField(@Path("id") id: String): Response<ApiResponse<FavoriteResponse>>
+
+    @HTTP(method = "DELETE", path = "api/v1/fields/{id}/favorite")
+    suspend fun unfavoriteField(@Path("id") id: String): Response<ApiResponse<FavoriteResponse>>
 
     @GET("api/v1/notifications/unread-count")
     suspend fun unreadCount(): Response<ApiResponse<UnreadCountDto>>

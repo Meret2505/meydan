@@ -53,6 +53,16 @@
     <string name="profile_joined_stat">Ýazyldy</string>
     <string name="profile_attendance">Gatnaşyk</string>
 
+    <!-- fields -->
+    <string name="fields_search_placeholder">Meýdança ýa etrap gözle</string>
+    <string name="fields_favorites">Halanan</string>
+    <string name="fields_capacity_chip">%1$d çenli</string>
+    <string name="fields_no_results">Hiç zat tapylmady</string>
+    <string name="fields_no_results_sub">Süzgüçleri aýryň ýa-da soň gaýdyp geliň.</string>
+    <string name="fields_surface_turf">Emeli ot</string>
+    <string name="fields_surface_rubber">Rezin</string>
+    <string name="fields_surface_dirt">Toprak</string>
+
     <!-- coming soon (sections without a mobile API yet) -->
     <string name="coming_soon_title">Basym</string>
     <string name="coming_soon_sub">Bu bölüm ýakyn wagtda programmada peýda bolar.</string>
