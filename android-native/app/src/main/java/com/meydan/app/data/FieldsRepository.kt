@@ -5,6 +5,7 @@ import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.FieldsCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.FieldCardDto
+import com.meydan.app.core.network.dto.FieldDetailDto
 
 /**
  * Fields catalogue with the same offline-first read path as games: cached list
@@ -39,6 +40,9 @@ class FieldsRepository(
             ApiResult.NetworkError -> ApiResult.NetworkError
         }
     }
+
+    suspend fun detail(id: String): ApiResult<FieldDetailDto> =
+        apiCall { api.getFieldDetail(id) }
 
     suspend fun clearCache() = fieldsCache.clear()
 }

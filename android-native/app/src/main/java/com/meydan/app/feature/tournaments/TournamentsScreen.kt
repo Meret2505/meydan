@@ -48,7 +48,7 @@ import java.util.Locale
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TournamentsScreen(container: AppContainer) {
+fun TournamentsScreen(container: AppContainer, onTournamentClick: (String) -> Unit) {
     val viewModel: TournamentsViewModel = viewModel {
         TournamentsViewModel(container.tournamentsRepository)
     }
@@ -94,7 +94,7 @@ fun TournamentsScreen(container: AppContainer) {
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp),
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    items(state.visible, key = { it.id }) { TournamentCard(it) }
+                    items(state.visible, key = { it.id }) { TournamentCard(it, onClick = { onTournamentClick(it.id) }) }
                 }
             }
         }
@@ -122,7 +122,7 @@ private fun TabButton(label: String, active: Boolean, onClick: () -> Unit, modif
 }
 
 @Composable
-private fun TournamentCard(t: TournamentCardDto) {
+private fun TournamentCard(t: TournamentCardDto, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
         ?: Locale.forLanguageTag("ru")
@@ -132,6 +132,7 @@ private fun TournamentCard(t: TournamentCardDto) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(colors.surface)
+            .clickable(onClick = onClick)
             .padding(16.dp),
     ) {
         Box(

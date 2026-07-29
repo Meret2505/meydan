@@ -5,6 +5,7 @@ import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.TournamentCardDto
+import com.meydan.app.core.network.dto.TournamentDetailDto
 
 /** Tournaments tab data with the offline-first read path. */
 class TournamentsRepository(
@@ -24,6 +25,9 @@ class TournamentsRepository(
             ApiResult.NetworkError -> ApiResult.NetworkError
         }
     }
+
+    suspend fun detail(id: String): ApiResult<TournamentDetailDto> =
+        apiCall { api.getTournamentDetail(id) }
 
     suspend fun clearCache() = tournamentsCache.clear()
 }

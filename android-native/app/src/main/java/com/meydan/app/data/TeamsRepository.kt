@@ -4,6 +4,7 @@ import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.TeamsCache
 import com.meydan.app.core.network.MeydanApi
+import com.meydan.app.core.network.dto.TeamDetailDto
 import com.meydan.app.core.network.dto.TeamsResponse
 
 /** Teams tab data with the offline-first read path shared by games/fields. */
@@ -18,6 +19,9 @@ class TeamsRepository(
         if (result is ApiResult.Success) teamsCache.save(result.data)
         return result
     }
+
+    suspend fun detail(id: String): ApiResult<TeamDetailDto> =
+        apiCall { api.getTeamDetail(id) }
 
     suspend fun clearCache() = teamsCache.clear()
 }

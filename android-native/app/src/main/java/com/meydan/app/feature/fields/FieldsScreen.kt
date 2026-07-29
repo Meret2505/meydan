@@ -59,7 +59,7 @@ import com.meydan.app.core.network.dto.FieldCardDto
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FieldsScreen(container: AppContainer) {
+fun FieldsScreen(container: AppContainer, onFieldClick: (String) -> Unit) {
     val viewModel: FieldsViewModel = viewModel { FieldsViewModel(container.fieldsRepository) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isTurkmen = ConfigurationCompat.getLocales(LocalConfiguration.current)
@@ -114,6 +114,7 @@ fun FieldsScreen(container: AppContainer) {
                             field = field,
                             isTurkmen = isTurkmen,
                             onToggleFavorite = { viewModel.toggleFavorite(field.id) },
+                            onClick = { onFieldClick(field.id) },
                         )
                     }
                 }
@@ -127,13 +128,15 @@ private fun FieldCard(
     field: FieldCardDto,
     isTurkmen: Boolean,
     onToggleFavorite: () -> Unit,
+    onClick: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(colors.surface),
+            .background(colors.surface)
+            .clickable(onClick = onClick),
     ) {
         // Photo banner with a green-pitch gradient fallback, like the web card.
         Box(

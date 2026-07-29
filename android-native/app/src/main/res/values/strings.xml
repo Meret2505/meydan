@@ -141,6 +141,48 @@
     <string name="pos_short_midfielder">ПЗ</string>
     <string name="pos_short_forward">НАП</string>
 
+    <!-- field detail -->
+    <string name="fields_address">Адрес</string>
+    <string name="fields_surface_label">Покрытие</string>
+    <string name="fields_capacity_label">Вместимость</string>
+    <string name="fields_capacity_value">до %1$d игроков</string>
+    <string name="fields_games_played_label">Игр прошло</string>
+    <string name="fields_about">О поле</string>
+    <string name="fields_schedule">Расписание</string>
+    <string name="fields_amenities">Удобства</string>
+    <string name="fields_contacts">Контакты</string>
+    <string name="fields_call">Позвонить</string>
+    <string name="fields_closed">Выходной</string>
+    <string name="day_monday">Пн</string>
+    <string name="day_tuesday">Вт</string>
+    <string name="day_wednesday">Ср</string>
+    <string name="day_thursday">Чт</string>
+    <string name="day_friday">Пт</string>
+    <string name="day_saturday">Сб</string>
+    <string name="day_sunday">Вс</string>
+
+    <!-- team detail -->
+    <string name="teams_wins">побед</string>
+    <string name="teams_losses">поражений</string>
+    <string name="teams_points">очков</string>
+    <string name="teams_roster">Состав</string>
+    <string name="teams_captain_badge">К</string>
+    <string name="teams_you_paren">(вы)</string>
+
+    <!-- tournament detail -->
+    <string name="tournaments_teams_section">Команды (%1$d)</string>
+    <string name="tournaments_matches_section">Матчи (%1$d)</string>
+    <string name="tournaments_no_registered">Пока никто не зарегистрировался.</string>
+    <string name="tournaments_no_matches">Матчи появятся после первого результата.</string>
+    <string name="tournaments_table">Таблица</string>
+    <string name="tournaments_col_team">Команда</string>
+    <string name="tournaments_col_played" translatable="false">И</string>
+    <string name="tournaments_col_won" translatable="false">В</string>
+    <string name="tournaments_col_drawn" translatable="false">Н</string>
+    <string name="tournaments_col_lost" translatable="false">П</string>
+    <string name="tournaments_col_diff" translatable="false">±</string>
+    <string name="tournaments_col_points">Очки</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Неверный пароль</string>
     <string name="error_invalid_input">Заполните оба поля (минимум 6 символов)</string>

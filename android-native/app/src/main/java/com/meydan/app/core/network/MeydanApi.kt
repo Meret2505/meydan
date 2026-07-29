@@ -3,7 +3,10 @@ package com.meydan.app.core.network
 import com.meydan.app.core.network.dto.ApiResponse
 import com.meydan.app.core.network.dto.FcmTokenRequest
 import com.meydan.app.core.network.dto.FavoriteResponse
+import com.meydan.app.core.network.dto.FieldDetailDto
 import com.meydan.app.core.network.dto.FieldsResponse
+import com.meydan.app.core.network.dto.TeamDetailDto
+import com.meydan.app.core.network.dto.TournamentDetailDto
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.GamesFeedDto
 import com.meydan.app.core.network.dto.TeamsResponse
@@ -67,6 +70,15 @@ interface MeydanApi {
 
     @GET("api/v1/fields")
     suspend fun getFields(): Response<ApiResponse<FieldsResponse>>
+
+    @GET("api/v1/fields/{id}")
+    suspend fun getFieldDetail(@Path("id") id: String): Response<ApiResponse<FieldDetailDto>>
+
+    @GET("api/v1/teams/{id}")
+    suspend fun getTeamDetail(@Path("id") id: String): Response<ApiResponse<TeamDetailDto>>
+
+    @GET("api/v1/tournaments/{id}")
+    suspend fun getTournamentDetail(@Path("id") id: String): Response<ApiResponse<TournamentDetailDto>>
 
     @POST("api/v1/fields/{id}/favorite")
     suspend fun favoriteField(@Path("id") id: String): Response<ApiResponse<FavoriteResponse>>

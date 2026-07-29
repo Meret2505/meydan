@@ -129,6 +129,48 @@
     <string name="pos_short_midfielder">OÝÇ</string>
     <string name="pos_short_forward">HÜJ</string>
 
+    <!-- field detail -->
+    <string name="fields_address">Salgy</string>
+    <string name="fields_surface_label">Örtük</string>
+    <string name="fields_capacity_label">Sygym</string>
+    <string name="fields_capacity_value">%1$d oýunça çenli</string>
+    <string name="fields_games_played_label">Geçen oýunlar</string>
+    <string name="fields_about">Meýdança barada</string>
+    <string name="fields_schedule">Iş tertibi</string>
+    <string name="fields_amenities">Amatlyklar</string>
+    <string name="fields_contacts">Aragatnaşyklar</string>
+    <string name="fields_call">Jaň etmek</string>
+    <string name="fields_closed">Dynç gün</string>
+    <string name="day_monday">Du</string>
+    <string name="day_tuesday">Si</string>
+    <string name="day_wednesday">Ça</string>
+    <string name="day_thursday">Pe</string>
+    <string name="day_friday">An</string>
+    <string name="day_saturday">Şe</string>
+    <string name="day_sunday">Ýe</string>
+
+    <!-- team detail -->
+    <string name="teams_wins">ýeňiş</string>
+    <string name="teams_losses">ýeňliş</string>
+    <string name="teams_points">utuk</string>
+    <string name="teams_roster">Düzüm</string>
+    <string name="teams_captain_badge">K</string>
+    <string name="teams_you_paren">(siz)</string>
+
+    <!-- tournament detail -->
+    <string name="tournaments_teams_section">Komandalar (%1$d)</string>
+    <string name="tournaments_matches_section">Oýunlar (%1$d)</string>
+    <string name="tournaments_no_registered">Henuz hiç kim hasaba alynmady.</string>
+    <string name="tournaments_no_matches">Oýunlar ilkinji netijeden soň görner.</string>
+    <string name="tournaments_table">Tablisa</string>
+    <string name="tournaments_col_team">Komanda</string>
+    <string name="tournaments_col_played" translatable="false">O</string>
+    <string name="tournaments_col_won" translatable="false">Ý</string>
+    <string name="tournaments_col_drawn" translatable="false">D</string>
+    <string name="tournaments_col_lost" translatable="false">Ý</string>
+    <string name="tournaments_col_diff" translatable="false">±</string>
+    <string name="tournaments_col_points">Bal</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Parol nädogry</string>
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>

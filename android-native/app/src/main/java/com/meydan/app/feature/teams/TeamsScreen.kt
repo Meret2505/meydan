@@ -1,6 +1,7 @@
 package com.meydan.app.feature.teams
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,7 +46,7 @@ import com.meydan.app.core.network.dto.TeamCardDto
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeamsScreen(container: AppContainer) {
+fun TeamsScreen(container: AppContainer, onTeamClick: (String) -> Unit) {
     val viewModel: TeamsViewModel = viewModel { TeamsViewModel(container.teamsRepository) }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -77,7 +78,7 @@ fun TeamsScreen(container: AppContainer) {
                     item { NotInTeamCard() }
                 } else {
                     itemsIndexed(state.mine, key = { _, t -> t.id }) { index, team ->
-                        MyTeamCard(team = team, rank = index + 1)
+                        MyTeamCard(team = team, rank = index + 1, onClick = { onTeamClick(team.id) })
                     }
                 }
 
@@ -86,7 +87,7 @@ fun TeamsScreen(container: AppContainer) {
                         Spacer(Modifier.size(8.dp))
                         SectionLabel(stringResource(R.string.teams_city_teams))
                     }
-                    item { CityTeamsList(state.others) }
+                    item { CityTeamsList(state.others, onTeamClick) }
                     item {
                         Text(
                             text = stringResource(R.string.teams_matches_hint),
@@ -132,7 +133,7 @@ private fun NotInTeamCard() {
 }
 
 @Composable
-private fun MyTeamCard(team: TeamCardDto, rank: Int) {
+private fun MyTeamCard(team: TeamCardDto, rank: Int, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val palette = TeamColors.of(team.color)
     Row(
@@ -141,6 +142,7 @@ private fun MyTeamCard(team: TeamCardDto, rank: Int) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
             .background(colors.surface)
+            .clickable(onClick = onClick)
             .padding(15.dp),
     ) {
         Box(
@@ -199,7 +201,7 @@ private fun MyTeamCard(team: TeamCardDto, rank: Int) {
 }
 
 @Composable
-private fun CityTeamsList(teams: List<TeamCardDto>) {
+private fun CityTeamsList(teams: List<TeamCardDto>, onTeamClick: (String) -> Unit) {
     val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
@@ -212,6 +214,7 @@ private fun CityTeamsList(teams: List<TeamCardDto>) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { onTeamClick(team.id) }
                     .padding(horizontal = 16.dp, vertical = 13.dp),
             ) {
                 Text(

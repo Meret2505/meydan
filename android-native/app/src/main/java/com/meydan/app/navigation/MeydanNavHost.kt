@@ -18,8 +18,11 @@ import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
 import com.meydan.app.feature.auth.LoginViewModel
 import com.meydan.app.feature.auth.PhoneLoginScreen
+import com.meydan.app.feature.fielddetail.FieldDetailScreen
 import com.meydan.app.feature.gamedetail.GameDetailScreen
 import com.meydan.app.feature.main.MainScaffold
+import com.meydan.app.feature.teamdetail.TeamDetailScreen
+import com.meydan.app.feature.tournamentdetail.TournamentDetailScreen
 import com.meydan.app.feature.onboarding.OnboardingFlow
 
 /** Route names, referenced from navigation calls only. */
@@ -30,6 +33,12 @@ object Routes {
     const val HOME = "home"
     const val GAME_DETAIL = "game/{gameId}"
     fun gameDetail(id: String) = "game/$id"
+    const val FIELD_DETAIL = "field/{fieldId}"
+    fun fieldDetail(id: String) = "field/$id"
+    const val TEAM_DETAIL = "team/{teamId}"
+    fun teamDetail(id: String) = "team/$id"
+    const val TOURNAMENT_DETAIL = "tournament/{tournamentId}"
+    fun tournamentDetail(id: String) = "tournament/$id"
 }
 
 /**
@@ -120,14 +129,37 @@ fun MeydanApp(container: AppContainer) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                onGameClick = { gameId -> navController.navigate(Routes.gameDetail(gameId)) },
+                onGameClick = { navController.navigate(Routes.gameDetail(it)) },
+                onFieldClick = { navController.navigate(Routes.fieldDetail(it)) },
+                onTeamClick = { navController.navigate(Routes.teamDetail(it)) },
+                onTournamentClick = { navController.navigate(Routes.tournamentDetail(it)) },
             )
         }
         composable(Routes.GAME_DETAIL) { entry ->
-            val gameId = entry.arguments?.getString("gameId").orEmpty()
             GameDetailScreen(
                 container = container,
-                gameId = gameId,
+                gameId = entry.arguments?.getString("gameId").orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.FIELD_DETAIL) { entry ->
+            FieldDetailScreen(
+                container = container,
+                fieldId = entry.arguments?.getString("fieldId").orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.TEAM_DETAIL) { entry ->
+            TeamDetailScreen(
+                container = container,
+                teamId = entry.arguments?.getString("teamId").orEmpty(),
+                onBack = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.TOURNAMENT_DETAIL) { entry ->
+            TournamentDetailScreen(
+                container = container,
+                tournamentId = entry.arguments?.getString("tournamentId").orEmpty(),
                 onBack = { navController.popBackStack() },
             )
         }
