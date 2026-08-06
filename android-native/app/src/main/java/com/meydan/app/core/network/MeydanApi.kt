@@ -72,6 +72,10 @@ interface MeydanApi {
     @HTTP(method = "DELETE", path = "api/v1/games/{id}/join")
     suspend fun leaveGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
 
+    /** Organizer-only. Soft-deletes the game (status CANCELLED). */
+    @HTTP(method = "DELETE", path = "api/v1/games/{id}")
+    suspend fun cancelGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
+
     @GET("api/v1/fields")
     suspend fun getFields(): Response<ApiResponse<FieldsResponse>>
 

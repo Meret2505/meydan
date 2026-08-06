@@ -83,6 +83,12 @@ export type LeaveError = "not_found" | "organizer_cannot_leave" | "game_over";
 
 export type LeaveResult = { ok: true } | { ok: false; error: LeaveError };
 
+export type CancelError = "not_found" | "not_organizer" | "game_over";
+
+export type CancelResult =
+  | { ok: true; alreadyCancelled: boolean }
+  | { ok: false; error: CancelError };
+
 /**
  * Adds the user to a game.
  *
@@ -219,4 +225,92 @@ export async function leaveGame(gameId: string, userId: string): Promise<LeaveRe
     }
     return { ok: true as const };
   });
+}
+
+/**
+ * Cancels a game. Only the organizer may cancel, and only a game that has not
+ * already finished — cancelling a COMPLETED game would rewrite recorded history.
+ *
+ * Idempotent: cancelling an already-cancelled game succeeds and reports
+ * `alreadyCancelled` without notifying anyone a second time.
+ */
+export async function cancelGame(
+  gameId: string,
+  userId: string,
+): Promise<CancelResult> {
+  const outcome = await prisma.$transaction(async (tx) => {
+    // Lock the row so two concurrent cancels cannot both pass the status check
+    // and each create a full set of "game cancelled" notifications.
+    const locked = await tx.$queryRaw<
+      { id: string }[]
+    >`SELECT id FROM games WHERE id = ${gameId} FOR UPDATE`;
+    if (locked.length === 0) return { ok: false as const, error: "not_found" as const };
+
+    const game = await tx.game.findUnique({ where: { id: gameId } });
+    if (!game) return { ok: false as const, error: "not_found" as const };
+    if (game.organizerId !== userId) {
+      return { ok: false as const, error: "not_organizer" as const };
+    }
+    if (game.status === "COMPLETED") {
+      return { ok: false as const, error: "game_over" as const };
+    }
+    if (game.status === "CANCELLED") {
+      return { ok: true as const, alreadyCancelled: true, notify: [] };
+    }
+
+    // Everyone except the organizer gets told; the organizer is the one acting.
+    const participants = await tx.gameParticipant.findMany({
+      where: { gameId, userId: { not: userId } },
+      select: { userId: true },
+    });
+
+    await tx.game.update({ where: { id: gameId }, data: { status: "CANCELLED" } });
+
+    // Committed with the status change so the in-app notification can never be
+    // lost, independently of whether the pushes below succeed.
+    await tx.notification.createMany({
+      data: participants.map((p) => ({
+        userId: p.userId,
+        type: "GAME_CANCELLED" as const,
+        title: "Игра отменена",
+        body: "Организатор отменил игру.",
+        data: { gameId },
+      })),
+    });
+
+    return {
+      ok: true as const,
+      alreadyCancelled: false,
+      notify: participants.map((p) => p.userId),
+    };
+  });
+
+  if (!outcome.ok) return outcome;
+
+  await pushCancelled(outcome.notify, gameId);
+  return { ok: true, alreadyCancelled: outcome.alreadyCancelled };
+}
+
+/**
+ * Best-effort pushes to the cancelled game's players. Runs after the
+ * transaction commits — a Firebase outage must never roll back the cancel.
+ */
+async function pushCancelled(userIds: string[], gameId: string): Promise<void> {
+  if (userIds.length === 0) return;
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds }, fcmToken: { not: null } },
+    select: { fcmToken: true, locale: true },
+  });
+
+  for (const user of users) {
+    if (!user.fcmToken) continue;
+    const ru = user.locale !== "tm";
+    await sendPush(
+      user.fcmToken,
+      ru ? "Игра отменена" : "Oýun ýatyryldy",
+      ru ? "Организатор отменил игру." : "Guramaçy oýny ýatyrdy.",
+      { gameId, url: `/${user.locale}/games/${gameId}` },
+    );
+  }
 }

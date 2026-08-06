@@ -128,7 +128,13 @@
     <string name="games_is_past">Oýun geçdi</string>
     <string name="games_completed">Oýun tamamlandy</string>
     <string name="games_cancelled_full">Oýun ýatyryldy</string>
+    <string name="games_cancel_cta">Oýny ýatyr</string>
+    <string name="games_cancel_title">Oýun ýatyrylsynmy?</string>
+    <string name="games_cancel_body">Ýazylan ähli oýunçylara habar iberiler. Bu hereketi yzyna gaýtaryp bolmaýar.</string>
+    <string name="games_cancel_confirm">Oýny ýatyr</string>
+    <string name="games_cancel_dismiss">Ýatyrma</string>
     <string name="games_banner_over">OÝUN TAMAMLANDY</string>
+    <string name="games_banner_cancelled">OÝUN ÝATYRYLDY</string>
     <string name="games_banner_yours">SIZIŇ OÝNUŇYZ</string>
     <string name="games_banner_open">AÇYK OÝUN</string>
     <string name="games_show_contact">Guramaçynyň kontaktyny görkez</string>

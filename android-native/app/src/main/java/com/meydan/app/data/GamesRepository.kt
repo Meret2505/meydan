@@ -42,6 +42,10 @@ class GamesRepository(
     suspend fun leaveGame(id: String): ApiResult<GameDetailDto> =
         apiCall { api.leaveGame(id) }
 
+    /** Cancel returns the updated (CANCELLED) detail. Organizer only (403). */
+    suspend fun cancelGame(id: String): ApiResult<GameDetailDto> =
+        apiCall { api.cancelGame(id) }
+
     suspend fun unreadCount(): ApiResult<Int> =
         when (val result = apiCall { api.unreadCount() }) {
             is ApiResult.Success -> ApiResult.Success(result.data.count)

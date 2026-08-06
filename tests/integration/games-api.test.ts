@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { GET as getFeed } from "@/app/api/v1/games/route";
-import { GET as getGame } from "@/app/api/v1/games/[id]/route";
+import { DELETE as cancelRoute, GET as getGame } from "@/app/api/v1/games/[id]/route";
 import { DELETE as leaveRoute, POST as joinRoute } from "@/app/api/v1/games/[id]/join/route";
 import { GET as getMe, PATCH as patchMe } from "@/app/api/v1/me/route";
 import { signAccessToken } from "@/lib/api/tokens";
@@ -411,6 +411,96 @@ describe.skipIf(!dbAvailable)("games API (integration)", () => {
       expect(
         await prisma.gameParticipant.count({ where: { gameId: game.id, attended: true } }),
       ).toBe(1);
+    });
+  });
+
+  describe("cancelling", () => {
+    it("lets the organizer cancel and notifies the other players", async () => {
+      const organizer = await makeUser("Organizer", "+99310000001");
+      const player = await makeUser("Player", "+99310000002");
+      const game = await makeGame(organizer.id, 6);
+      await joinGame(game.id, player.id);
+
+      const response = await cancelRoute(
+        await authed(`${BASE}/games/${game.id}`, organizer.id, { method: "DELETE" }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(200);
+      expect((await body(response)).data.status).toBe("CANCELLED");
+
+      const notifications = await prisma.notification.findMany({
+        where: { type: "GAME_CANCELLED" },
+      });
+      // The organizer acted, so only the other player is told.
+      expect(notifications).toHaveLength(1);
+      expect(notifications[0].userId).toBe(player.id);
+    });
+
+    it("refuses to cancel someone else's game", async () => {
+      const organizer = await makeUser("Organizer", "+99310000001");
+      const player = await makeUser("Player", "+99310000002");
+      const game = await makeGame(organizer.id, 6);
+      await joinGame(game.id, player.id);
+
+      const response = await cancelRoute(
+        await authed(`${BASE}/games/${game.id}`, player.id, { method: "DELETE" }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(403);
+      expect((await body(response)).error).toBe("not_organizer");
+
+      const after = await prisma.game.findUnique({ where: { id: game.id } });
+      expect(after?.status).toBe("OPEN");
+    });
+
+    it("refuses to cancel a completed game", async () => {
+      const organizer = await makeUser("Organizer", "+99310000001");
+      const game = await makeGame(organizer.id, 6);
+      await prisma.game.update({
+        where: { id: game.id },
+        data: { status: "COMPLETED" },
+      });
+
+      const response = await cancelRoute(
+        await authed(`${BASE}/games/${game.id}`, organizer.id, { method: "DELETE" }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(409);
+      expect((await body(response)).error).toBe("game_over");
+    });
+
+    it("is idempotent and does not notify twice", async () => {
+      const organizer = await makeUser("Organizer", "+99310000001");
+      const player = await makeUser("Player", "+99310000002");
+      const game = await makeGame(organizer.id, 6);
+      await joinGame(game.id, player.id);
+
+      for (let i = 0; i < 2; i++) {
+        const response = await cancelRoute(
+          await authed(`${BASE}/games/${game.id}`, organizer.id, { method: "DELETE" }),
+          ctx(game.id),
+        );
+        expect(response.status).toBe(200);
+      }
+
+      const notifications = await prisma.notification.findMany({
+        where: { type: "GAME_CANCELLED" },
+      });
+      expect(notifications).toHaveLength(1);
+    });
+
+    it("404s an unknown game", async () => {
+      const organizer = await makeUser("Organizer", "+99310000001");
+
+      const response = await cancelRoute(
+        await authed(`${BASE}/games/missing`, organizer.id, { method: "DELETE" }),
+        ctx("missing"),
+      );
+
+      expect(response.status).toBe(404);
     });
   });
 

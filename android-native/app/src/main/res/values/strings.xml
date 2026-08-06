@@ -140,7 +140,13 @@
     <string name="games_is_past">Игра прошла</string>
     <string name="games_completed">Игра завершена</string>
     <string name="games_cancelled_full">Игра отменена</string>
+    <string name="games_cancel_cta">Отменить игру</string>
+    <string name="games_cancel_title">Отменить игру?</string>
+    <string name="games_cancel_body">Все записавшиеся игроки получат уведомление. Это действие нельзя отменить.</string>
+    <string name="games_cancel_confirm">Отменить игру</string>
+    <string name="games_cancel_dismiss">Не отменять</string>
     <string name="games_banner_over">ИГРА ЗАВЕРШЕНА</string>
+    <string name="games_banner_cancelled">ИГРА ОТМЕНЕНА</string>
     <string name="games_banner_yours">ВАША ИГРА</string>
     <string name="games_banner_open">ОТКРЫТАЯ ИГРА</string>
     <string name="games_show_contact">Показать контакт организатора</string>

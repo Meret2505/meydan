@@ -3,8 +3,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseScore } from "@/lib/validate";
-import { sendPush } from "@/lib/fcm";
 import {
+  cancelGame as cancelGameService,
   createGame as createGameService,
   joinGame as joinGameService,
   leaveGame as leaveGameService,
@@ -63,43 +63,10 @@ export async function leaveGame(gameId: string, locale: string): Promise<void> {
 
 export async function cancelGame(gameId: string, locale: string): Promise<void> {
   const userId = await requireUserId();
-  const game = await prisma.game.findUnique({
-    where: { id: gameId },
-    include: {
-      participants: {
-        where: { userId: { not: userId } },
-        include: { user: { select: { fcmToken: true, locale: true } } },
-      },
-    },
-  });
-  if (!game || game.organizerId !== userId) return;
-
-  await prisma.$transaction([
-    prisma.game.update({
-      where: { id: gameId },
-      data: { status: "CANCELLED" },
-    }),
-    prisma.notification.createMany({
-      data: game.participants.map((p) => ({
-        userId: p.userId,
-        type: "GAME_CANCELLED" as const,
-        title: "Игра отменена",
-        body: "Организатор отменил игру.",
-        data: { gameId },
-      })),
-    }),
-  ]);
-
-  for (const p of game.participants) {
-    if (!p.user.fcmToken) continue;
-    const ru = p.user.locale !== "tm";
-    await sendPush(
-      p.user.fcmToken,
-      ru ? "Игра отменена" : "Oýun ýatyryldy",
-      ru ? "Организатор отменил игру." : "Guramaçy oýny ýatyrdy.",
-      { gameId, url: `/${p.user.locale}/games/${gameId}` },
-    );
-  }
+  const result = await cancelGameService(gameId, userId);
+  // A failed attempt (not found, not the organizer, already finished) resolves
+  // silently and simply re-renders, as it always has.
+  if (!result.ok) return;
 
   revalidatePath(`/${locale}/games`);
   redirect(`/${locale}/games`);

@@ -28,6 +28,8 @@ class GameDetailViewModel(
         val acting: Boolean = false,
         val loadError: Boolean = false,
         val actionErrorCode: String? = null,
+        /** Cancelling is destructive and irreversible, so it is confirmed first. */
+        val confirmingCancel: Boolean = false,
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -62,6 +64,34 @@ class GameDetailViewModel(
                 if (game.joined) gamesRepository.leaveGame(gameId)
                 else gamesRepository.joinGame(gameId)
             when (result) {
+                is ApiResult.Success ->
+                    _state.update { it.copy(game = result.data, acting = false) }
+                is ApiResult.Failure ->
+                    _state.update { it.copy(acting = false, actionErrorCode = result.code) }
+                ApiResult.NetworkError ->
+                    _state.update { it.copy(acting = false, actionErrorCode = "network") }
+            }
+        }
+    }
+
+    fun askCancel() {
+        val game = _state.value.game ?: return
+        if (!game.isOrganizer || game.status == "CANCELLED" || game.status == "COMPLETED") return
+        _state.update { it.copy(confirmingCancel = true) }
+    }
+
+    fun dismissCancel() = _state.update { it.copy(confirmingCancel = false) }
+
+    /**
+     * Cancels the game. Like join/leave, the server returns the updated detail,
+     * so the response replaces state and the screen re-renders as CANCELLED.
+     */
+    fun confirmCancel() {
+        val game = _state.value.game ?: return
+        if (_state.value.acting || !game.isOrganizer) return
+        _state.update { it.copy(acting = true, confirmingCancel = false, actionErrorCode = null) }
+        viewModelScope.launch {
+            when (val result = gamesRepository.cancelGame(gameId)) {
                 is ApiResult.Success ->
                     _state.update { it.copy(game = result.data, acting = false) }
                 is ApiResult.Failure ->

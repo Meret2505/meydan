@@ -22,12 +22,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -98,6 +100,14 @@ fun GameDetailScreen(
                 acting = state.acting,
                 onBack = onBack,
                 onToggleJoin = viewModel::toggleJoin,
+                onCancelGame = viewModel::askCancel,
+            )
+        }
+
+        if (state.confirmingCancel) {
+            CancelGameDialog(
+                onConfirm = viewModel::confirmCancel,
+                onDismiss = viewModel::dismissCancel,
             )
         }
         // Always reachable back button on error/loading.
@@ -113,6 +123,7 @@ private fun GameDetailContent(
     acting: Boolean,
     onBack: () -> Unit,
     onToggleJoin: () -> Unit,
+    onCancelGame: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
@@ -172,7 +183,13 @@ private fun GameDetailContent(
                 .systemBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 12.dp),
         ) {
-            CtaButton(game = game, acting = acting, isOver = isOver, onToggleJoin = onToggleJoin)
+            CtaButton(
+                game = game,
+                acting = acting,
+                isOver = isOver,
+                onToggleJoin = onToggleJoin,
+                onCancelGame = onCancelGame,
+            )
         }
     }
 }
@@ -204,6 +221,9 @@ private fun PitchHeader(game: GameDetailDto, isOver: Boolean, onBack: () -> Unit
                 .padding(horizontal = 24.dp, vertical = 18.dp),
         ) {
             val bannerRes = when {
+                // Cancelled and completed are both "over" but read very
+                // differently to a player, so they get distinct labels.
+                game.status == "CANCELLED" -> R.string.games_banner_cancelled
                 isOver -> R.string.games_banner_over
                 game.isOrganizer -> R.string.games_banner_yours
                 else -> R.string.games_banner_open
@@ -429,10 +449,77 @@ private fun ContactRow(name: String, phone: String) {
     }
 }
 
+/** Confirmation for the irreversible cancel; players are notified on confirm. */
 @Composable
-private fun CtaButton(game: GameDetailDto, acting: Boolean, isOver: Boolean, onToggleJoin: () -> Unit) {
+private fun CancelGameDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    // Organizer / finished / past games have no join action; show status text.
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        // Explicit: M3 defaults a dialog's container to shapes.extraLarge, which
+        // this theme defines as a 999dp pill for buttons — that renders the
+        // dialog as an oval. 28dp is the M3 dialog corner radius.
+        shape = RoundedCornerShape(28.dp),
+        title = { Text(stringResource(R.string.games_cancel_title)) },
+        text = { Text(stringResource(R.string.games_cancel_body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    text = stringResource(R.string.games_cancel_confirm),
+                    color = colors.error,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.games_cancel_dismiss))
+            }
+        },
+    )
+}
+
+@Composable
+private fun CtaButton(
+    game: GameDetailDto,
+    acting: Boolean,
+    isOver: Boolean,
+    onToggleJoin: () -> Unit,
+    onCancelGame: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+
+    // The organizer of a game that has not happened yet gets the cancel action
+    // here. The "your game" badge already sits in the header, so the bottom bar
+    // is free for it rather than repeating the label.
+    if (game.isOrganizer && !isOver && !game.isPast) {
+        Button(
+            onClick = onCancelGame,
+            enabled = !acting,
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colors.error.copy(alpha = 0.12f),
+                contentColor = colors.error,
+            ),
+            modifier = Modifier.fillMaxWidth().height(58.dp),
+        ) {
+            if (acting) {
+                CircularProgressIndicator(
+                    strokeWidth = 2.5.dp,
+                    modifier = Modifier.size(22.dp),
+                    color = colors.error,
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.games_cancel_cta),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
+        return
+    }
+
+    // Finished / past games have no action; show status text.
     if (game.isOrganizer || isOver || game.isPast) {
         val label = when {
             game.status == "CANCELLED" -> stringResource(R.string.games_cancelled_full)
