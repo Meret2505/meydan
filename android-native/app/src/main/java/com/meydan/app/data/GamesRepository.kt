@@ -4,6 +4,7 @@ import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.FeedCache
 import com.meydan.app.core.network.MeydanApi
+import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.GamesFeedDto
 
@@ -28,6 +29,10 @@ class GamesRepository(
 
     suspend fun gameDetail(id: String): ApiResult<GameDetailDto> =
         apiCall { api.getGame(id) }
+
+    /** Creates a game (organizer auto-joined); returns the new game's detail. */
+    suspend fun createGame(req: CreateGameRequest): ApiResult<GameDetailDto> =
+        apiCall { api.createGame(req) }
 
     /** Join returns the updated detail (roster, counts, joined flag). */
     suspend fun joinGame(id: String): ApiResult<GameDetailDto> =

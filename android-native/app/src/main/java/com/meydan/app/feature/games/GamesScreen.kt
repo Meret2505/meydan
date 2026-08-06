@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.DropdownMenu
@@ -65,6 +66,7 @@ import java.util.Locale
 fun GamesScreen(
     container: AppContainer,
     onGameClick: (String) -> Unit,
+    onCreateGame: () -> Unit,
 ) {
     val viewModel: GamesViewModel = viewModel {
         GamesViewModel(container.gamesRepository)
@@ -79,7 +81,7 @@ fun GamesScreen(
             // Only the top inset — the bottom nav owns the bottom inset.
             .systemBarsPadding(),
     ) {
-        FeedHeader(unread = state.unread)
+        FeedHeader(unread = state.unread, onCreateGame = onCreateGame)
         TabRow(tab = state.tab, onSelect = viewModel::selectTab)
         ChipRow(chip = state.chip, onToggle = viewModel::toggleChip)
 
@@ -125,18 +127,35 @@ fun GamesScreen(
 }
 
 @Composable
-private fun FeedHeader(unread: Int) {
+private fun FeedHeader(unread: Int, onCreateGame: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, top = 16.dp),
+            .padding(start = 24.dp, end = 20.dp, top = 16.dp),
     ) {
         Text(
             text = stringResource(R.string.games_feed_title),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.weight(1f),
         )
+        // Create-game entry point.
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(end = 4.dp)
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable(onClick = onCreateGame),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = stringResource(R.string.games_create),
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(22.dp),
+            )
+        }
         Box {
             Icon(
                 imageVector = Icons.Filled.Notifications,

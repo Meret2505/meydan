@@ -1,6 +1,7 @@
 package com.meydan.app.core.network
 
 import com.meydan.app.core.network.dto.ApiResponse
+import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.FcmTokenRequest
 import com.meydan.app.core.network.dto.FavoriteResponse
 import com.meydan.app.core.network.dto.FieldDetailDto
@@ -57,6 +58,9 @@ interface MeydanApi {
 
     @GET("api/v1/games")
     suspend fun getGames(): Response<ApiResponse<GamesFeedDto>>
+
+    @POST("api/v1/games")
+    suspend fun createGame(@Body body: CreateGameRequest): Response<ApiResponse<GameDetailDto>>
 
     @GET("api/v1/games/{id}")
     suspend fun getGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>

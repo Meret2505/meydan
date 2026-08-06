@@ -11,6 +11,68 @@ import { sendPush } from "@/lib/fcm";
  * committed before any push is attempted.
  */
 
+import type { Position } from "@prisma/client";
+
+const ALL_POSITIONS: Position[] = ["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD"];
+
+export type CreateGameInput = {
+  scheduledAt: string;
+  fieldId?: string | null;
+  fieldName?: string | null;
+  totalSpots: number;
+  pricePerPlayer?: number | null;
+  notes?: string | null;
+  neededPositions: string[];
+};
+
+export type CreateGameResult =
+  | { ok: true; gameId: string }
+  | { ok: false; error: "invalid_input" };
+
+/**
+ * Creates a game with the organizer auto-joined, shared by the web create
+ * action and the mobile POST /games. Validation mirrors the original action:
+ * a time, a field (picked or free-text), and at least 2 spots are required;
+ * anything else is rejected rather than silently coerced.
+ */
+export async function createGame(
+  userId: string,
+  input: CreateGameInput,
+): Promise<CreateGameResult> {
+  const fieldId = input.fieldId?.trim() || null;
+  const fieldName = input.fieldName?.trim() || null;
+  const notes = input.notes?.trim() || null;
+  const pricePerPlayer =
+    input.pricePerPlayer != null && input.pricePerPlayer >= 0
+      ? Math.trunc(input.pricePerPlayer)
+      : null;
+  const positions = input.neededPositions.filter((p): p is Position =>
+    ALL_POSITIONS.includes(p as Position),
+  );
+
+  if (!input.scheduledAt || (!fieldId && !fieldName) || input.totalSpots < 2) {
+    return { ok: false, error: "invalid_input" };
+  }
+  const scheduledAt = new Date(input.scheduledAt);
+  if (Number.isNaN(scheduledAt.getTime())) return { ok: false, error: "invalid_input" };
+
+  const game = await prisma.game.create({
+    data: {
+      scheduledAt,
+      fieldId,
+      // A picked field owns the name; free-text only when no field is chosen.
+      fieldName: fieldId ? null : fieldName,
+      totalSpots: input.totalSpots,
+      pricePerPlayer,
+      neededPositions: positions,
+      notes,
+      organizerId: userId,
+      participants: { create: { userId } },
+    },
+  });
+  return { ok: true, gameId: game.id };
+}
+
 export type JoinError = "not_found" | "not_joinable" | "game_full";
 
 export type JoinResult =

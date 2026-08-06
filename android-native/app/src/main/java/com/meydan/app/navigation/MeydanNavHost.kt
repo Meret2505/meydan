@@ -18,6 +18,7 @@ import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
 import com.meydan.app.feature.auth.LoginViewModel
 import com.meydan.app.feature.auth.PhoneLoginScreen
+import com.meydan.app.feature.creategame.CreateGameScreen
 import com.meydan.app.feature.fielddetail.FieldDetailScreen
 import com.meydan.app.feature.gamedetail.GameDetailScreen
 import com.meydan.app.feature.main.MainScaffold
@@ -33,6 +34,7 @@ object Routes {
     const val HOME = "home"
     const val GAME_DETAIL = "game/{gameId}"
     fun gameDetail(id: String) = "game/$id"
+    const val CREATE_GAME = "create-game"
     const val FIELD_DETAIL = "field/{fieldId}"
     fun fieldDetail(id: String) = "field/$id"
     const val TEAM_DETAIL = "team/{teamId}"
@@ -133,6 +135,20 @@ fun MeydanApp(container: AppContainer) {
                 onFieldClick = { navController.navigate(Routes.fieldDetail(it)) },
                 onTeamClick = { navController.navigate(Routes.teamDetail(it)) },
                 onTournamentClick = { navController.navigate(Routes.tournamentDetail(it)) },
+                onCreateGame = { navController.navigate(Routes.CREATE_GAME) },
+            )
+        }
+        composable(Routes.CREATE_GAME) {
+            CreateGameScreen(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onCreated = { gameId ->
+                    // Replace the form with the new game's detail so Back from
+                    // detail returns to the feed, not the create form.
+                    navController.navigate(Routes.gameDetail(gameId)) {
+                        popUpTo(Routes.CREATE_GAME) { inclusive = true }
+                    }
+                },
             )
         }
         composable(Routes.GAME_DETAIL) { entry ->

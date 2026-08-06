@@ -5,14 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { parseScore } from "@/lib/validate";
 import { sendPush } from "@/lib/fcm";
 import {
+  createGame as createGameService,
   joinGame as joinGameService,
   leaveGame as leaveGameService,
 } from "@/lib/services/games";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { Position } from "@prisma/client";
-
-const ALL_POSITIONS: Position[] = ["GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD"];
 
 async function requireUserId() {
   const session = await auth();
@@ -24,39 +22,21 @@ export async function createGame(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const locale = String(formData.get("locale") ?? "ru");
 
-  const scheduledRaw = String(formData.get("scheduledAt") ?? "");
-  const fieldId = String(formData.get("fieldId") ?? "") || null;
-  const fieldName = String(formData.get("fieldName") ?? "").trim() || null;
-  const totalSpots = parseInt(String(formData.get("totalSpots") ?? "0"), 10);
   const priceRaw = String(formData.get("pricePerPlayer") ?? "").trim();
-  const pricePerPlayer = priceRaw ? Math.max(0, parseInt(priceRaw, 10)) : null;
-  const notes = String(formData.get("notes") ?? "").trim() || null;
-  const positions = formData
-    .getAll("neededPositions")
-    .map(String)
-    .filter((p): p is Position => ALL_POSITIONS.includes(p as Position));
-
-  if (!scheduledRaw || (!fieldId && !fieldName) || totalSpots < 2) return;
-
-  const scheduledAt = new Date(scheduledRaw);
-  if (Number.isNaN(scheduledAt.getTime())) return;
-
-  const game = await prisma.game.create({
-    data: {
-      scheduledAt,
-      fieldId,
-      fieldName: fieldId ? null : fieldName,
-      totalSpots,
-      pricePerPlayer,
-      neededPositions: positions,
-      notes,
-      organizerId: userId,
-      participants: { create: { userId } },
-    },
+  const result = await createGameService(userId, {
+    scheduledAt: String(formData.get("scheduledAt") ?? ""),
+    fieldId: String(formData.get("fieldId") ?? "") || null,
+    fieldName: String(formData.get("fieldName") ?? ""),
+    totalSpots: parseInt(String(formData.get("totalSpots") ?? "0"), 10),
+    pricePerPlayer: priceRaw ? parseInt(priceRaw, 10) : null,
+    notes: String(formData.get("notes") ?? ""),
+    neededPositions: formData.getAll("neededPositions").map(String),
   });
+  // Preserve the original behaviour: invalid input silently re-renders.
+  if (!result.ok) return;
 
   revalidatePath(`/${locale}/games`);
-  redirect(`/${locale}/games/${game.id}`);
+  redirect(`/${locale}/games/${result.gameId}`);
 }
 
 /**

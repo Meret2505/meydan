@@ -171,6 +171,20 @@
     <string name="tournaments_col_diff" translatable="false">±</string>
     <string name="tournaments_col_points">Bal</string>
 
+    <!-- create game -->
+    <string name="games_create_title">Oýun dör</string>
+    <string name="games_create">Oýun dör</string>
+    <string name="games_create_when">Haçan</string>
+    <string name="games_create_total">Oýunçy sany</string>
+    <string name="games_create_needed">Haýsy pozisiýa ýetenok</string>
+    <string name="games_create_notes">Bellik</string>
+    <string name="games_create_price">Oýunçydan baha (man, hökman däl)</string>
+    <string name="games_create_field_label">Meýdança</string>
+    <string name="games_create_field_free">Ýa-da meýdançanyň adyny ýaz</string>
+    <string name="games_create_field_choose">katalogdan saýla</string>
+    <string name="games_create_field_placeholder">«Olimp» meýdança, kort 2</string>
+    <string name="games_create_notes_placeholder">Mysal üçin: suw ýanyňda, top üpjün edilen</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Parol nädogry</string>
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>

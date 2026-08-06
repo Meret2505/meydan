@@ -1,8 +1,12 @@
+import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
+import { badRequest, notFound } from "@/lib/api/errors";
 import { originOf } from "@/lib/api/images";
 import { handler, ok } from "@/lib/api/response";
-import { toGameCardDto } from "@/lib/api/serializers/game";
-import { fetchGamesFeed } from "@/lib/services/game-queries";
+import { toGameCardDto, toGameDetailDto } from "@/lib/api/serializers/game";
+import { parseJson } from "@/lib/api/validate";
+import { fetchGamesFeed, getGameDetail } from "@/lib/services/game-queries";
+import { createGame } from "@/lib/services/games";
 
 /**
  * The games feed, in the two buckets the UI renders: `open` (joinable games
@@ -22,4 +26,41 @@ export const GET = handler(async (request: Request) => {
     open: open.map((game) => toGameCardDto(game, origin, userId)),
     mine: mine.map((game) => toGameCardDto(game, origin, userId)),
   });
+});
+
+const createSchema = z
+  .object({
+    scheduledAt: z.string(),
+    fieldId: z.string().nullish(),
+    fieldName: z.string().nullish(),
+    totalSpots: z.number().int(),
+    pricePerPlayer: z.number().int().nullish(),
+    notes: z.string().nullish(),
+    neededPositions: z.array(z.string()).default([]),
+  })
+  .strict();
+
+/**
+ * Creates a game (the caller is auto-joined) and returns its full detail, so
+ * the client can navigate straight to the new game with no follow-up GET.
+ */
+export const POST = handler(async (request: Request) => {
+  const { userId } = await requireOnboarded(request);
+  const body = await parseJson(request, createSchema);
+
+  const result = await createGame(userId, {
+    scheduledAt: body.scheduledAt,
+    fieldId: body.fieldId ?? null,
+    fieldName: body.fieldName ?? null,
+    totalSpots: body.totalSpots,
+    pricePerPlayer: body.pricePerPlayer ?? null,
+    notes: body.notes ?? null,
+    neededPositions: body.neededPositions,
+  });
+  if (!result.ok) throw badRequest();
+
+  const detail = await getGameDetail(result.gameId, userId);
+  if (!detail) throw notFound("game_not_found");
+
+  return ok(toGameDetailDto(detail, originOf(request)));
 });

@@ -183,6 +183,20 @@
     <string name="tournaments_col_diff" translatable="false">±</string>
     <string name="tournaments_col_points">Очки</string>
 
+    <!-- create game -->
+    <string name="games_create_title">Создать игру</string>
+    <string name="games_create">Создать игру</string>
+    <string name="games_create_when">Когда</string>
+    <string name="games_create_total">Всего игроков</string>
+    <string name="games_create_needed">Каких позиций не хватает</string>
+    <string name="games_create_notes">Комментарий</string>
+    <string name="games_create_price">Цена с игрока (ман, опц.)</string>
+    <string name="games_create_field_label">Поле</string>
+    <string name="games_create_field_free">Или впиши название поля</string>
+    <string name="games_create_field_choose">выбрать из каталога</string>
+    <string name="games_create_field_placeholder">Поле «Олимп», корт 2</string>
+    <string name="games_create_notes_placeholder">Например: вода с собой, мяч обеспечен</string>
+
     <!-- errors -->
     <string name="error_wrong_password">Неверный пароль</string>
     <string name="error_invalid_input">Заполните оба поля (минимум 6 символов)</string>

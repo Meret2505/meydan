@@ -37,6 +37,7 @@ fun MainScaffold(
     onFieldClick: (String) -> Unit,
     onTeamClick: (String) -> Unit,
     onTournamentClick: (String) -> Unit,
+    onCreateGame: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.GAMES) }
     val currentLang = ConfigurationCompat.getLocales(LocalConfiguration.current)
@@ -56,6 +57,7 @@ fun MainScaffold(
                 MainTab.GAMES -> GamesScreen(
                     container = container,
                     onGameClick = onGameClick,
+                    onCreateGame = onCreateGame,
                 )
                 MainTab.TEAMS -> TeamsScreen(container = container, onTeamClick = onTeamClick)
                 MainTab.FIELDS -> FieldsScreen(container = container, onFieldClick = onFieldClick)

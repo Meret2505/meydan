@@ -71,6 +71,18 @@ data class OrganizerDto(
     val attendanceRate: Int? = null,
 )
 
+/** Body of POST /api/v1/games. Either fieldId or fieldName must be set. */
+@Serializable
+data class CreateGameRequest(
+    val scheduledAt: String,
+    val fieldId: String? = null,
+    val fieldName: String? = null,
+    val totalSpots: Int,
+    val pricePerPlayer: Int? = null,
+    val notes: String? = null,
+    val neededPositions: List<String>,
+)
+
 @Serializable
 data class UnreadCountDto(val count: Int)
 
