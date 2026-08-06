@@ -19,6 +19,7 @@ import com.meydan.app.feature.auth.LoginScreen
 import com.meydan.app.feature.auth.LoginViewModel
 import com.meydan.app.feature.auth.PhoneLoginScreen
 import com.meydan.app.feature.creategame.CreateGameScreen
+import com.meydan.app.feature.createteam.CreateTeamScreen
 import com.meydan.app.feature.fielddetail.FieldDetailScreen
 import com.meydan.app.feature.gamedetail.GameDetailScreen
 import com.meydan.app.feature.main.MainScaffold
@@ -37,6 +38,7 @@ object Routes {
     fun gameDetail(id: String) = "game/$id"
     const val CREATE_GAME = "create-game"
     const val PROFILE_EDIT = "profile-edit"
+    const val CREATE_TEAM = "create-team"
     const val FIELD_DETAIL = "field/{fieldId}"
     fun fieldDetail(id: String) = "field/$id"
     const val TEAM_DETAIL = "team/{teamId}"
@@ -139,6 +141,20 @@ fun MeydanApp(container: AppContainer) {
                 onTournamentClick = { navController.navigate(Routes.tournamentDetail(it)) },
                 onCreateGame = { navController.navigate(Routes.CREATE_GAME) },
                 onEditProfile = { navController.navigate(Routes.PROFILE_EDIT) },
+                onCreateTeam = { navController.navigate(Routes.CREATE_TEAM) },
+            )
+        }
+        composable(Routes.CREATE_TEAM) {
+            CreateTeamScreen(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onCreated = { teamId ->
+                    // Replace the form with the new team's detail so Back from
+                    // detail returns to the teams tab, not the create form.
+                    navController.navigate(Routes.teamDetail(teamId)) {
+                        popUpTo(Routes.CREATE_TEAM) { inclusive = true }
+                    }
+                },
             )
         }
         composable(Routes.PROFILE_EDIT) {

@@ -7,10 +7,10 @@ type Context = { params: Promise<{ id: string }> };
 
 /** Full detail for one team: record + roster. */
 export const GET = handler(async (request: Request, context: Context) => {
-  await requireOnboarded(request);
+  const { userId } = await requireOnboarded(request);
   const { id } = await context.params;
 
-  const detail = await fetchTeamDetail(id);
+  const detail = await fetchTeamDetail(id, userId);
   if (!detail) throw notFound("team_not_found");
 
   return ok(detail);

@@ -181,6 +181,15 @@
     <string name="teams_losses">поражений</string>
     <string name="teams_points">очков</string>
     <string name="teams_roster">Состав</string>
+    <string name="teams_join_cta">Вступить в команду</string>
+    <string name="teams_leave_cta">Выйти из команды</string>
+    <string name="teams_you_are_captain">Вы капитан</string>
+    <string name="teams_create">Создать команду</string>
+    <string name="teams_create_title">Новая команда</string>
+    <string name="teams_create_cta">Создать команду</string>
+    <string name="teams_create_name">Название</string>
+    <string name="teams_create_name_placeholder">Например: Ýyldyz</string>
+    <string name="teams_create_color">Цвет</string>
     <string name="teams_captain_badge">К</string>
     <string name="teams_you_paren">(вы)</string>
 

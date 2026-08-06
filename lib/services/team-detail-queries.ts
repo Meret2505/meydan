@@ -6,8 +6,14 @@ import type { TeamDetailDto } from "@/lib/api/serializers/team-detail";
  * Full team detail: the roster (captain first) with each member's attendance,
  * plus the aggregate win/loss/points record from completed games. Mirrors the
  * web team page's computation.
+ *
+ * `viewerId` adds the caller's membership context, which the mobile client
+ * needs to decide between the join and leave actions.
  */
-export async function fetchTeamDetail(id: string): Promise<TeamDetailDto | null> {
+export async function fetchTeamDetail(
+  id: string,
+  viewerId?: string,
+): Promise<TeamDetailDto | null> {
   const team = await prisma.team.findUnique({
     where: { id },
     include: {
@@ -46,6 +52,10 @@ export async function fetchTeamDetail(id: string): Promise<TeamDetailDto | null>
     }),
   );
 
+  const viewerMembership = viewerId
+    ? team.members.find((m) => m.userId === viewerId)
+    : undefined;
+
   return {
     id: team.id,
     name: team.name,
@@ -56,5 +66,7 @@ export async function fetchTeamDetail(id: string): Promise<TeamDetailDto | null>
     losses,
     points: wins * 3 + draws,
     members,
+    isMember: !!viewerMembership,
+    isCaptain: viewerMembership?.isCaptain ?? false,
   };
 }

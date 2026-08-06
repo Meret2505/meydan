@@ -169,6 +169,15 @@
     <string name="teams_losses">ýeňliş</string>
     <string name="teams_points">utuk</string>
     <string name="teams_roster">Düzüm</string>
+    <string name="teams_join_cta">Topara goşul</string>
+    <string name="teams_leave_cta">Topardan çyk</string>
+    <string name="teams_you_are_captain">Siz kapitan</string>
+    <string name="teams_create">Topar döret</string>
+    <string name="teams_create_title">Täze topar</string>
+    <string name="teams_create_cta">Topar döret</string>
+    <string name="teams_create_name">Ady</string>
+    <string name="teams_create_name_placeholder">Meselem: Ýyldyz</string>
+    <string name="teams_create_color">Reňk</string>
     <string name="teams_captain_badge">K</string>
     <string name="teams_you_paren">(siz)</string>
 

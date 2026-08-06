@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
-import com.meydan.app.core.common.DetailViewModel
 import com.meydan.app.core.common.TeamColors
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.TeamDetailDto
@@ -49,24 +51,34 @@ import com.meydan.app.feature.detail.DetailStateBox
  */
 @Composable
 fun TeamDetailScreen(container: AppContainer, teamId: String, onBack: () -> Unit) {
-    val viewModel: DetailViewModel<TeamDetailDto> = viewModel {
-        DetailViewModel { container.teamsRepository.detail(teamId) }
+    val viewModel: TeamDetailViewModel = viewModel {
+        TeamDetailViewModel(container.teamsRepository, teamId)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     DetailStateBox(
         loading = state.loading,
-        error = state.error,
-        hasData = state.data != null,
+        error = state.loadError,
+        hasData = state.team != null,
         onBack = onBack,
         onRetry = viewModel::retry,
     ) {
-        Content(team = state.data!!, onBack = onBack)
+        Content(
+            team = state.team!!,
+            acting = state.acting,
+            onBack = onBack,
+            onToggleMembership = viewModel::toggleMembership,
+        )
     }
 }
 
 @Composable
-private fun Content(team: TeamDetailDto, onBack: () -> Unit) {
+private fun Content(
+    team: TeamDetailDto,
+    acting: Boolean,
+    onBack: () -> Unit,
+    onToggleMembership: () -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     val palette = TeamColors.of(team.color)
 
@@ -109,6 +121,12 @@ private fun Content(team: TeamDetailDto, onBack: () -> Unit) {
                     Stat(team.losses.toString(), stringResource(R.string.teams_losses), colors.onSurface, Modifier.weight(1f))
                     Stat(team.points.toString(), stringResource(R.string.teams_points), Color(0xFFF2B53C), Modifier.weight(1f))
                 }
+                MembershipCta(
+                    team = team,
+                    acting = acting,
+                    onClick = onToggleMembership,
+                    modifier = Modifier.padding(top = 18.dp),
+                )
                 Text(
                     text = stringResource(R.string.teams_roster),
                     fontSize = 15.sp,
@@ -121,6 +139,67 @@ private fun Content(team: TeamDetailDto, onBack: () -> Unit) {
             MemberRow(m, Modifier.padding(horizontal = 24.dp).padding(bottom = 10.dp))
         }
         item { Spacer(Modifier.height(24.dp)) }
+    }
+}
+
+/**
+ * Join / leave. A captain gets an inert badge instead: leaving would strand the
+ * team, so the only captain exit is disbanding (web-only for now).
+ */
+@Composable
+private fun MembershipCta(
+    team: TeamDetailDto,
+    acting: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+
+    if (team.isCaptain) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(colors.surfaceVariant.copy(alpha = 0.5f)),
+        ) {
+            Text(
+                text = stringResource(R.string.teams_you_are_captain),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.onSurfaceVariant,
+            )
+        }
+        return
+    }
+
+    val member = team.isMember
+    Button(
+        onClick = onClick,
+        enabled = !acting,
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (member) colors.surfaceVariant else colors.primary,
+            contentColor = if (member) colors.onSurface else colors.onPrimary,
+        ),
+        modifier = modifier.fillMaxWidth().height(52.dp),
+    ) {
+        if (acting) {
+            CircularProgressIndicator(
+                strokeWidth = 2.5.dp,
+                modifier = Modifier.size(20.dp),
+                color = if (member) colors.onSurface else colors.onPrimary,
+            )
+        } else {
+            Text(
+                text = stringResource(
+                    if (member) R.string.teams_leave_cta else R.string.teams_join_cta,
+                ),
+                fontSize = 14.5.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
     }
 }
 

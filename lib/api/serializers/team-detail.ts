@@ -21,4 +21,8 @@ export interface TeamDetailDto {
   losses: number;
   points: number;
   members: TeamMemberDto[];
+  /** Viewer context — drives the join/leave action. */
+  isMember: boolean;
+  /** Captains cannot leave; their exit is disbanding the team. */
+  isCaptain: boolean;
 }

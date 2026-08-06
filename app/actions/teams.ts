@@ -2,6 +2,11 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  createTeam as createTeamService,
+  joinTeam as joinTeamService,
+  leaveTeam as leaveTeamService,
+} from "@/lib/services/teams";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -11,54 +16,38 @@ async function requireUserId() {
   return session.user.id;
 }
 
-const ALLOWED_COLORS = ["green", "blue", "amber", "red", "purple"] as const;
-
+/**
+ * Create/join/leave delegate to lib/services/teams.ts so the mobile API runs
+ * the same logic. A failed attempt (too-short name, captain leaving) still
+ * resolves silently here and simply re-renders, as it always has.
+ */
 export async function createTeam(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const locale = String(formData.get("locale") ?? "ru");
-  const name = String(formData.get("name") ?? "").trim();
-  const district = String(formData.get("district") ?? "").trim() || null;
-  const rawColor = String(formData.get("color") ?? "");
-  const color = (ALLOWED_COLORS as readonly string[]).includes(rawColor)
-    ? rawColor
-    : "green";
 
-  if (name.length < 2) return;
-
-  const team = await prisma.team.create({
-    data: {
-      name,
-      district,
-      color,
-      members: { create: { userId, isCaptain: true } },
-    },
+  const result = await createTeamService(userId, {
+    name: String(formData.get("name") ?? ""),
+    district: String(formData.get("district") ?? ""),
+    color: String(formData.get("color") ?? ""),
   });
+  if (!result.ok) return;
 
   revalidatePath(`/${locale}/teams`);
-  redirect(`/${locale}/teams/${team.id}`);
+  redirect(`/${locale}/teams/${result.teamId}`);
 }
 
 export async function joinTeam(teamId: string, locale: string): Promise<void> {
   const userId = await requireUserId();
-  await prisma.teamMember.upsert({
-    where: { teamId_userId: { teamId, userId } },
-    create: { teamId, userId },
-    update: {},
-  });
+  await joinTeamService(teamId, userId);
+
   revalidatePath(`/${locale}/teams/${teamId}`);
   revalidatePath(`/${locale}/teams`);
 }
 
 export async function leaveTeam(teamId: string, locale: string): Promise<void> {
   const userId = await requireUserId();
-  const member = await prisma.teamMember.findUnique({
-    where: { teamId_userId: { teamId, userId } },
-  });
-  if (!member) return;
-  if (member.isCaptain) return;
-  await prisma.teamMember.delete({
-    where: { teamId_userId: { teamId, userId } },
-  });
+  await leaveTeamService(teamId, userId);
+
   revalidatePath(`/${locale}/teams/${teamId}`);
   revalidatePath(`/${locale}/teams`);
 }

@@ -14,9 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -46,7 +50,11 @@ import com.meydan.app.core.network.dto.TeamCardDto
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeamsScreen(container: AppContainer, onTeamClick: (String) -> Unit) {
+fun TeamsScreen(
+    container: AppContainer,
+    onTeamClick: (String) -> Unit,
+    onCreateTeam: () -> Unit,
+) {
     val viewModel: TeamsViewModel = viewModel { TeamsViewModel(container.teamsRepository) }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -56,11 +64,30 @@ fun TeamsScreen(container: AppContainer, onTeamClick: (String) -> Unit) {
             .systemBarsPadding()
             .padding(horizontal = 24.dp),
     ) {
-        Text(
-            text = stringResource(R.string.nav_teams),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.nav_teams),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.weight(1f),
+            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable(onClick = onCreateTeam),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.teams_create),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
+        }
         PullToRefreshBox(
             isRefreshing = state.refreshing,
             onRefresh = viewModel::pullRefresh,

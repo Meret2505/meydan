@@ -61,6 +61,18 @@ data class TeamDetailDto(
     val losses: Int,
     val points: Int,
     val members: List<TeamMemberDto> = emptyList(),
+    /** Viewer context — drives the join/leave action. */
+    val isMember: Boolean = false,
+    /** Captains cannot leave; their exit is disbanding the team. */
+    val isCaptain: Boolean = false,
+)
+
+/** Body of POST /teams. */
+@Serializable
+data class CreateTeamRequest(
+    val name: String,
+    val district: String? = null,
+    val color: String? = null,
 )
 
 // --- Tournament detail (GET /tournaments/[id]) ---

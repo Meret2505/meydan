@@ -4,6 +4,7 @@ import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.TeamsCache
 import com.meydan.app.core.network.MeydanApi
+import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.core.network.dto.TeamDetailDto
 import com.meydan.app.core.network.dto.TeamsResponse
 
@@ -22,6 +23,18 @@ class TeamsRepository(
 
     suspend fun detail(id: String): ApiResult<TeamDetailDto> =
         apiCall { api.getTeamDetail(id) }
+
+    /** Creates a team (caller becomes captain); returns the new team's detail. */
+    suspend fun createTeam(req: CreateTeamRequest): ApiResult<TeamDetailDto> =
+        apiCall { api.createTeam(req) }
+
+    /** Join returns the updated detail (roster, count, membership flags). */
+    suspend fun joinTeam(id: String): ApiResult<TeamDetailDto> =
+        apiCall { api.joinTeam(id) }
+
+    /** Leave returns the updated detail. Captains cannot leave (403). */
+    suspend fun leaveTeam(id: String): ApiResult<TeamDetailDto> =
+        apiCall { api.leaveTeam(id) }
 
     suspend fun clearCache() = teamsCache.clear()
 }

@@ -2,6 +2,7 @@ package com.meydan.app.core.network
 
 import com.meydan.app.core.network.dto.ApiResponse
 import com.meydan.app.core.network.dto.CreateGameRequest
+import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.core.network.dto.FcmTokenRequest
 import com.meydan.app.core.network.dto.FavoriteResponse
 import com.meydan.app.core.network.dto.FieldDetailDto
@@ -96,6 +97,16 @@ interface MeydanApi {
 
     @GET("api/v1/teams")
     suspend fun getTeams(): Response<ApiResponse<TeamsResponse>>
+
+    @POST("api/v1/teams")
+    suspend fun createTeam(@Body body: CreateTeamRequest): Response<ApiResponse<TeamDetailDto>>
+
+    @POST("api/v1/teams/{id}/members")
+    suspend fun joinTeam(@Path("id") id: String): Response<ApiResponse<TeamDetailDto>>
+
+    /** Captains cannot leave (403); disbanding is their exit. */
+    @HTTP(method = "DELETE", path = "api/v1/teams/{id}/members")
+    suspend fun leaveTeam(@Path("id") id: String): Response<ApiResponse<TeamDetailDto>>
 
     @GET("api/v1/tournaments")
     suspend fun getTournaments(): Response<ApiResponse<TournamentsResponse>>
