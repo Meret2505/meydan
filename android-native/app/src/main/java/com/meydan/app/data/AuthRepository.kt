@@ -36,6 +36,13 @@ class AuthRepository(
 
     suspend fun cachedUser(): UserDto? = userCache.current()
 
+    /**
+     * The cached profile as a stream. Screens that must reflect edits made
+     * elsewhere (e.g. the profile tab after profile editing) observe this so a
+     * cache write updates them without re-fetching.
+     */
+    val cachedUserFlow: kotlinx.coroutines.flow.Flow<UserDto?> = userCache.user
+
     suspend fun phoneLogin(
         phone: String,
         password: String,

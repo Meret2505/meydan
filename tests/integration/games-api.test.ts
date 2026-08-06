@@ -465,6 +465,49 @@ describe.skipIf(!dbAvailable)("games API (integration)", () => {
       expect(data.accessToken).toBeUndefined();
     });
 
+    it("updates the profile-edit fields (skill level and open-to-invite)", async () => {
+      const me = await makeUser("Me", "+99310000001");
+
+      const data = (
+        await body(
+          await patchMe(
+            await authed(`${BASE}/me`, me.id, {
+              method: "PATCH",
+              body: JSON.stringify({
+                skillLevel: "ADVANCED",
+                isOpenToInvite: false,
+              }),
+            }),
+          ),
+        )
+      ).data;
+
+      expect(data.user.skillLevel).toBe("ADVANCED");
+      expect(data.user.isOpenToInvite).toBe(false);
+    });
+
+    it("falls back to BEGINNER for an unknown skill level", async () => {
+      const me = await makeUser("Me", "+99310000001");
+      // Seed a non-default value so the fallback is an observable overwrite.
+      await prisma.user.update({
+        where: { id: me.id },
+        data: { skillLevel: "ADVANCED" },
+      });
+
+      const data = (
+        await body(
+          await patchMe(
+            await authed(`${BASE}/me`, me.id, {
+              method: "PATCH",
+              body: JSON.stringify({ skillLevel: "WIZARD" }),
+            }),
+          ),
+        )
+      ).data;
+
+      expect(data.user.skillLevel).toBe("BEGINNER");
+    });
+
     it("rejects claiming a phone another user already holds", async () => {
       await makeUser("Owner", "+99312345678");
       const me = await prisma.user.create({ data: { name: "Squatter" } });

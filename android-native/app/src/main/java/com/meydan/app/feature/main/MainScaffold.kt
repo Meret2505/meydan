@@ -38,6 +38,7 @@ fun MainScaffold(
     onTeamClick: (String) -> Unit,
     onTournamentClick: (String) -> Unit,
     onCreateGame: () -> Unit,
+    onEditProfile: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.GAMES) }
     val currentLang = ConfigurationCompat.getLocales(LocalConfiguration.current)
@@ -66,6 +67,7 @@ fun MainScaffold(
                     container = container,
                     onLoggedOut = onLoggedOut,
                     onToggleLanguage = { toggleLanguage(currentLang) },
+                    onEditProfile = onEditProfile,
                 )
             }
         }

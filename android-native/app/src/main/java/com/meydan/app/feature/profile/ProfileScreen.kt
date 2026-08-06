@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,6 +53,7 @@ fun ProfileScreen(
     container: AppContainer,
     onLoggedOut: () -> Unit,
     onToggleLanguage: () -> Unit,
+    onEditProfile: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = viewModel { ProfileViewModel(container.authRepository) }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -171,6 +173,13 @@ fun ProfileScreen(
                 .clip(RoundedCornerShape(16.dp))
                 .background(colors.surface),
         ) {
+            SettingsRow(
+                icon = Icons.Outlined.Edit,
+                label = stringResource(R.string.profile_edit),
+                trailing = null,
+                onClick = onEditProfile,
+            )
+            androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
             SettingsRow(
                 icon = Icons.Outlined.Language,
                 label = stringResource(R.string.profile_language),

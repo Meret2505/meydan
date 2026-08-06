@@ -17,6 +17,8 @@ const patchSchema = z
     district: z.string().optional(),
     age: z.union([z.string(), z.number(), z.null()]).optional(),
     locale: z.string().optional(),
+    skillLevel: z.string().optional(),
+    isOpenToInvite: z.boolean().optional(),
   })
   .strict();
 

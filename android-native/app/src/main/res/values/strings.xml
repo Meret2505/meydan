@@ -57,6 +57,15 @@
     <!-- profile -->
     <string name="profile_open_invites">Открыт к приглашению в игры</string>
     <string name="profile_closed_invites">Закрыт от приглашений</string>
+    <string name="profile_edit">Редактировать профиль</string>
+    <string name="profile_edit_title">Редактировать профиль</string>
+    <string name="profile_edit_name">Имя</string>
+    <string name="profile_edit_district">Район</string>
+    <string name="profile_edit_skill">Уровень игры</string>
+    <string name="profile_edit_save">Сохранить</string>
+    <string name="skill_beginner">Новичок</string>
+    <string name="skill_intermediate">Средний</string>
+    <string name="skill_advanced">Продвинутый</string>
     <string name="profile_settings">Настройки</string>
     <string name="profile_language">Язык интерфейса</string>
     <string name="profile_logout_full">Выйти из аккаунта</string>

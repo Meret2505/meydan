@@ -39,4 +39,6 @@ data class ProfilePatch(
     val district: String? = null,
     val age: String? = null,
     val locale: String? = null,
+    val skillLevel: String? = null,
+    val isOpenToInvite: Boolean? = null,
 )

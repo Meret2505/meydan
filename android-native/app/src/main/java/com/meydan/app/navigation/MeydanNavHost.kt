@@ -25,6 +25,7 @@ import com.meydan.app.feature.main.MainScaffold
 import com.meydan.app.feature.teamdetail.TeamDetailScreen
 import com.meydan.app.feature.tournamentdetail.TournamentDetailScreen
 import com.meydan.app.feature.onboarding.OnboardingFlow
+import com.meydan.app.feature.profileedit.ProfileEditScreen
 
 /** Route names, referenced from navigation calls only. */
 object Routes {
@@ -35,6 +36,7 @@ object Routes {
     const val GAME_DETAIL = "game/{gameId}"
     fun gameDetail(id: String) = "game/$id"
     const val CREATE_GAME = "create-game"
+    const val PROFILE_EDIT = "profile-edit"
     const val FIELD_DETAIL = "field/{fieldId}"
     fun fieldDetail(id: String) = "field/$id"
     const val TEAM_DETAIL = "team/{teamId}"
@@ -136,6 +138,14 @@ fun MeydanApp(container: AppContainer) {
                 onTeamClick = { navController.navigate(Routes.teamDetail(it)) },
                 onTournamentClick = { navController.navigate(Routes.tournamentDetail(it)) },
                 onCreateGame = { navController.navigate(Routes.CREATE_GAME) },
+                onEditProfile = { navController.navigate(Routes.PROFILE_EDIT) },
+            )
+        }
+        composable(Routes.PROFILE_EDIT) {
+            ProfileEditScreen(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onSaved = { navController.popBackStack() },
             )
         }
         composable(Routes.CREATE_GAME) {

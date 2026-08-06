@@ -1,4 +1,4 @@
-import type { Position, Prisma } from "@prisma/client";
+import type { Position, Prisma, SkillLevel } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/phone";
 import { parseAge } from "@/lib/validate";
@@ -20,6 +20,8 @@ const VALID_POSITIONS: Position[] = [
   "FORWARD",
 ];
 
+const VALID_SKILLS: SkillLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+
 const VALID_LOCALES = ["ru", "tm"];
 
 export type OnboardingPatch = {
@@ -29,6 +31,10 @@ export type OnboardingPatch = {
   district?: string;
   age?: string | number | null;
   locale?: string;
+  // Profile-editing extras (not collected during onboarding). skillLevel and
+  // isOpenToInvite are only sent by the mobile profile-edit screen.
+  skillLevel?: string;
+  isOpenToInvite?: boolean;
 };
 
 export type OnboardingError = "invalid_input" | "phone_taken";
@@ -77,6 +83,18 @@ export async function updateOnboardingProfile(
 
   if (patch.age !== undefined) {
     data.age = patch.age === null ? null : parseAge(String(patch.age));
+  }
+
+  if (patch.skillLevel !== undefined) {
+    // Mirror the web profile action: an unrecognized value falls back to
+    // BEGINNER rather than rejecting the whole patch.
+    data.skillLevel = VALID_SKILLS.includes(patch.skillLevel as SkillLevel)
+      ? (patch.skillLevel as SkillLevel)
+      : "BEGINNER";
+  }
+
+  if (patch.isOpenToInvite !== undefined) {
+    data.isOpenToInvite = patch.isOpenToInvite;
   }
 
   if (patch.phone !== undefined) {

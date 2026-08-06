@@ -2,7 +2,6 @@ package com.meydan.app.feature.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.network.dto.UserDto
 import com.meydan.app.data.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,12 +28,16 @@ class ProfileViewModel(
     val state: StateFlow<UiState> = _state.asStateFlow()
 
     init {
+        // Observe the cache so edits made on the profile-edit screen (which
+        // writes the cache) are reflected the moment we return here.
         viewModelScope.launch {
-            authRepository.cachedUser()?.let { u -> _state.update { it.copy(user = u) } }
-            (authRepository.getMe() as? ApiResult.Success)?.let { r ->
-                _state.update { it.copy(user = r.data.user) }
+            authRepository.cachedUserFlow.collect { u ->
+                if (u != null) _state.update { it.copy(user = u) }
             }
         }
+        // Refresh from the server; getMe writes the cache, so the collector above
+        // picks up the result.
+        viewModelScope.launch { authRepository.getMe() }
     }
 
     fun logout() {

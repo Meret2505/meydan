@@ -46,6 +46,15 @@
     <!-- profile -->
     <string name="profile_open_invites">Oýunlara çakylyga açyk</string>
     <string name="profile_closed_invites">Çakylyklardan ýapyk</string>
+    <string name="profile_edit">Profili üýtget</string>
+    <string name="profile_edit_title">Profili üýtget</string>
+    <string name="profile_edit_name">At</string>
+    <string name="profile_edit_district">Etrap</string>
+    <string name="profile_edit_skill">Oýun derejesi</string>
+    <string name="profile_edit_save">Ýatda sakla</string>
+    <string name="skill_beginner">Başlangyç</string>
+    <string name="skill_intermediate">Orta</string>
+    <string name="skill_advanced">Ösen</string>
     <string name="profile_settings">Sazlamalar</string>
     <string name="profile_language">Interfeýs dili</string>
     <string name="profile_logout_full">Hasapdan çyk</string>
