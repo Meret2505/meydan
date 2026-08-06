@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { GET as getTeams, POST as createRoute } from "@/app/api/v1/teams/route";
-import { GET as getTeam } from "@/app/api/v1/teams/[id]/route";
+import {
+  DELETE as disbandRoute,
+  GET as getTeam,
+} from "@/app/api/v1/teams/[id]/route";
+import { DELETE as removeMemberRoute } from "@/app/api/v1/teams/[id]/members/[userId]/route";
 import {
   DELETE as leaveRoute,
   POST as joinRoute,
@@ -60,6 +64,10 @@ async function makeTeam(captainId: string, name = "Ýyldyz") {
 
 describe.skipIf(!dbAvailable)("teams API (integration)", () => {
   beforeEach(async () => {
+    // Order matters: games reference both teams and users, and none of those
+    // FKs cascade.
+    await prisma.gameParticipant.deleteMany();
+    await prisma.game.deleteMany();
     await prisma.teamMember.deleteMany();
     await prisma.team.deleteMany();
     await prisma.refreshToken.deleteMany();
@@ -209,6 +217,121 @@ describe.skipIf(!dbAvailable)("teams API (integration)", () => {
       );
 
       expect(response.status).toBe(404);
+    });
+  });
+
+  describe("captain management", () => {
+    const memberCtx = (id: string, userId: string) => ({
+      params: Promise.resolve({ id, userId }),
+    });
+
+    it("lets the captain remove a member", async () => {
+      const captain = await makeUser("Captain", "+99310000001");
+      const player = await makeUser("Player", "+99310000002");
+      const team = await makeTeam(captain.id);
+      await prisma.teamMember.create({ data: { teamId: team.id, userId: player.id } });
+
+      const response = await removeMemberRoute(
+        await authed(`${BASE}/teams/${team.id}/members/${player.id}`, captain.id, {
+          method: "DELETE",
+        }),
+        memberCtx(team.id, player.id),
+      );
+
+      expect(response.status).toBe(200);
+      expect((await body(response)).data.memberCount).toBe(1);
+    });
+
+    it("refuses to let the captain remove themselves", async () => {
+      // Same captain-vacancy hole as leaving, reached a different way.
+      const captain = await makeUser("Captain", "+99310000001");
+      const team = await makeTeam(captain.id);
+
+      const response = await removeMemberRoute(
+        await authed(`${BASE}/teams/${team.id}/members/${captain.id}`, captain.id, {
+          method: "DELETE",
+        }),
+        memberCtx(team.id, captain.id),
+      );
+
+      expect(response.status).toBe(403);
+      expect((await body(response)).error).toBe("cannot_remove_self");
+      expect(await prisma.teamMember.count({ where: { teamId: team.id } })).toBe(1);
+    });
+
+    it("refuses removal by a non-captain", async () => {
+      const captain = await makeUser("Captain", "+99310000001");
+      const player = await makeUser("Player", "+99310000002");
+      const other = await makeUser("Other", "+99310000003");
+      const team = await makeTeam(captain.id);
+      await prisma.teamMember.create({ data: { teamId: team.id, userId: player.id } });
+      await prisma.teamMember.create({ data: { teamId: team.id, userId: other.id } });
+
+      const response = await removeMemberRoute(
+        await authed(`${BASE}/teams/${team.id}/members/${player.id}`, other.id, {
+          method: "DELETE",
+        }),
+        memberCtx(team.id, player.id),
+      );
+
+      expect(response.status).toBe(403);
+      expect((await body(response)).error).toBe("not_captain");
+    });
+
+    it("disbands an unused team", async () => {
+      const captain = await makeUser("Captain", "+99310000001");
+      const player = await makeUser("Player", "+99310000002");
+      const team = await makeTeam(captain.id);
+      await prisma.teamMember.create({ data: { teamId: team.id, userId: player.id } });
+
+      const response = await disbandRoute(
+        await authed(`${BASE}/teams/${team.id}`, captain.id, { method: "DELETE" }),
+        ctx(team.id),
+      );
+
+      expect(response.status).toBe(200);
+      expect(await prisma.team.count()).toBe(0);
+      expect(await prisma.teamMember.count()).toBe(0);
+    });
+
+    it("refuses to disband a team that has games", async () => {
+      // Game.teamId has no onDelete: Cascade — deleting anyway raises an FK
+      // error, so this guard is load-bearing, not cosmetic.
+      const captain = await makeUser("Captain", "+99310000001");
+      const team = await makeTeam(captain.id);
+      await prisma.game.create({
+        data: {
+          organizerId: captain.id,
+          teamId: team.id,
+          totalSpots: 10,
+          scheduledAt: new Date(Date.now() + 86_400_000),
+          fieldName: "Test pitch",
+        },
+      });
+
+      const response = await disbandRoute(
+        await authed(`${BASE}/teams/${team.id}`, captain.id, { method: "DELETE" }),
+        ctx(team.id),
+      );
+
+      expect(response.status).toBe(409);
+      expect((await body(response)).error).toBe("team_in_use");
+      expect(await prisma.team.count()).toBe(1);
+    });
+
+    it("refuses to disband by a non-captain", async () => {
+      const captain = await makeUser("Captain", "+99310000001");
+      const player = await makeUser("Player", "+99310000002");
+      const team = await makeTeam(captain.id);
+      await prisma.teamMember.create({ data: { teamId: team.id, userId: player.id } });
+
+      const response = await disbandRoute(
+        await authed(`${BASE}/teams/${team.id}`, player.id, { method: "DELETE" }),
+        ctx(team.id),
+      );
+
+      expect(response.status).toBe(403);
+      expect(await prisma.team.count()).toBe(1);
     });
   });
 

@@ -172,6 +172,13 @@
     <string name="teams_join_cta">Topara goşul</string>
     <string name="teams_leave_cta">Topardan çyk</string>
     <string name="teams_you_are_captain">Siz kapitan</string>
+    <string name="teams_remove_title">Oýunçy aýrylsynmy?</string>
+    <string name="teams_remove_body">%1$s mundan beýläk toparyň düzüminde bolmaz.</string>
+    <string name="teams_remove_confirm">Aýyr</string>
+    <string name="teams_disband_cta">Topary dargat</string>
+    <string name="teams_disband_title">Topar dargadylsynmy?</string>
+    <string name="teams_disband_body">Topar düzümi bilen bilelikde pozular. Bu hereketi yzyna gaýtaryp bolmaýar.</string>
+    <string name="teams_disband_confirm">Dargat</string>
     <string name="teams_create">Topar döret</string>
     <string name="teams_create_title">Täze topar</string>
     <string name="teams_create_cta">Topar döret</string>
@@ -212,6 +219,7 @@
     <!-- errors -->
     <string name="error_wrong_password">Parol nädogry</string>
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>
+    <string name="error_team_in_use">Toparyň oýunlary bar — ony dargadyp bolmaýar.</string>
     <string name="error_auth_failed">Girip bolmady</string>
     <string name="error_rate_limited">Örän köp synanyşyk. Soňrak synanyşyň.</string>
     <string name="error_offline_title">Birikme ýok</string>
@@ -220,6 +228,7 @@
 
     <!-- common -->
     <string name="common_back">Yza</string>
+    <string name="common_cancel">Ýatyr</string>
     <string name="common_next">Indiki</string>
     <string name="common_skip">Geç</string>
     <string name="common_loading">Ýüklenýär…</string>

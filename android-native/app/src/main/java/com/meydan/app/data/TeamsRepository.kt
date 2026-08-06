@@ -5,6 +5,7 @@ import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.TeamsCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.CreateTeamRequest
+import com.meydan.app.core.network.dto.DisbandedDto
 import com.meydan.app.core.network.dto.TeamDetailDto
 import com.meydan.app.core.network.dto.TeamsResponse
 
@@ -35,6 +36,14 @@ class TeamsRepository(
     /** Leave returns the updated detail. Captains cannot leave (403). */
     suspend fun leaveTeam(id: String): ApiResult<TeamDetailDto> =
         apiCall { api.leaveTeam(id) }
+
+    /** Captain removes a player; returns the updated detail. */
+    suspend fun removeMember(id: String, userId: String): ApiResult<TeamDetailDto> =
+        apiCall { api.removeMember(id, userId) }
+
+    /** Captain disbands the team. Refused while it still has games (409). */
+    suspend fun disbandTeam(id: String): ApiResult<DisbandedDto> =
+        apiCall { api.disbandTeam(id) }
 
     suspend fun clearCache() = teamsCache.clear()
 }

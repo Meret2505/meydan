@@ -3,6 +3,7 @@ package com.meydan.app.core.network
 import com.meydan.app.core.network.dto.ApiResponse
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.CreateTeamRequest
+import com.meydan.app.core.network.dto.DisbandedDto
 import com.meydan.app.core.network.dto.FcmTokenRequest
 import com.meydan.app.core.network.dto.FavoriteResponse
 import com.meydan.app.core.network.dto.FieldDetailDto
@@ -107,6 +108,17 @@ interface MeydanApi {
     /** Captains cannot leave (403); disbanding is their exit. */
     @HTTP(method = "DELETE", path = "api/v1/teams/{id}/members")
     suspend fun leaveTeam(@Path("id") id: String): Response<ApiResponse<TeamDetailDto>>
+
+    /** Captain removes a player. Removing yourself is refused (403). */
+    @HTTP(method = "DELETE", path = "api/v1/teams/{id}/members/{userId}")
+    suspend fun removeMember(
+        @Path("id") id: String,
+        @Path("userId") userId: String,
+    ): Response<ApiResponse<TeamDetailDto>>
+
+    /** Captain-only. Refused while the team still has games (409). */
+    @HTTP(method = "DELETE", path = "api/v1/teams/{id}")
+    suspend fun disbandTeam(@Path("id") id: String): Response<ApiResponse<DisbandedDto>>
 
     @GET("api/v1/tournaments")
     suspend fun getTournaments(): Response<ApiResponse<TournamentsResponse>>

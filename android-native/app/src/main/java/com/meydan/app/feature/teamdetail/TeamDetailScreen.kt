@@ -1,6 +1,7 @@
 package com.meydan.app.feature.teamdetail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +18,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PersonRemove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +39,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +50,7 @@ import com.meydan.app.core.common.TeamColors
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.TeamDetailDto
 import com.meydan.app.core.network.dto.TeamMemberDto
+import com.meydan.app.feature.auth.errorTextRes
 import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
 
@@ -56,6 +66,12 @@ fun TeamDetailScreen(container: AppContainer, teamId: String, onBack: () -> Unit
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    // The team row is gone, so there is nothing left to show — leave.
+    if (state.disbanded) {
+        LaunchedEffect(Unit) { onBack() }
+        return
+    }
+
     DetailStateBox(
         loading = state.loading,
         error = state.loadError,
@@ -66,18 +82,75 @@ fun TeamDetailScreen(container: AppContainer, teamId: String, onBack: () -> Unit
         Content(
             team = state.team!!,
             acting = state.acting,
+            actionErrorCode = state.actionErrorCode,
             onBack = onBack,
             onToggleMembership = viewModel::toggleMembership,
+            onRemoveMember = viewModel::askRemove,
+            onDisband = viewModel::askDisband,
         )
     }
+
+    state.confirmingRemove?.let { member ->
+        ConfirmDialog(
+            title = stringResource(R.string.teams_remove_title),
+            text = stringResource(R.string.teams_remove_body, member.name),
+            confirmLabel = stringResource(R.string.teams_remove_confirm),
+            onConfirm = viewModel::confirmRemove,
+            onDismiss = viewModel::dismissRemove,
+        )
+    }
+
+    if (state.confirmingDisband) {
+        ConfirmDialog(
+            title = stringResource(R.string.teams_disband_title),
+            text = stringResource(R.string.teams_disband_body),
+            confirmLabel = stringResource(R.string.teams_disband_confirm),
+            onConfirm = viewModel::confirmDisband,
+            onDismiss = viewModel::dismissDisband,
+        )
+    }
+}
+
+/**
+ * Shared destructive confirmation. The shape is explicit because M3 defaults a
+ * dialog to shapes.extraLarge, which this theme defines as a button pill.
+ */
+@Composable
+private fun ConfirmDialog(
+    title: String,
+    text: String,
+    confirmLabel: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(28.dp),
+        title = { Text(title) },
+        text = { Text(text) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(confirmLabel, color = colors.error, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.common_cancel))
+            }
+        },
+    )
 }
 
 @Composable
 private fun Content(
     team: TeamDetailDto,
     acting: Boolean,
+    actionErrorCode: String?,
     onBack: () -> Unit,
     onToggleMembership: () -> Unit,
+    onRemoveMember: (TeamMemberDto) -> Unit,
+    onDisband: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val palette = TeamColors.of(team.color)
@@ -127,6 +200,14 @@ private fun Content(
                     onClick = onToggleMembership,
                     modifier = Modifier.padding(top = 18.dp),
                 )
+                actionErrorCode?.let { code ->
+                    Text(
+                        text = stringResource(errorTextRes(code)),
+                        color = colors.error,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 10.dp),
+                    )
+                }
                 Text(
                     text = stringResource(R.string.teams_roster),
                     fontSize = 15.sp,
@@ -136,7 +217,38 @@ private fun Content(
             }
         }
         items(team.members, key = { it.id }) { m ->
-            MemberRow(m, Modifier.padding(horizontal = 24.dp).padding(bottom = 10.dp))
+            MemberRow(
+                m = m,
+                // Captains can remove anyone but themselves.
+                onRemove = if (team.isCaptain && !m.isCaptain) {
+                    { onRemoveMember(m) }
+                } else {
+                    null
+                },
+                enabled = !acting,
+                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 10.dp),
+            )
+        }
+        if (team.isCaptain) {
+            item {
+                // Disbanding is the captain's only exit, so it lives at the end
+                // of the roster rather than competing with the primary CTA.
+                Text(
+                    text = stringResource(R.string.teams_disband_cta),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.error,
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 10.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(colors.error.copy(alpha = 0.10f))
+                        .clickable(enabled = !acting, onClick = onDisband)
+                        .padding(vertical = 14.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
         item { Spacer(Modifier.height(24.dp)) }
     }
@@ -215,7 +327,12 @@ private fun Stat(value: String, label: String, valueColor: Color, modifier: Modi
 }
 
 @Composable
-private fun MemberRow(m: TeamMemberDto, modifier: Modifier) {
+private fun MemberRow(
+    m: TeamMemberDto,
+    onRemove: (() -> Unit)?,
+    enabled: Boolean,
+    modifier: Modifier,
+) {
     val colors = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -248,6 +365,16 @@ private fun MemberRow(m: TeamMemberDto, modifier: Modifier) {
             fontWeight = FontWeight.ExtraBold,
             color = attendanceColor(m.attendanceRate),
         )
+        if (onRemove != null) {
+            IconButton(onClick = onRemove, enabled = enabled, modifier = Modifier.size(32.dp)) {
+                Icon(
+                    imageVector = Icons.Outlined.PersonRemove,
+                    contentDescription = stringResource(R.string.teams_remove_confirm),
+                    tint = colors.error,
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+        }
     }
 }
 

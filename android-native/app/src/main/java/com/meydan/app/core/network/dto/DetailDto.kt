@@ -75,6 +75,10 @@ data class CreateTeamRequest(
     val color: String? = null,
 )
 
+/** Response of DELETE /teams/{id} — the row is gone, so there is no detail. */
+@Serializable
+data class DisbandedDto(val disbanded: Boolean)
+
 // --- Tournament detail (GET /tournaments/[id]) ---
 
 @Serializable

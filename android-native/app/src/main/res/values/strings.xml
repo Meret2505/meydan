@@ -184,6 +184,13 @@
     <string name="teams_join_cta">Вступить в команду</string>
     <string name="teams_leave_cta">Выйти из команды</string>
     <string name="teams_you_are_captain">Вы капитан</string>
+    <string name="teams_remove_title">Убрать игрока?</string>
+    <string name="teams_remove_body">%1$s больше не будет в составе команды.</string>
+    <string name="teams_remove_confirm">Убрать</string>
+    <string name="teams_disband_cta">Распустить команду</string>
+    <string name="teams_disband_title">Распустить команду?</string>
+    <string name="teams_disband_body">Команда будет удалена вместе с составом. Это действие нельзя отменить.</string>
+    <string name="teams_disband_confirm">Распустить</string>
     <string name="teams_create">Создать команду</string>
     <string name="teams_create_title">Новая команда</string>
     <string name="teams_create_cta">Создать команду</string>
@@ -224,6 +231,7 @@
     <!-- errors -->
     <string name="error_wrong_password">Неверный пароль</string>
     <string name="error_invalid_input">Заполните оба поля (минимум 6 символов)</string>
+    <string name="error_team_in_use">У команды есть игры — её нельзя распустить.</string>
     <string name="error_auth_failed">Не удалось войти</string>
     <string name="error_rate_limited">Слишком много попыток. Попробуйте позже.</string>
     <string name="error_offline_title">Нет соединения</string>
@@ -232,6 +240,7 @@
 
     <!-- common -->
     <string name="common_back">Назад</string>
+    <string name="common_cancel">Отмена</string>
     <string name="common_next">Далее</string>
     <string name="common_skip">Пропустить</string>
     <string name="common_loading">Загрузка…</string>

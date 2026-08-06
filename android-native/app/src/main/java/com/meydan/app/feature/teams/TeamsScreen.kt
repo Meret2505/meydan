@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +58,10 @@ fun TeamsScreen(
 ) {
     val viewModel: TeamsViewModel = viewModel { TeamsViewModel(container.teamsRepository) }
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // Re-runs whenever the tab is entered, so returning from create / disband /
+    // join / leave shows the real roster rather than the cached one.
+    LaunchedEffect(Unit) { viewModel.refreshOnEnter() }
 
     Column(
         modifier = Modifier

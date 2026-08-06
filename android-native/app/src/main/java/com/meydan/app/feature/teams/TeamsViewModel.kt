@@ -41,6 +41,16 @@ class TeamsViewModel(
         viewModelScope.launch { load() }
     }
 
+    /**
+     * Silent re-fetch when the tab is shown again. This ViewModel is scoped to
+     * the home back-stack entry, so `init` does not re-run after a trip to a
+     * team detail or the create form — without this the list would still show a
+     * team that was just disbanded, or miss one just created.
+     */
+    fun refreshOnEnter() {
+        viewModelScope.launch { load() }
+    }
+
     private suspend fun load() {
         when (val result = teamsRepository.refresh()) {
             is ApiResult.Success -> _state.update {

@@ -159,6 +159,7 @@ internal fun errorTextRes(code: String): Int = when (code) {
     "wrong_password" -> R.string.error_wrong_password
     "invalid_input" -> R.string.error_invalid_input
     "rate_limited" -> R.string.error_rate_limited
+    "team_in_use" -> R.string.error_team_in_use
     "network" -> R.string.error_offline_title
     else -> R.string.error_auth_failed
 }

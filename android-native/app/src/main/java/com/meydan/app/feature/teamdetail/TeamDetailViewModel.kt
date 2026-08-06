@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.network.dto.TeamDetailDto
+import com.meydan.app.core.network.dto.TeamMemberDto
 import com.meydan.app.data.TeamsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +31,12 @@ class TeamDetailViewModel(
         val acting: Boolean = false,
         val loadError: Boolean = false,
         val actionErrorCode: String? = null,
+        /** Both captain actions are destructive, so they are confirmed first. */
+        val confirmingDisband: Boolean = false,
+        /** The member the captain is about to remove, if any. */
+        val confirmingRemove: TeamMemberDto? = null,
+        /** Set once the team is gone; the screen leaves. */
+        val disbanded: Boolean = false,
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -66,6 +73,56 @@ class TeamDetailViewModel(
             when (result) {
                 is ApiResult.Success ->
                     _state.update { it.copy(team = result.data, acting = false) }
+                is ApiResult.Failure ->
+                    _state.update { it.copy(acting = false, actionErrorCode = result.code) }
+                ApiResult.NetworkError ->
+                    _state.update { it.copy(acting = false, actionErrorCode = "network") }
+            }
+        }
+    }
+
+    // --- Captain actions ---
+
+    fun askRemove(member: TeamMemberDto) {
+        val team = _state.value.team ?: return
+        // The captain cannot remove themselves — that would strand the team.
+        if (!team.isCaptain || member.isCaptain) return
+        _state.update { it.copy(confirmingRemove = member) }
+    }
+
+    fun dismissRemove() = _state.update { it.copy(confirmingRemove = null) }
+
+    fun confirmRemove() {
+        val member = _state.value.confirmingRemove ?: return
+        if (_state.value.acting) return
+        _state.update { it.copy(acting = true, confirmingRemove = null, actionErrorCode = null) }
+        viewModelScope.launch {
+            when (val result = teamsRepository.removeMember(teamId, member.id)) {
+                is ApiResult.Success ->
+                    _state.update { it.copy(team = result.data, acting = false) }
+                is ApiResult.Failure ->
+                    _state.update { it.copy(acting = false, actionErrorCode = result.code) }
+                ApiResult.NetworkError ->
+                    _state.update { it.copy(acting = false, actionErrorCode = "network") }
+            }
+        }
+    }
+
+    fun askDisband() {
+        val team = _state.value.team ?: return
+        if (!team.isCaptain) return
+        _state.update { it.copy(confirmingDisband = true) }
+    }
+
+    fun dismissDisband() = _state.update { it.copy(confirmingDisband = false) }
+
+    fun confirmDisband() {
+        if (_state.value.acting) return
+        _state.update { it.copy(acting = true, confirmingDisband = false, actionErrorCode = null) }
+        viewModelScope.launch {
+            when (val result = teamsRepository.disbandTeam(teamId)) {
+                is ApiResult.Success ->
+                    _state.update { it.copy(acting = false, disbanded = true) }
                 is ApiResult.Failure ->
                     _state.update { it.copy(acting = false, actionErrorCode = result.code) }
                 ApiResult.NetworkError ->

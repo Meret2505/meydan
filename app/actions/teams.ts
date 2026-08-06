@@ -1,11 +1,12 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import {
   createTeam as createTeamService,
+  disbandTeam as disbandTeamService,
   joinTeam as joinTeamService,
   leaveTeam as leaveTeamService,
+  removeMember as removeMemberService,
 } from "@/lib/services/teams";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -58,41 +59,18 @@ export async function removeMember(
   locale: string,
 ): Promise<void> {
   const userId = await requireUserId();
-  const captain = await prisma.teamMember.findUnique({
-    where: { teamId_userId: { teamId, userId } },
-  });
-  if (!captain?.isCaptain) return;
-  if (memberUserId === userId) return;
+  await removeMemberService(teamId, userId, memberUserId);
 
-  await prisma.teamMember.deleteMany({
-    where: { teamId, userId: memberUserId },
-  });
   revalidatePath(`/${locale}/teams/${teamId}`);
 }
 
 export async function disbandTeam(teamId: string, locale: string): Promise<void> {
   const userId = await requireUserId();
-  const captain = await prisma.teamMember.findUnique({
-    where: { teamId_userId: { teamId, userId } },
-  });
-  if (!captain?.isCaptain) return;
+  const result = await disbandTeamService(teamId, userId);
+  // A refused disband (not captain, or the team still has games) resolves
+  // silently and re-renders, as it always has.
+  if (!result.ok) return;
 
-  const refs = await prisma.team.findUnique({
-    where: { id: teamId },
-    select: {
-      _count: { select: { games: true, homeMatches: true, awayMatches: true } },
-    },
-  });
-  const total =
-    (refs?._count.games ?? 0) +
-    (refs?._count.homeMatches ?? 0) +
-    (refs?._count.awayMatches ?? 0);
-  if (total > 0) return;
-
-  await prisma.$transaction([
-    prisma.teamMember.deleteMany({ where: { teamId } }),
-    prisma.team.delete({ where: { id: teamId } }),
-  ]);
   revalidatePath(`/${locale}/teams`);
   redirect(`/${locale}/teams`);
 }

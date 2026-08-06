@@ -110,3 +110,104 @@ export async function leaveTeam(
   });
   return { ok: true };
 }
+
+export type RemoveMemberError =
+  | "not_found"
+  | "not_captain"
+  | "cannot_remove_self"
+  | "not_member";
+
+export type RemoveMemberResult =
+  | { ok: true }
+  | { ok: false; error: RemoveMemberError };
+
+/**
+ * Captain removes another player from the team.
+ *
+ * The captain cannot remove themselves: that is the same captain-vacancy hole
+ * `leaveTeam` guards, reached by a different route.
+ */
+export async function removeMember(
+  teamId: string,
+  captainId: string,
+  memberUserId: string,
+): Promise<RemoveMemberResult> {
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+    select: { id: true },
+  });
+  if (!team) return { ok: false, error: "not_found" };
+
+  const captain = await prisma.teamMember.findUnique({
+    where: { teamId_userId: { teamId, userId: captainId } },
+  });
+  if (!captain?.isCaptain) return { ok: false, error: "not_captain" };
+  if (memberUserId === captainId) return { ok: false, error: "cannot_remove_self" };
+
+  const removed = await prisma.teamMember.deleteMany({
+    where: { teamId, userId: memberUserId },
+  });
+  if (removed.count === 0) return { ok: false, error: "not_member" };
+
+  return { ok: true };
+}
+
+export type DisbandError = "not_found" | "not_captain" | "team_in_use";
+
+export type DisbandResult = { ok: true } | { ok: false; error: DisbandError };
+
+/**
+ * Captain disbands the team — the only way a captain exits.
+ *
+ * The usage check is load-bearing, not cosmetic: `Game.teamId` and
+ * `TournamentMatch.home/awayTeamId` have no `onDelete: Cascade`, so deleting a
+ * team that any game or match references raises a foreign-key error.
+ * (`TournamentTeam` *is* cascade, so registrations correctly don't block.)
+ */
+export async function disbandTeam(
+  teamId: string,
+  userId: string,
+): Promise<DisbandResult> {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const captain = await tx.teamMember.findUnique({
+        where: { teamId_userId: { teamId, userId } },
+      });
+      if (!captain?.isCaptain) {
+        const team = await tx.team.findUnique({
+          where: { id: teamId },
+          select: { id: true },
+        });
+        return {
+          ok: false as const,
+          error: team ? ("not_captain" as const) : ("not_found" as const),
+        };
+      }
+
+      // Counted inside the transaction so a game created concurrently is far
+      // less likely to slip between the check and the delete.
+      const refs = await tx.team.findUnique({
+        where: { id: teamId },
+        select: {
+          _count: { select: { games: true, homeMatches: true, awayMatches: true } },
+        },
+      });
+      const total =
+        (refs?._count.games ?? 0) +
+        (refs?._count.homeMatches ?? 0) +
+        (refs?._count.awayMatches ?? 0);
+      if (total > 0) return { ok: false as const, error: "team_in_use" as const };
+
+      await tx.teamMember.deleteMany({ where: { teamId } });
+      await tx.team.delete({ where: { id: teamId } });
+      return { ok: true as const };
+    });
+  } catch (e) {
+    // The count above still isn't a lock. If a reference appeared anyway,
+    // report the real reason instead of surfacing a raw FK error.
+    if (e && typeof e === "object" && (e as { code?: string }).code === "P2003") {
+      return { ok: false, error: "team_in_use" };
+    }
+    throw e;
+  }
+}
