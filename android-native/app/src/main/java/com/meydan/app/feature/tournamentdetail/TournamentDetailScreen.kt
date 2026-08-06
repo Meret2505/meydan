@@ -1,6 +1,7 @@
 package com.meydan.app.feature.tournamentdetail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,9 +16,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,6 +34,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,12 +42,13 @@ import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
-import com.meydan.app.core.common.DetailViewModel
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.StandingsRowDto
 import com.meydan.app.core.network.dto.TournamentDetailDto
 import com.meydan.app.core.network.dto.TournamentMatchDto
+import com.meydan.app.core.network.dto.ViewerTeamDto
+import com.meydan.app.feature.auth.errorTextRes
 import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
 import java.time.format.DateTimeFormatter
@@ -49,29 +57,166 @@ import java.util.Locale
 /**
  * Tournament detail — port of tournaments/[id]/page.tsx: header (name, dates,
  * status, description), registered teams, the standings table, and the match
- * list. Read-only; the record-result and cancel actions are out of scope.
+ * list, plus the two write flows: a captain entering or withdrawing their own
+ * team, and the creator recording a result. Cancelling is still web-only.
  */
 @Composable
 fun TournamentDetailScreen(container: AppContainer, tournamentId: String, onBack: () -> Unit) {
-    val viewModel: DetailViewModel<TournamentDetailDto> = viewModel {
-        DetailViewModel { container.tournamentsRepository.detail(tournamentId) }
+    val viewModel: TournamentDetailViewModel = viewModel {
+        TournamentDetailViewModel(container.tournamentsRepository, tournamentId)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     DetailStateBox(
         loading = state.loading,
-        error = state.error,
-        hasData = state.data != null,
+        error = state.loadError,
+        hasData = state.tournament != null,
         onBack = onBack,
         onRetry = viewModel::retry,
     ) {
-        Content(tr = state.data!!, onBack = onBack)
+        Content(
+            tr = state.tournament!!,
+            acting = state.acting,
+            actionErrorCode = state.actionErrorCode,
+            onBack = onBack,
+            onToggleRegistration = viewModel::toggleRegistration,
+            onRecord = viewModel::openRecord,
+        )
     }
+
+    state.recording?.let { form ->
+        RecordResultDialog(
+            teams = state.tournament?.teams.orEmpty(),
+            form = form,
+            onHome = viewModel::setHome,
+            onAway = viewModel::setAway,
+            onScoreHome = viewModel::setScoreHome,
+            onScoreAway = viewModel::setScoreAway,
+            onSubmit = viewModel::submitRecord,
+            onDismiss = viewModel::closeRecord,
+        )
+    }
+}
+
+/** Score entry for one played match, over the tournament's entered teams. */
+@Composable
+private fun RecordResultDialog(
+    teams: List<com.meydan.app.core.network.dto.TournamentTeamDto>,
+    form: TournamentDetailViewModel.RecordForm,
+    onHome: (String) -> Unit,
+    onAway: (String) -> Unit,
+    onScoreHome: (String) -> Unit,
+    onScoreAway: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        // Explicit: M3 defaults a dialog to shapes.extraLarge, which this theme
+        // defines as a button pill.
+        shape = RoundedCornerShape(28.dp),
+        title = { Text(stringResource(R.string.tournaments_record_title)) },
+        text = {
+            Column {
+                Text(
+                    text = stringResource(R.string.tournaments_record_home),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onSurfaceVariant,
+                )
+                TeamPicker(teams, form.homeTeamId, form.awayTeamId, onHome)
+                Text(
+                    text = stringResource(R.string.tournaments_record_away),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+                TeamPicker(teams, form.awayTeamId, form.homeTeamId, onAway)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.padding(top = 14.dp),
+                ) {
+                    ScoreField(form.scoreHome, onScoreHome, Modifier.weight(1f))
+                    ScoreField(form.scoreAway, onScoreAway, Modifier.weight(1f))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onSubmit, enabled = form.canSubmit) {
+                Text(
+                    text = stringResource(R.string.tournaments_record_save),
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.common_cancel))
+            }
+        },
+    )
+}
+
+/** Entered teams as selectable chips; the opposing pick is excluded. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TeamPicker(
+    teams: List<com.meydan.app.core.network.dto.TournamentTeamDto>,
+    selected: String?,
+    excluded: String?,
+    onSelect: (String) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        teams.filter { it.id != excluded }.forEach { team ->
+            val active = selected == team.id
+            Text(
+                text = team.name,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = if (active) colors.primary else colors.onBackground,
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(
+                        if (active) colors.primary.copy(alpha = 0.12f)
+                        else colors.surfaceVariant.copy(alpha = 0.5f),
+                    )
+                    .clickable { onSelect(team.id) }
+                    .padding(horizontal = 10.dp, vertical = 7.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ScoreField(value: String, onChange: (String) -> Unit, modifier: Modifier) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        shape = MaterialTheme.shapes.large,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+        ),
+        modifier = modifier,
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Content(tr: TournamentDetailDto, onBack: () -> Unit) {
+private fun Content(
+    tr: TournamentDetailDto,
+    acting: Boolean,
+    actionErrorCode: String?,
+    onBack: () -> Unit,
+    onToggleRegistration: (ViewerTeamDto) -> Unit,
+    onRecord: () -> Unit,
+) {
     val colors = MaterialTheme.colorScheme
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0) ?: Locale.forLanguageTag("ru")
 
@@ -121,11 +266,82 @@ private fun Content(tr: TournamentDetailDto, onBack: () -> Unit) {
                 }
             }
 
+            // My teams — enter or withdraw. Only shown when the viewer captains
+            // something, since only a captain may register a team.
+            if (tr.myTeams.isNotEmpty() && tr.status != "cancelled") {
+                Section(stringResource(R.string.tournaments_my_teams)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        tr.myTeams.forEach { team ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(colors.surface)
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                            ) {
+                                Text(
+                                    text = team.name,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Text(
+                                    text = stringResource(
+                                        if (team.registered) R.string.tournaments_withdraw
+                                        else R.string.tournaments_enter,
+                                    ),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (team.registered) colors.error else colors.primary,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(
+                                            (if (team.registered) colors.error else colors.primary)
+                                                .copy(alpha = 0.12f),
+                                        )
+                                        .clickable(enabled = !acting) { onToggleRegistration(team) }
+                                        .padding(horizontal = 12.dp, vertical = 7.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            actionErrorCode?.let { code ->
+                Text(
+                    text = stringResource(errorTextRes(code)),
+                    color = colors.error,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
+                )
+            }
+
             // Standings table.
             if (tr.standings.isNotEmpty() && tr.matches.isNotEmpty()) {
                 Section(stringResource(R.string.tournaments_table)) {
                     StandingsTable(tr.standings)
                 }
+            }
+
+            // Record result — creator only, and only once two teams are in.
+            if (tr.isCreator && tr.teams.size >= 2 && tr.status != "cancelled") {
+                Text(
+                    text = stringResource(R.string.tournaments_record_cta),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 8.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(colors.primary.copy(alpha = 0.12f))
+                        .clickable(enabled = !acting, onClick = onRecord)
+                        .padding(vertical = 14.dp),
+                )
             }
 
             // Matches.

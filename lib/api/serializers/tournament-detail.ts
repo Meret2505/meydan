@@ -32,6 +32,13 @@ export interface TournamentMatchDto {
   scoreAway: number | null;
 }
 
+/** A team the viewer captains, and whether it is already entered. */
+export interface ViewerTeamDto {
+  id: string;
+  name: string;
+  registered: boolean;
+}
+
 export interface TournamentDetailDto {
   id: string;
   name: string;
@@ -42,6 +49,10 @@ export interface TournamentDetailDto {
   teams: TournamentTeamDto[];
   standings: StandingsRowDto[];
   matches: TournamentMatchDto[];
+  /** Viewer context — only the creator may record results. */
+  isCreator: boolean;
+  /** Teams the viewer captains; only these can be entered or withdrawn. */
+  myTeams: ViewerTeamDto[];
 }
 
 type TournamentWithRelations = {
@@ -63,8 +74,20 @@ type TournamentWithRelations = {
   }[];
 };
 
-export function toTournamentDetailDto(tr: TournamentWithRelations): TournamentDetailDto {
+/** The viewer's captaincies, resolved by the caller (needs its own query). */
+export type ViewerContext = {
+  userId: string;
+  captainOf: { id: string; name: string }[];
+};
+
+export function toTournamentDetailDto(
+  // creatorId is nullable on the model (legacy rows have none); a null creator
+  // simply means nobody passes the isCreator check.
+  tr: TournamentWithRelations & { creatorId?: string | null },
+  viewer?: ViewerContext,
+): TournamentDetailDto {
   const teamName = new Map(tr.teams.map((t) => [t.teamId, t.team.name]));
+  const registeredIds = new Set(tr.teams.map((t) => t.teamId));
   const standings = computeStandings(
     tr.teams.map((t) => t.teamId),
     tr.matches.map((m) => ({
@@ -104,6 +127,12 @@ export function toTournamentDetailDto(tr: TournamentWithRelations): TournamentDe
       awayTeamName: m.awayTeam.name,
       scoreHome: m.scoreHome,
       scoreAway: m.scoreAway,
+    })),
+    isCreator: !!viewer && tr.creatorId === viewer.userId,
+    myTeams: (viewer?.captainOf ?? []).map((t) => ({
+      id: t.id,
+      name: t.name,
+      registered: registeredIds.has(t.id),
     })),
   };
 }

@@ -1,33 +1,17 @@
 import { requireOnboarded } from "@/lib/api/auth";
 import { notFound } from "@/lib/api/errors";
 import { handler, ok } from "@/lib/api/response";
-import { toTournamentDetailDto } from "@/lib/api/serializers/tournament-detail";
-import { prisma } from "@/lib/prisma";
+import { fetchTournamentDetail } from "@/lib/services/tournament-detail-queries";
 
 type Context = { params: Promise<{ id: string }> };
 
-/** Full detail for one tournament: teams, standings, and matches. */
+/** Full detail for one tournament: teams, standings, matches, viewer context. */
 export const GET = handler(async (request: Request, context: Context) => {
-  await requireOnboarded(request);
+  const { userId } = await requireOnboarded(request);
   const { id } = await context.params;
 
-  const tr = await prisma.tournament.findUnique({
-    where: { id },
-    include: {
-      teams: {
-        include: { team: { include: { _count: { select: { members: true } } } } },
-        orderBy: { joinedAt: "asc" },
-      },
-      matches: {
-        include: {
-          homeTeam: { select: { id: true, name: true } },
-          awayTeam: { select: { id: true, name: true } },
-        },
-        orderBy: { scheduledAt: "desc" },
-      },
-    },
-  });
-  if (!tr) throw notFound("tournament_not_found");
+  const detail = await fetchTournamentDetail(id, userId);
+  if (!detail) throw notFound("tournament_not_found");
 
-  return ok(toTournamentDetailDto(tr));
+  return ok(detail);
 });

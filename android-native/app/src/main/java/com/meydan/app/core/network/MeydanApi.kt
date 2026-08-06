@@ -4,6 +4,8 @@ import com.meydan.app.core.network.dto.ApiResponse
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.core.network.dto.DisbandedDto
+import com.meydan.app.core.network.dto.MatchResultRequest
+import com.meydan.app.core.network.dto.RegisterTeamRequest
 import com.meydan.app.core.network.dto.FcmTokenRequest
 import com.meydan.app.core.network.dto.FavoriteResponse
 import com.meydan.app.core.network.dto.FieldDetailDto
@@ -89,6 +91,26 @@ interface MeydanApi {
 
     @GET("api/v1/tournaments/{id}")
     suspend fun getTournamentDetail(@Path("id") id: String): Response<ApiResponse<TournamentDetailDto>>
+
+    /** Enters one of the caller's teams. Captain only (403). */
+    @POST("api/v1/tournaments/{id}/teams")
+    suspend fun registerTeam(
+        @Path("id") id: String,
+        @Body body: RegisterTeamRequest,
+    ): Response<ApiResponse<TournamentDetailDto>>
+
+    @HTTP(method = "DELETE", path = "api/v1/tournaments/{id}/teams/{teamId}")
+    suspend fun unregisterTeam(
+        @Path("id") id: String,
+        @Path("teamId") teamId: String,
+    ): Response<ApiResponse<TournamentDetailDto>>
+
+    /** Records a played match. Tournament creator only (403). */
+    @POST("api/v1/tournaments/{id}/matches")
+    suspend fun recordMatch(
+        @Path("id") id: String,
+        @Body body: MatchResultRequest,
+    ): Response<ApiResponse<TournamentDetailDto>>
 
     @POST("api/v1/fields/{id}/favorite")
     suspend fun favoriteField(@Path("id") id: String): Response<ApiResponse<FavoriteResponse>>

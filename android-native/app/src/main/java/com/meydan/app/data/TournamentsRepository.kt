@@ -4,6 +4,8 @@ import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.network.MeydanApi
+import com.meydan.app.core.network.dto.MatchResultRequest
+import com.meydan.app.core.network.dto.RegisterTeamRequest
 import com.meydan.app.core.network.dto.TournamentCardDto
 import com.meydan.app.core.network.dto.TournamentDetailDto
 
@@ -28,6 +30,18 @@ class TournamentsRepository(
 
     suspend fun detail(id: String): ApiResult<TournamentDetailDto> =
         apiCall { api.getTournamentDetail(id) }
+
+    /** All three writes return the updated detail (teams, standings, matches). */
+    suspend fun registerTeam(id: String, teamId: String): ApiResult<TournamentDetailDto> =
+        apiCall { api.registerTeam(id, RegisterTeamRequest(teamId)) }
+
+    suspend fun unregisterTeam(id: String, teamId: String): ApiResult<TournamentDetailDto> =
+        apiCall { api.unregisterTeam(id, teamId) }
+
+    suspend fun recordMatch(
+        id: String,
+        req: MatchResultRequest,
+    ): ApiResult<TournamentDetailDto> = apiCall { api.recordMatch(id, req) }
 
     suspend fun clearCache() = tournamentsCache.clear()
 }

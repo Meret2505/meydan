@@ -117,4 +117,30 @@ data class TournamentDetailDto(
     val teams: List<TournamentTeamDto> = emptyList(),
     val standings: List<StandingsRowDto> = emptyList(),
     val matches: List<TournamentMatchDto> = emptyList(),
+    /** Only the creator may record results. */
+    val isCreator: Boolean = false,
+    /** Teams the viewer captains; only these can be entered or withdrawn. */
+    val myTeams: List<ViewerTeamDto> = emptyList(),
+)
+
+/** One of the viewer's captained teams, with its registration state. */
+@Serializable
+data class ViewerTeamDto(
+    val id: String,
+    val name: String,
+    val registered: Boolean,
+)
+
+/** Body of POST /tournaments/{id}/teams. */
+@Serializable
+data class RegisterTeamRequest(val teamId: String)
+
+/** Body of POST /tournaments/{id}/matches. */
+@Serializable
+data class MatchResultRequest(
+    val homeTeamId: String,
+    val awayTeamId: String,
+    val scoreHome: Int,
+    val scoreAway: Int,
+    val round: String? = null,
 )

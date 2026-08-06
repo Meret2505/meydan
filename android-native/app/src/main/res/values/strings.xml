@@ -205,6 +205,14 @@
     <string name="tournaments_matches_section">Матчи (%1$d)</string>
     <string name="tournaments_no_registered">Пока никто не зарегистрировался.</string>
     <string name="tournaments_no_matches">Матчи появятся после первого результата.</string>
+    <string name="tournaments_my_teams">Мои команды</string>
+    <string name="tournaments_enter">Заявить</string>
+    <string name="tournaments_withdraw">Снять</string>
+    <string name="tournaments_record_cta">Записать результат</string>
+    <string name="tournaments_record_title">Результат матча</string>
+    <string name="tournaments_record_home">Хозяева</string>
+    <string name="tournaments_record_away">Гости</string>
+    <string name="tournaments_record_save">Сохранить</string>
     <string name="tournaments_table">Таблица</string>
     <string name="tournaments_col_team">Команда</string>
     <string name="tournaments_col_played" translatable="false">И</string>

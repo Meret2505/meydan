@@ -193,6 +193,14 @@
     <string name="tournaments_matches_section">Oýunlar (%1$d)</string>
     <string name="tournaments_no_registered">Henuz hiç kim hasaba alynmady.</string>
     <string name="tournaments_no_matches">Oýunlar ilkinji netijeden soň görner.</string>
+    <string name="tournaments_my_teams">Meniň toparlarym</string>
+    <string name="tournaments_enter">Hödürle</string>
+    <string name="tournaments_withdraw">Yzyna al</string>
+    <string name="tournaments_record_cta">Netijäni ýaz</string>
+    <string name="tournaments_record_title">Oýnuň netijesi</string>
+    <string name="tournaments_record_home">Öý eýeleri</string>
+    <string name="tournaments_record_away">Myhmanlar</string>
+    <string name="tournaments_record_save">Ýatda sakla</string>
     <string name="tournaments_table">Tablisa</string>
     <string name="tournaments_col_team">Komanda</string>
     <string name="tournaments_col_played" translatable="false">O</string>
