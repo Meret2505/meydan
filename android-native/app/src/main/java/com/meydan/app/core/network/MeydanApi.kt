@@ -1,6 +1,9 @@
 package com.meydan.app.core.network
 
 import com.meydan.app.core.network.dto.ApiResponse
+import com.meydan.app.core.network.dto.AvatarResponse
+import com.meydan.app.core.network.dto.ProfileStatsDto
+import okhttp3.MultipartBody
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.core.network.dto.CreateTournamentRequest
@@ -29,7 +32,9 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
+import retrofit2.http.Part
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -57,6 +62,19 @@ interface MeydanApi {
 
     @PATCH("api/v1/me")
     suspend fun patchMe(@Body body: ProfilePatch): Response<ApiResponse<MeResponse>>
+
+    @GET("api/v1/me/stats")
+    suspend fun getMyStats(): Response<ApiResponse<ProfileStatsDto>>
+
+    /** Multipart so the picked image streams through without base64 inflation. */
+    @Multipart
+    @POST("api/v1/me/avatar")
+    suspend fun uploadAvatar(
+        @Part file: MultipartBody.Part,
+    ): Response<ApiResponse<AvatarResponse>>
+
+    @HTTP(method = "DELETE", path = "api/v1/me/avatar")
+    suspend fun removeAvatar(): Response<ApiResponse<AvatarResponse>>
 
     @POST("api/v1/me/fcm-token")
     suspend fun registerFcmToken(@Body body: FcmTokenRequest): Response<ApiResponse<Unit>>

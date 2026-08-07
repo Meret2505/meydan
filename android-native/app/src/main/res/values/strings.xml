@@ -66,12 +66,16 @@
     <string name="skill_beginner">Новичок</string>
     <string name="skill_intermediate">Средний</string>
     <string name="skill_advanced">Продвинутый</string>
+    <string name="profile_attendance">Посещаемость</string>
+    <string name="profile_attendance_detail">%1$d из %2$d игр</string>
+    <string name="profile_games_played">Сыграно</string>
+    <string name="profile_total_joined">Записей</string>
+    <string name="profile_recent_games">Последние игры</string>
+    <string name="profile_attended">Был</string>
+    <string name="profile_missed">Пропустил</string>
     <string name="profile_settings">Настройки</string>
     <string name="profile_language">Язык интерфейса</string>
     <string name="profile_logout_full">Выйти из аккаунта</string>
-    <string name="profile_played">Сыграно</string>
-    <string name="profile_joined_stat">Записан</string>
-    <string name="profile_attendance">Посещаемость</string>
 
     <!-- fields -->
     <string name="fields_search_placeholder">Поиск поля или района</string>

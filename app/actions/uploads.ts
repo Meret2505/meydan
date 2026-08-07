@@ -1,26 +1,15 @@
 "use server";
 
-import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth";
-import { isAdmin } from "@/lib/authz";
-import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
-import { storage, parseObjectUrl } from "@/lib/storage";
+import {
+  removeAvatar as removeAvatarService,
+  removeFieldPhoto as removeFieldPhotoService,
+  uploadAvatar as uploadAvatarService,
+  uploadFieldPhoto as uploadFieldPhotoService,
+  type UploadInput,
+} from "@/lib/services/uploads";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp"];
-
-function extFor(name: string, mime: string) {
-  const fromName = name.split(".").pop()?.toLowerCase();
-  if (fromName && ["jpg", "jpeg", "png", "webp"].includes(fromName)) {
-    return fromName === "jpeg" ? "jpg" : fromName;
-  }
-  if (mime === "image/png") return "png";
-  if (mime === "image/webp") return "webp";
-  return "jpg";
-}
 
 async function requireUserId() {
   const session = await auth();
@@ -28,33 +17,28 @@ async function requireUserId() {
   return session.user.id;
 }
 
+/**
+ * These delegate to lib/services/uploads.ts so the mobile API runs the same
+ * validation, rate limiting and storage cleanup. A rejected upload (too large,
+ * wrong type, rate limited, not an admin) still resolves silently here and
+ * simply re-renders, as it always has.
+ */
+async function toUploadInput(file: unknown): Promise<UploadInput | null> {
+  if (!(file instanceof File) || file.size === 0) return null;
+  return {
+    bytes: Buffer.from(await file.arrayBuffer()),
+    mime: file.type,
+    filename: file.name,
+  };
+}
+
 export async function uploadAvatar(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  // 20 avatar uploads per user per hour — plenty for real use, caps abuse.
-  const limit = await rateLimit(`upload:avatar:${userId}`, 20, 60 * 60_000);
-  if (!limit.allowed) return;
-  const file = formData.get("file");
   const locale = String(formData.get("locale") ?? "ru");
-  if (!(file instanceof File) || file.size === 0) return;
-  if (file.size > MAX_BYTES) return;
-  if (!ALLOWED_MIME.includes(file.type)) return;
 
-  const ext = extFor(file.name, file.type);
-  const path = `${userId}/${Date.now()}-${randomUUID()}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  let publicUrl: string;
-  try {
-    publicUrl = await storage.put("avatars", path, buffer, file.type);
-  } catch (e) {
-    console.warn("[upload] avatar failed:", (e as Error).message);
-    return;
-  }
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: { avatar: publicUrl },
-  });
+  const input = await toUploadInput(formData.get("file"));
+  if (!input) return;
+  await uploadAvatarService(userId, input);
 
   revalidatePath(`/${locale}/profile`);
   revalidatePath(`/${locale}/profile/edit`);
@@ -62,46 +46,20 @@ export async function uploadAvatar(formData: FormData): Promise<void> {
 
 export async function removeAvatar(locale: string): Promise<void> {
   const userId = await requireUserId();
-  await prisma.user.update({ where: { id: userId }, data: { avatar: null } });
+  await removeAvatarService(userId);
+
   revalidatePath(`/${locale}/profile`);
   revalidatePath(`/${locale}/profile/edit`);
 }
 
 export async function uploadFieldPhoto(formData: FormData): Promise<void> {
   const userId = await requireUserId();
-  // Fields are shared/curated — only admins may mutate their photos, otherwise
-  // any logged-in user could deface or wipe any field's gallery.
-  if (!isAdmin(userId)) return;
   const fieldId = String(formData.get("fieldId") ?? "");
   const locale = String(formData.get("locale") ?? "ru");
-  const file = formData.get("file");
-  if (!fieldId || !(file instanceof File) || file.size === 0) return;
-  if (file.size > MAX_BYTES) return;
-  if (!ALLOWED_MIME.includes(file.type)) return;
 
-  const field = await prisma.field.findUnique({
-    where: { id: fieldId },
-    select: { photos: true },
-  });
-  if (!field) return;
-  if (field.photos.length >= 8) return; // soft cap
-
-  const ext = extFor(file.name, file.type);
-  const path = `${fieldId}/${Date.now()}-${randomUUID()}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  let publicUrl: string;
-  try {
-    publicUrl = await storage.put("field-photos", path, buffer, file.type);
-  } catch (e) {
-    console.warn("[upload] field photo failed:", (e as Error).message);
-    return;
-  }
-
-  await prisma.field.update({
-    where: { id: fieldId },
-    data: { photos: { push: publicUrl } },
-  });
+  const input = await toUploadInput(formData.get("file"));
+  if (!fieldId || !input) return;
+  await uploadFieldPhotoService(userId, fieldId, input);
 
   revalidatePath(`/${locale}/fields/${fieldId}`);
   revalidatePath(`/${locale}/fields`);
@@ -113,28 +71,7 @@ export async function removeFieldPhoto(
   locale: string,
 ): Promise<void> {
   const userId = await requireUserId();
-  if (!isAdmin(userId)) return;
-  const field = await prisma.field.findUnique({
-    where: { id: fieldId },
-    select: { photos: true },
-  });
-  if (!field) return;
-  const next = field.photos.filter((p) => p !== photoUrl);
-  if (next.length === field.photos.length) return;
-
-  const parsed = parseObjectUrl(photoUrl);
-  if (parsed) {
-    try {
-      await storage.remove(parsed.bucket, parsed.path);
-    } catch {
-      /* swallow — DB is the source of truth */
-    }
-  }
-
-  await prisma.field.update({
-    where: { id: fieldId },
-    data: { photos: next },
-  });
+  await removeFieldPhotoService(userId, fieldId, photoUrl);
 
   revalidatePath(`/${locale}/fields/${fieldId}`);
 }

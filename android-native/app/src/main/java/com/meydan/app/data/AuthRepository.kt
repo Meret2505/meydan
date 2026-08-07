@@ -9,7 +9,12 @@ import com.meydan.app.core.datastore.TokenStore
 import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.MeydanApi
+import com.meydan.app.core.network.dto.AvatarResponse
 import com.meydan.app.core.network.dto.GoogleAuthRequest
+import com.meydan.app.core.network.dto.ProfileStatsDto
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import com.meydan.app.core.network.dto.MeResponse
 import com.meydan.app.core.network.dto.PhoneAuthRequest
 import com.meydan.app.core.network.dto.ProfilePatch
@@ -80,6 +85,42 @@ class AuthRepository(
             userCache.save(result.data.user)
         }
         return result
+    }
+
+    /** The profile's attendance block. Not cached — cheap and always fresh. */
+    suspend fun myStats(): ApiResult<ProfileStatsDto> = apiCall { api.getMyStats() }
+
+    /**
+     * Uploads a new avatar. The picked image arrives as raw bytes (read from the
+     * content URI by the caller, which owns the ContentResolver).
+     */
+    suspend fun uploadAvatar(
+        bytes: ByteArray,
+        mime: String,
+        filename: String,
+    ): ApiResult<AvatarResponse> {
+        val part = MultipartBody.Part.createFormData(
+            "file",
+            filename,
+            bytes.toRequestBody(mime.toMediaTypeOrNull()),
+        )
+        val result = apiCall { api.uploadAvatar(part) }
+        if (result is ApiResult.Success) refreshCachedUser()
+        return result
+    }
+
+    suspend fun removeAvatar(): ApiResult<AvatarResponse> {
+        val result = apiCall { api.removeAvatar() }
+        if (result is ApiResult.Success) refreshCachedUser()
+        return result
+    }
+
+    /**
+     * The avatar endpoints return only the URL, so pull a fresh /me to keep the
+     * cached user (and every screen observing it) in step.
+     */
+    private suspend fun refreshCachedUser() {
+        (apiCall { api.getMe() } as? ApiResult.Success)?.let { userCache.save(it.data.user) }
     }
 
     /** Revokes the refresh token server-side (best effort), then clears local state. */

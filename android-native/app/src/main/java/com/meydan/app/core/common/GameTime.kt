@@ -40,6 +40,13 @@ object GameTime {
         }
     }
 
+    /**
+     * Day + month for a past game, where "today/tomorrow" wording makes no
+     * sense (the profile's recent-games list).
+     */
+    fun shortDate(dt: LocalDateTime, locale: Locale = Locale.getDefault()): String =
+        dt.format(DateTimeFormatter.ofPattern("d MMM", locale))
+
     /** True when the game starts before the end of today — the "today" chip. */
     fun isToday(dt: LocalDateTime, today: LocalDate = LocalDate.now()): Boolean =
         !dt.toLocalDate().isAfter(today)

@@ -55,12 +55,16 @@
     <string name="skill_beginner">Başlangyç</string>
     <string name="skill_intermediate">Orta</string>
     <string name="skill_advanced">Ösen</string>
+    <string name="profile_attendance">Gatnaşyk</string>
+    <string name="profile_attendance_detail">%2$d oýundan %1$d</string>
+    <string name="profile_games_played">Oýnaldy</string>
+    <string name="profile_total_joined">Ýazgylar</string>
+    <string name="profile_recent_games">Soňky oýunlar</string>
+    <string name="profile_attended">Geldi</string>
+    <string name="profile_missed">Gelmedi</string>
     <string name="profile_settings">Sazlamalar</string>
     <string name="profile_language">Interfeýs dili</string>
     <string name="profile_logout_full">Hasapdan çyk</string>
-    <string name="profile_played">Oýnaldy</string>
-    <string name="profile_joined_stat">Ýazyldy</string>
-    <string name="profile_attendance">Gatnaşyk</string>
 
     <!-- fields -->
     <string name="fields_search_placeholder">Meýdança ýa etrap gözle</string>

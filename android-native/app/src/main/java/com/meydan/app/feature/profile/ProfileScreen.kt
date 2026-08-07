@@ -22,9 +22,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Language
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import com.meydan.app.core.common.GameTime
+import com.meydan.app.core.network.dto.ProfileStatsDto
+import com.meydan.app.core.network.dto.RecentGameDto
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,6 +75,21 @@ fun ProfileScreen(
 
     val user = state.user
     val colors = MaterialTheme.colorScheme
+    val context = LocalContext.current
+
+    // Photo picker: on Android 13+ this is the system picker (no storage
+    // permission at all); below that the shim falls back to OpenDocument.
+    val pickImage = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val resolver = context.contentResolver
+        val bytes = runCatching {
+            resolver.openInputStream(uri)?.use { it.readBytes() }
+        }.getOrNull() ?: return@rememberLauncherForActivityResult
+        val mime = resolver.getType(uri) ?: "image/jpeg"
+        viewModel.uploadAvatar(bytes, mime, "avatar.${mime.substringAfterLast('/')}")
+    }
     val currentLangTag = ConfigurationCompat.getLocales(LocalConfiguration.current)
         .get(0)?.language ?: "ru"
     val langLabel = if (currentLangTag == "tk") "Türkmen" else "Русский"
@@ -85,14 +110,32 @@ fun ProfileScreen(
                 modifier = Modifier
                     .size(74.dp)
                     .clip(CircleShape)
-                    .background(colors.primary.copy(alpha = 0.15f)),
+                    .background(colors.primary.copy(alpha = 0.15f))
+                    .clickable(enabled = !state.uploadingAvatar) {
+                        pickImage.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    },
             ) {
-                Text(
-                    text = user?.name?.trim()?.take(1)?.uppercase() ?: "",
-                    color = colors.primary,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+                when {
+                    state.uploadingAvatar -> CircularProgressIndicator(
+                        strokeWidth = 2.5.dp,
+                        modifier = Modifier.size(24.dp),
+                        color = colors.primary,
+                    )
+                    user?.avatar != null -> AsyncImage(
+                        model = user.avatar,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    else -> Text(
+                        text = user?.name?.trim()?.take(1)?.uppercase() ?: "",
+                        color = colors.primary,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
             }
             Spacer(Modifier.size(16.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -160,6 +203,10 @@ fun ProfileScreen(
             )
         }
 
+        // Attendance + recent games. Absent until /me/stats answers, so the
+        // identity block above renders immediately on a cold start.
+        state.stats?.let { stats -> StatsBlock(stats) }
+
         // Settings card
         Text(
             text = stringResource(R.string.profile_settings),
@@ -197,6 +244,148 @@ fun ProfileScreen(
         }
 
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+/**
+ * Attendance headline + the two counters + the last few completed games.
+ * Port of the web profile page's ProfileStats.
+ */
+@Composable
+private fun StatsBlock(stats: ProfileStatsDto) {
+    val colors = MaterialTheme.colorScheme
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.padding(top = 16.dp),
+    ) {
+        // Attendance, with the same proportional bar the web shows.
+        Column(
+            modifier = Modifier
+                .weight(0.58f)
+                .clip(RoundedCornerShape(18.dp))
+                .background(colors.surface)
+                .padding(16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.profile_attendance),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.onSurfaceVariant,
+            )
+            Text(
+                text = stats.attendanceRate?.let { "$it%" } ?: "—",
+                fontSize = 34.sp,
+                fontWeight = FontWeight.Black,
+                color = colors.primary,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp)
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(CircleShape)
+                    .background(colors.surfaceVariant),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth((stats.attendanceRate ?: 0) / 100f)
+                        .height(6.dp)
+                        .clip(CircleShape)
+                        .background(colors.primary),
+                )
+            }
+            Text(
+                text = stringResource(
+                    R.string.profile_attendance_detail,
+                    stats.gamesPlayed,
+                    stats.totalJoined,
+                ),
+                fontSize = 11.5.sp,
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.weight(0.42f),
+        ) {
+            Counter(stats.gamesPlayed.toString(), stringResource(R.string.profile_games_played))
+            Counter(stats.totalJoined.toString(), stringResource(R.string.profile_total_joined))
+        }
+    }
+
+    if (stats.recent.isNotEmpty()) {
+        Text(
+            text = stringResource(R.string.profile_recent_games),
+            fontWeight = FontWeight.Bold,
+            fontSize = 15.sp,
+            modifier = Modifier.padding(top = 20.dp, bottom = 12.dp),
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            stats.recent.forEach { g -> RecentGameRow(g) }
+        }
+    }
+}
+
+@Composable
+private fun Counter(value: String, label: String) {
+    val colors = MaterialTheme.colorScheme
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(colors.surface)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Text(value, fontSize = 22.sp, fontWeight = FontWeight.Black, color = colors.onBackground)
+        Text(
+            text = label,
+            fontSize = 11.5.sp,
+            color = colors.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp),
+        )
+    }
+}
+
+@Composable
+private fun RecentGameRow(game: RecentGameDto) {
+    val colors = MaterialTheme.colorScheme
+    val dt = GameTime.parse(game.scheduledAt)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(colors.surface)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(game.venue, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+            Text(
+                text = dt?.let { GameTime.shortDate(it) } ?: "—",
+                fontSize = 12.sp,
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+        }
+        // Attendance verdict, or a dash when the organizer never marked it.
+        Text(
+            text = when (game.attended) {
+                true -> stringResource(R.string.profile_attended)
+                false -> stringResource(R.string.profile_missed)
+                null -> "—"
+            },
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = when (game.attended) {
+                true -> colors.primary
+                false -> colors.error
+                null -> colors.onSurfaceVariant
+            },
+        )
     }
 }
 

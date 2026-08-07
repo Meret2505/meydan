@@ -30,6 +30,30 @@ data class MeResponse(
     val accessToken: String? = null,
 )
 
+/** Response of POST/DELETE /me/avatar — the new absolute URL, or null. */
+@Serializable
+data class AvatarResponse(val avatar: String? = null)
+
+/** One recently completed game on the profile. */
+@Serializable
+data class RecentGameDto(
+    val id: String,
+    val scheduledAt: String,
+    val venue: String,
+    /** Null when the organizer never marked attendance. */
+    val attended: Boolean? = null,
+)
+
+/** Response of GET /me/stats — the profile's attendance block. */
+@Serializable
+data class ProfileStatsDto(
+    /** Percent, or null when nothing has been marked yet. */
+    val attendanceRate: Int? = null,
+    val gamesPlayed: Int = 0,
+    val totalJoined: Int = 0,
+    val recent: List<RecentGameDto> = emptyList(),
+)
+
 /** Body of PATCH /me — every field optional; only what changed is sent. */
 @Serializable
 data class ProfilePatch(
