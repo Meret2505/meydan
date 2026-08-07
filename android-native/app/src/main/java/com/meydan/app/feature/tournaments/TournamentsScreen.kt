@@ -13,8 +13,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -48,7 +52,11 @@ import java.util.Locale
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TournamentsScreen(container: AppContainer, onTournamentClick: (String) -> Unit) {
+fun TournamentsScreen(
+    container: AppContainer,
+    onTournamentClick: (String) -> Unit,
+    onCreateTournament: () -> Unit,
+) {
     val viewModel: TournamentsViewModel = viewModel {
         TournamentsViewModel(container.tournamentsRepository)
     }
@@ -60,11 +68,30 @@ fun TournamentsScreen(container: AppContainer, onTournamentClick: (String) -> Un
             .systemBarsPadding()
             .padding(horizontal = 24.dp),
     ) {
-        Text(
-            text = stringResource(R.string.nav_tournaments),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(top = 16.dp, bottom = 12.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.nav_tournaments),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.weight(1f),
+            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable(onClick = onCreateTournament),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.tournaments_create),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
+        }
 
         // Segmented tab bar.
         Row(

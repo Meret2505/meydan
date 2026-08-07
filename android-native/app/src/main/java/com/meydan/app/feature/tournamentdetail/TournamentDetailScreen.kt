@@ -81,6 +81,30 @@ fun TournamentDetailScreen(container: AppContainer, tournamentId: String, onBack
             onBack = onBack,
             onToggleRegistration = viewModel::toggleRegistration,
             onRecord = viewModel::openRecord,
+            onCancel = viewModel::askCancel,
+        )
+    }
+
+    if (state.confirmingCancel) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissCancel,
+            shape = RoundedCornerShape(28.dp),
+            title = { Text(stringResource(R.string.tournaments_cancel_title)) },
+            text = { Text(stringResource(R.string.tournaments_cancel_body)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmCancel) {
+                    Text(
+                        text = stringResource(R.string.tournaments_cancel_confirm),
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissCancel) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
         )
     }
 
@@ -216,6 +240,7 @@ private fun Content(
     onBack: () -> Unit,
     onToggleRegistration: (ViewerTeamDto) -> Unit,
     onRecord: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0) ?: Locale.forLanguageTag("ru")
@@ -353,6 +378,25 @@ private fun Content(
                         tr.matches.forEach { MatchRow(it) }
                     }
                 }
+            }
+
+            // Cancel — creator only, and only while it is still live.
+            if (tr.isCreator && tr.status != "cancelled") {
+                Text(
+                    text = stringResource(R.string.tournaments_cancel_cta),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .padding(top = 8.dp, bottom = 24.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(colors.error.copy(alpha = 0.12f))
+                        .clickable(enabled = !acting, onClick = onCancel)
+                        .padding(vertical = 14.dp),
+                )
             }
         }
     }

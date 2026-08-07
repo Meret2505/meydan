@@ -4,6 +4,7 @@ import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
 import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.network.MeydanApi
+import com.meydan.app.core.network.dto.CreateTournamentRequest
 import com.meydan.app.core.network.dto.MatchResultRequest
 import com.meydan.app.core.network.dto.RegisterTeamRequest
 import com.meydan.app.core.network.dto.TournamentCardDto
@@ -30,6 +31,15 @@ class TournamentsRepository(
 
     suspend fun detail(id: String): ApiResult<TournamentDetailDto> =
         apiCall { api.getTournamentDetail(id) }
+
+    /** Creates a tournament (caller becomes creator); returns its detail. */
+    suspend fun createTournament(
+        req: CreateTournamentRequest,
+    ): ApiResult<TournamentDetailDto> = apiCall { api.createTournament(req) }
+
+    /** Creator only. Soft-cancels and returns the updated detail. */
+    suspend fun cancelTournament(id: String): ApiResult<TournamentDetailDto> =
+        apiCall { api.cancelTournament(id) }
 
     /** All three writes return the updated detail (teams, standings, matches). */
     suspend fun registerTeam(id: String, teamId: String): ApiResult<TournamentDetailDto> =

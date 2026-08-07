@@ -1,7 +1,12 @@
+import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
+import { badRequest, notFound } from "@/lib/api/errors";
 import { handler, ok } from "@/lib/api/response";
 import { toTournamentCardDto } from "@/lib/api/serializers/tournament";
+import { parseJson } from "@/lib/api/validate";
+import { fetchTournamentDetail } from "@/lib/services/tournament-detail-queries";
 import { fetchTournaments } from "@/lib/services/tournament-queries";
+import { createTournament } from "@/lib/services/tournaments";
 
 /**
  * All tournaments with their computed status. The client filters into the
@@ -13,4 +18,27 @@ export const GET = handler(async (request: Request) => {
   const tournaments = await fetchTournaments();
 
   return ok({ tournaments: tournaments.map(toTournamentCardDto) });
+});
+
+const createSchema = z
+  .object({
+    name: z.string(),
+    startDate: z.string(),
+    endDate: z.string().nullable().optional(),
+    description: z.string().nullable().optional(),
+  })
+  .strict();
+
+/** Creates a tournament; the caller becomes its creator (the result recorder). */
+export const POST = handler(async (request: Request) => {
+  const { userId } = await requireOnboarded(request);
+  const input = await parseJson(request, createSchema);
+
+  const result = await createTournament(userId, input);
+  if (!result.ok) throw badRequest();
+
+  const detail = await fetchTournamentDetail(result.tournamentId, userId);
+  if (!detail) throw notFound("tournament_not_found");
+
+  return ok(detail);
 });

@@ -1,8 +1,9 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import {
+  cancelTournament as cancelTournamentService,
+  createTournament as createTournamentService,
   recordMatchResult as recordMatchResultService,
   registerTeam as registerTeamService,
   unregisterTeam as unregisterTeamService,
@@ -19,22 +20,17 @@ async function requireUserId() {
 export async function createTournament(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const locale = String(formData.get("locale") ?? "ru");
-  const name = String(formData.get("name") ?? "").trim();
-  const startRaw = String(formData.get("startDate") ?? "");
-  const endRaw = String(formData.get("endDate") ?? "");
-  const description = String(formData.get("description") ?? "").trim() || null;
 
-  if (name.length < 2 || !startRaw) return;
-  const startDate = new Date(startRaw);
-  if (Number.isNaN(startDate.getTime())) return;
-  const endDate = endRaw ? new Date(endRaw) : null;
-  if (endDate && Number.isNaN(endDate.getTime())) return;
-
-  const t = await prisma.tournament.create({
-    data: { name, startDate, endDate, description, creatorId: userId },
+  const result = await createTournamentService(userId, {
+    name: String(formData.get("name") ?? ""),
+    startDate: String(formData.get("startDate") ?? ""),
+    endDate: String(formData.get("endDate") ?? "") || null,
+    description: String(formData.get("description") ?? ""),
   });
+  if (!result.ok) return;
+
   revalidatePath(`/${locale}/tournaments`);
-  redirect(`/${locale}/tournaments/${t.id}`);
+  redirect(`/${locale}/tournaments/${result.tournamentId}`);
 }
 
 export async function registerTeamForTournament(
@@ -84,15 +80,8 @@ export async function cancelTournament(
   locale: string,
 ): Promise<void> {
   const userId = await requireUserId();
-  const t = await prisma.tournament.findUnique({
-    where: { id: tournamentId },
-    select: { creatorId: true },
-  });
-  if (!t || t.creatorId !== userId) return;
-  await prisma.tournament.update({
-    where: { id: tournamentId },
-    data: { cancelled: true },
-  });
+  await cancelTournamentService(tournamentId, userId);
+
   revalidatePath(`/${locale}/tournaments`);
   revalidatePath(`/${locale}/tournaments/${tournamentId}`);
 }

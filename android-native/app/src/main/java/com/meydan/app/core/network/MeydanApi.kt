@@ -3,6 +3,7 @@ package com.meydan.app.core.network
 import com.meydan.app.core.network.dto.ApiResponse
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.CreateTeamRequest
+import com.meydan.app.core.network.dto.CreateTournamentRequest
 import com.meydan.app.core.network.dto.DisbandedDto
 import com.meydan.app.core.network.dto.MatchResultRequest
 import com.meydan.app.core.network.dto.RegisterTeamRequest
@@ -91,6 +92,17 @@ interface MeydanApi {
 
     @GET("api/v1/tournaments/{id}")
     suspend fun getTournamentDetail(@Path("id") id: String): Response<ApiResponse<TournamentDetailDto>>
+
+    @POST("api/v1/tournaments")
+    suspend fun createTournament(
+        @Body body: CreateTournamentRequest,
+    ): Response<ApiResponse<TournamentDetailDto>>
+
+    /** Creator only (403). Soft-cancels; the row stays. */
+    @HTTP(method = "DELETE", path = "api/v1/tournaments/{id}")
+    suspend fun cancelTournament(
+        @Path("id") id: String,
+    ): Response<ApiResponse<TournamentDetailDto>>
 
     /** Enters one of the caller's teams. Captain only (403). */
     @POST("api/v1/tournaments/{id}/teams")

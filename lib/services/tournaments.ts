@@ -11,6 +11,78 @@ import { prisma } from "@/lib/prisma";
  * post fabricated scores into any tournament.
  */
 
+export type CreateTournamentInput = {
+  name: string;
+  startDate: string;
+  endDate?: string | null;
+  description?: string | null;
+};
+
+export type CreateTournamentResult =
+  | { ok: true; tournamentId: string }
+  | { ok: false; error: "invalid_input" };
+
+/** Creates a tournament with the caller as its creator (the result recorder). */
+export async function createTournament(
+  userId: string,
+  input: CreateTournamentInput,
+): Promise<CreateTournamentResult> {
+  const name = input.name.trim();
+  if (name.length < 2) return { ok: false, error: "invalid_input" };
+
+  if (!input.startDate) return { ok: false, error: "invalid_input" };
+  const startDate = new Date(input.startDate);
+  if (Number.isNaN(startDate.getTime())) return { ok: false, error: "invalid_input" };
+
+  const endDate = input.endDate ? new Date(input.endDate) : null;
+  if (endDate && Number.isNaN(endDate.getTime())) {
+    return { ok: false, error: "invalid_input" };
+  }
+  // An end before the start is a data-entry slip that would make the status
+  // computation nonsense; the web form never checked it.
+  if (endDate && endDate < startDate) return { ok: false, error: "invalid_input" };
+
+  const tournament = await prisma.tournament.create({
+    data: {
+      name,
+      startDate,
+      endDate,
+      description: input.description?.trim() || null,
+      creatorId: userId,
+    },
+  });
+
+  return { ok: true, tournamentId: tournament.id };
+}
+
+export type CancelTournamentResult =
+  | { ok: true; alreadyCancelled: boolean }
+  | { ok: false; error: "not_found" | "not_creator" };
+
+/**
+ * Cancels a tournament. Creator only, and soft — the row stays so entered
+ * teams keep seeing it with the reason, matching how games are cancelled.
+ */
+export async function cancelTournament(
+  tournamentId: string,
+  userId: string,
+): Promise<CancelTournamentResult> {
+  const tournament = await prisma.tournament.findUnique({
+    where: { id: tournamentId },
+    select: { creatorId: true, cancelled: true },
+  });
+  if (!tournament) return { ok: false, error: "not_found" };
+  if (tournament.creatorId !== userId) return { ok: false, error: "not_creator" };
+  if (tournament.cancelled) return { ok: true, alreadyCancelled: true };
+
+  await prisma.tournament.update({
+    where: { id: tournamentId },
+    data: { cancelled: true },
+  });
+
+  return { ok: true, alreadyCancelled: false };
+}
+
 export type RegisterError =
   | "tournament_not_found"
   | "team_not_found"

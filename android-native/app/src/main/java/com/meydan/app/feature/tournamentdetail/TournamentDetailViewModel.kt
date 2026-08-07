@@ -33,6 +33,8 @@ class TournamentDetailViewModel(
         val actionErrorCode: String? = null,
         /** Non-null while the record-result sheet is open. */
         val recording: RecordForm? = null,
+        /** Cancelling is destructive, so it is confirmed first. */
+        val confirmingCancel: Boolean = false,
     )
 
     /** In-progress result entry. Team ids are picked from the entered teams. */
@@ -127,6 +129,24 @@ class TournamentDetailViewModel(
                 scoreAway = form.scoreAway.toInt(),
             )
             applyWrite(tournamentsRepository.recordMatch(tournamentId, req))
+        }
+    }
+
+    // --- Cancel ---
+
+    fun askCancel() {
+        val t = _state.value.tournament ?: return
+        if (!t.isCreator || t.status == "cancelled") return
+        _state.update { it.copy(confirmingCancel = true) }
+    }
+
+    fun dismissCancel() = _state.update { it.copy(confirmingCancel = false) }
+
+    fun confirmCancel() {
+        if (_state.value.acting) return
+        _state.update { it.copy(acting = true, confirmingCancel = false, actionErrorCode = null) }
+        viewModelScope.launch {
+            applyWrite(tournamentsRepository.cancelTournament(tournamentId))
         }
     }
 

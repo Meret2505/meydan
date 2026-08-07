@@ -135,6 +135,15 @@ data class ViewerTeamDto(
 @Serializable
 data class RegisterTeamRequest(val teamId: String)
 
+/** Body of POST /tournaments. Dates are ISO-8601 instants. */
+@Serializable
+data class CreateTournamentRequest(
+    val name: String,
+    val startDate: String,
+    val endDate: String? = null,
+    val description: String? = null,
+)
+
 /** Body of POST /tournaments/{id}/matches. */
 @Serializable
 data class MatchResultRequest(

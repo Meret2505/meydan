@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { GET as getTournament } from "@/app/api/v1/tournaments/[id]/route";
+import { POST as createRoute } from "@/app/api/v1/tournaments/route";
+import {
+  DELETE as cancelRoute,
+  GET as getTournament,
+} from "@/app/api/v1/tournaments/[id]/route";
 import { POST as registerRoute } from "@/app/api/v1/tournaments/[id]/teams/route";
 import { DELETE as unregisterRoute } from "@/app/api/v1/tournaments/[id]/teams/[teamId]/route";
 import { POST as matchRoute } from "@/app/api/v1/tournaments/[id]/matches/route";
@@ -73,6 +77,117 @@ describe.skipIf(!dbAvailable)("tournaments API (integration)", () => {
 
   afterAll(async () => {
     await prisma.$disconnect();
+  });
+
+  describe("creating and cancelling", () => {
+    const iso = (daysFromNow: number) =>
+      new Date(Date.now() + daysFromNow * 86_400_000).toISOString();
+
+    it("creates a tournament with the caller as creator", async () => {
+      const me = await makeUser("Me", "+99310000001");
+
+      const response = await createRoute(
+        await authed(`${BASE}/tournaments`, me.id, {
+          method: "POST",
+          body: JSON.stringify({
+            name: "Kubok 2026",
+            startDate: iso(7),
+            description: "Bahar kubogy",
+          }),
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      const data = (await body(response)).data;
+      expect(data.name).toBe("Kubok 2026");
+      expect(data.description).toBe("Bahar kubogy");
+      expect(data.isCreator).toBe(true);
+    });
+
+    it("rejects a one-character name and a bad date", async () => {
+      const me = await makeUser("Me", "+99310000001");
+
+      for (const payload of [
+        { name: "K", startDate: iso(1) },
+        { name: "Kubok", startDate: "not-a-date" },
+      ]) {
+        const response = await createRoute(
+          await authed(`${BASE}/tournaments`, me.id, {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
+        );
+        expect(response.status).toBe(400);
+      }
+
+      expect(await prisma.tournament.count()).toBe(0);
+    });
+
+    it("rejects an end date before the start", async () => {
+      const me = await makeUser("Me", "+99310000001");
+
+      const response = await createRoute(
+        await authed(`${BASE}/tournaments`, me.id, {
+          method: "POST",
+          body: JSON.stringify({
+            name: "Kubok",
+            startDate: iso(7),
+            endDate: iso(1),
+          }),
+        }),
+      );
+
+      expect(response.status).toBe(400);
+    });
+
+    it("lets the creator cancel", async () => {
+      const creator = await makeUser("Creator", "+99310000001");
+      const tournament = await makeTournament(creator.id);
+
+      const response = await cancelRoute(
+        await authed(`${BASE}/tournaments/${tournament.id}`, creator.id, {
+          method: "DELETE",
+        }),
+        ctx(tournament.id),
+      );
+
+      expect(response.status).toBe(200);
+      expect((await body(response)).data.status).toBe("cancelled");
+    });
+
+    it("refuses a cancel by anyone else", async () => {
+      const creator = await makeUser("Creator", "+99310000001");
+      const stranger = await makeUser("Stranger", "+99310000002");
+      const tournament = await makeTournament(creator.id);
+
+      const response = await cancelRoute(
+        await authed(`${BASE}/tournaments/${tournament.id}`, stranger.id, {
+          method: "DELETE",
+        }),
+        ctx(tournament.id),
+      );
+
+      expect(response.status).toBe(403);
+      const after = await prisma.tournament.findUnique({
+        where: { id: tournament.id },
+      });
+      expect(after?.cancelled).toBe(false);
+    });
+
+    it("is idempotent when cancelling twice", async () => {
+      const creator = await makeUser("Creator", "+99310000001");
+      const tournament = await makeTournament(creator.id);
+
+      for (let i = 0; i < 2; i++) {
+        const response = await cancelRoute(
+          await authed(`${BASE}/tournaments/${tournament.id}`, creator.id, {
+            method: "DELETE",
+          }),
+          ctx(tournament.id),
+        );
+        expect(response.status).toBe(200);
+      }
+    });
   });
 
   describe("registering teams", () => {

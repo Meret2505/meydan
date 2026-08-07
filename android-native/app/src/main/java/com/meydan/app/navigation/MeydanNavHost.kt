@@ -20,6 +20,7 @@ import com.meydan.app.feature.auth.LoginViewModel
 import com.meydan.app.feature.auth.PhoneLoginScreen
 import com.meydan.app.feature.creategame.CreateGameScreen
 import com.meydan.app.feature.createteam.CreateTeamScreen
+import com.meydan.app.feature.createtournament.CreateTournamentScreen
 import com.meydan.app.feature.fielddetail.FieldDetailScreen
 import com.meydan.app.feature.gamedetail.GameDetailScreen
 import com.meydan.app.feature.main.MainScaffold
@@ -39,6 +40,7 @@ object Routes {
     const val CREATE_GAME = "create-game"
     const val PROFILE_EDIT = "profile-edit"
     const val CREATE_TEAM = "create-team"
+    const val CREATE_TOURNAMENT = "create-tournament"
     const val FIELD_DETAIL = "field/{fieldId}"
     fun fieldDetail(id: String) = "field/$id"
     const val TEAM_DETAIL = "team/{teamId}"
@@ -142,6 +144,18 @@ fun MeydanApp(container: AppContainer) {
                 onCreateGame = { navController.navigate(Routes.CREATE_GAME) },
                 onEditProfile = { navController.navigate(Routes.PROFILE_EDIT) },
                 onCreateTeam = { navController.navigate(Routes.CREATE_TEAM) },
+                onCreateTournament = { navController.navigate(Routes.CREATE_TOURNAMENT) },
+            )
+        }
+        composable(Routes.CREATE_TOURNAMENT) {
+            CreateTournamentScreen(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onCreated = { id ->
+                    navController.navigate(Routes.tournamentDetail(id)) {
+                        popUpTo(Routes.CREATE_TOURNAMENT) { inclusive = true }
+                    }
+                },
             )
         }
         composable(Routes.CREATE_TEAM) {
