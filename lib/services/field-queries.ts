@@ -6,12 +6,23 @@ import { prisma } from "@/lib/prisma";
  * handler or a test.
  */
 
+/**
+ * Upper bound on the fields list.
+ *
+ * Fields are a curated set for one city, so this is far above any plausible
+ * count — it exists so the query can never become an unbounded table scan if
+ * the catalogue is ever bulk-imported. Every other list read is already capped;
+ * this was the last one without a limit.
+ */
+const MAX_FIELDS = 200;
+
 /** Active fields plus the viewer's favorite ids, for the list endpoint. */
 export async function fetchFields(userId: string) {
   const [fields, favorites] = await Promise.all([
     prisma.field.findMany({
       where: { isActive: true },
       orderBy: { name: "asc" },
+      take: MAX_FIELDS,
     }),
     prisma.fieldFavorite.findMany({
       where: { userId },

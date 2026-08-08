@@ -25,16 +25,19 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.network.dto.ProfileStatsDto
 import com.meydan.app.core.network.dto.RecentGameDto
+import com.meydan.app.feature.auth.errorTextRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,9 +57,9 @@ import com.meydan.app.core.common.LocaleMapper
 import com.meydan.app.core.di.AppContainer
 
 /**
- * Profile tab — port of the web profile page's identity block + settings.
- * Stats and recent games are deferred until a mobile stats endpoint exists;
- * everything shown here is backed by the existing /me response.
+ * Profile tab — port of the web profile page: identity (with a tappable avatar
+ * backed by the system photo picker), the attendance block and recent games
+ * from /me/stats, and settings.
  */
 @Composable
 fun ProfileScreen(
@@ -112,7 +115,10 @@ fun ProfileScreen(
                     .clip(CircleShape)
                     .background(colors.primary.copy(alpha = 0.15f))
                     .clickable(enabled = !state.uploadingAvatar) {
-                        pickImage.launch(
+                        // With a photo set there are two things you might mean,
+                        // so ask; without one there is only one.
+                        if (user?.avatar != null) viewModel.openAvatarMenu()
+                        else pickImage.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                         )
                     },
@@ -156,6 +162,18 @@ fun ProfileScreen(
                     modifier = Modifier.padding(top = 4.dp),
                 )
             }
+        }
+
+        // An avatar write that failed used to leave no trace at all — the
+        // spinner just stopped and the photo silently stayed as it was.
+        state.avatarErrorCode?.let { code ->
+            Text(
+                text = stringResource(errorTextRes(code)),
+                color = colors.error,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 10.dp),
+            )
         }
 
         // Open-to-invites status pill
@@ -244,6 +262,38 @@ fun ProfileScreen(
         }
 
         Spacer(Modifier.height(24.dp))
+    }
+
+    if (state.avatarMenuOpen) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissAvatarMenu,
+            // Explicit: M3 defaults a dialog to shapes.extraLarge, which this
+            // theme defines as a button pill.
+            shape = RoundedCornerShape(28.dp),
+            title = { Text(stringResource(R.string.profile_photo_title)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.dismissAvatarMenu()
+                    pickImage.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                    )
+                }) {
+                    Text(
+                        text = stringResource(R.string.profile_photo_change),
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::removeAvatar) {
+                    Text(
+                        text = stringResource(R.string.profile_photo_remove),
+                        color = colors.error,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            },
+        )
     }
 }
 

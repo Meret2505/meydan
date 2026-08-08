@@ -27,6 +27,10 @@ class ProfileViewModel(
         val stats: ProfileStatsDto? = null,
         val statsLoading: Boolean = true,
         val uploadingAvatar: Boolean = false,
+        /** Set when an avatar write fails — too large, rate limited, offline. */
+        val avatarErrorCode: String? = null,
+        /** True while the change/remove sheet is open (only with an avatar set). */
+        val avatarMenuOpen: Boolean = false,
         val loggedOut: Boolean = false,
     )
 
@@ -65,21 +69,37 @@ class ProfileViewModel(
      */
     fun uploadAvatar(bytes: ByteArray, mime: String, filename: String) {
         if (_state.value.uploadingAvatar) return
-        _state.update { it.copy(uploadingAvatar = true) }
+        _state.update { it.copy(uploadingAvatar = true, avatarErrorCode = null) }
         viewModelScope.launch {
-            authRepository.uploadAvatar(bytes, mime, filename)
-            // The repository refreshes the cached user, so the collector above
-            // swaps in the new avatar; nothing to apply here.
-            _state.update { it.copy(uploadingAvatar = false) }
+            // The repository refreshes the cached user on success, so the
+            // collector above swaps in the new avatar; only failure needs
+            // handling here, and it used to be dropped silently.
+            applyAvatarResult(authRepository.uploadAvatar(bytes, mime, filename))
         }
     }
 
+    fun openAvatarMenu() = _state.update { it.copy(avatarMenuOpen = true) }
+
+    fun dismissAvatarMenu() = _state.update { it.copy(avatarMenuOpen = false) }
+
     fun removeAvatar() {
         if (_state.value.uploadingAvatar) return
-        _state.update { it.copy(uploadingAvatar = true) }
-        viewModelScope.launch {
-            authRepository.removeAvatar()
-            _state.update { it.copy(uploadingAvatar = false) }
+        _state.update {
+            it.copy(uploadingAvatar = true, avatarMenuOpen = false, avatarErrorCode = null)
+        }
+        viewModelScope.launch { applyAvatarResult(authRepository.removeAvatar()) }
+    }
+
+    private fun applyAvatarResult(result: ApiResult<*>) {
+        _state.update {
+            it.copy(
+                uploadingAvatar = false,
+                avatarErrorCode = when (result) {
+                    is ApiResult.Success -> null
+                    is ApiResult.Failure -> result.code
+                    ApiResult.NetworkError -> "network"
+                },
+            )
         }
     }
 

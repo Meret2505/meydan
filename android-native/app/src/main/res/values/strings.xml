@@ -66,6 +66,9 @@
     <string name="skill_beginner">Новичок</string>
     <string name="skill_intermediate">Средний</string>
     <string name="skill_advanced">Продвинутый</string>
+    <string name="profile_photo_title">Фото профиля</string>
+    <string name="profile_photo_change">Заменить</string>
+    <string name="profile_photo_remove">Удалить</string>
     <string name="profile_attendance">Посещаемость</string>
     <string name="profile_attendance_detail">%1$d из %2$d игр</string>
     <string name="profile_games_played">Сыграно</string>

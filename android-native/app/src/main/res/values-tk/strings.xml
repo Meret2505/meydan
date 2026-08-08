@@ -55,6 +55,9 @@
     <string name="skill_beginner">Başlangyç</string>
     <string name="skill_intermediate">Orta</string>
     <string name="skill_advanced">Ösen</string>
+    <string name="profile_photo_title">Profil suraty</string>
+    <string name="profile_photo_change">Çalyş</string>
+    <string name="profile_photo_remove">Poz</string>
     <string name="profile_attendance">Gatnaşyk</string>
     <string name="profile_attendance_detail">%2$d oýundan %1$d</string>
     <string name="profile_games_played">Oýnaldy</string>

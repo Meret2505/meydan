@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +52,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.di.AppContainer
+import com.meydan.app.feature.auth.errorTextRes
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.ParticipantDto
 import java.util.Locale
@@ -98,6 +100,7 @@ fun GameDetailScreen(
             state.game != null -> GameDetailContent(
                 game = state.game!!,
                 acting = state.acting,
+                actionErrorCode = state.actionErrorCode,
                 onBack = onBack,
                 onToggleJoin = viewModel::toggleJoin,
                 onCancelGame = viewModel::askCancel,
@@ -121,6 +124,7 @@ fun GameDetailScreen(
 private fun GameDetailContent(
     game: GameDetailDto,
     acting: Boolean,
+    actionErrorCode: String?,
     onBack: () -> Unit,
     onToggleJoin: () -> Unit,
     onCancelGame: () -> Unit,
@@ -175,7 +179,7 @@ private fun GameDetailContent(
         }
 
         // Sticky bottom CTA.
-        Box(
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
@@ -183,6 +187,18 @@ private fun GameDetailContent(
                 .systemBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 12.dp),
         ) {
+            // A failed join/leave/cancel used to do nothing visible at all —
+            // the tap simply had no effect and the reason was dropped.
+            actionErrorCode?.let { code ->
+                Text(
+                    text = stringResource(errorTextRes(code)),
+                    color = colors.error,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                )
+            }
             CtaButton(
                 game = game,
                 acting = acting,
