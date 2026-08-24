@@ -27,8 +27,11 @@ class SettingsStore(private val context: Context) {
     val themeMode: Flow<ThemeMode> = context.settingsDataStore.data.map { prefs ->
         when (prefs[Keys.THEME_MODE]) {
             "LIGHT" -> ThemeMode.LIGHT
-            "DARK" -> ThemeMode.DARK
-            else -> ThemeMode.SYSTEM
+            "SYSTEM" -> ThemeMode.SYSTEM
+            // Default (no choice saved yet) is dark: the web app launches dark,
+            // so the native app matches its signature look out of the box. The
+            // user can still pick Light or "follow system" in Profile → Тема.
+            else -> ThemeMode.DARK
         }
     }
 

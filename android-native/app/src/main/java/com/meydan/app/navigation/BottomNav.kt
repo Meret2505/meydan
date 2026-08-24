@@ -58,7 +58,9 @@ fun BottomNav(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
+                // The web bar uses a dedicated --nav-bg shade, slightly darker
+                // than surface in dark mode — match it rather than reusing surface.
+                .background(com.meydan.app.core.designsystem.MeydanTheme.colors.navBg)
                 .navigationBarsPadding()
                 .padding(top = 10.dp, bottom = 8.dp),
         ) {

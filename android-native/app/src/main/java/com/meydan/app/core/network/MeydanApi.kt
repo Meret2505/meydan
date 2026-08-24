@@ -22,6 +22,7 @@ import com.meydan.app.core.network.dto.TeamsResponse
 import com.meydan.app.core.network.dto.TournamentsResponse
 import com.meydan.app.core.network.dto.GoogleAuthRequest
 import com.meydan.app.core.network.dto.MeResponse
+import com.meydan.app.core.network.dto.NotificationsDto
 import com.meydan.app.core.network.dto.PhoneAuthRequest
 import com.meydan.app.core.network.dto.ProfilePatch
 import com.meydan.app.core.network.dto.RefreshRequest
@@ -177,4 +178,11 @@ interface MeydanApi {
 
     @GET("api/v1/notifications/unread-count")
     suspend fun unreadCount(): Response<ApiResponse<UnreadCountDto>>
+
+    @GET("api/v1/notifications")
+    suspend fun notifications(): Response<ApiResponse<NotificationsDto>>
+
+    /** Marks every unread notification read, clearing the bell badge. */
+    @POST("api/v1/notifications")
+    suspend fun markNotificationsRead(): Response<ApiResponse<Unit>>
 }

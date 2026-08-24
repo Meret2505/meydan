@@ -135,6 +135,10 @@
     <string name="empty_no_my_games">Ты ещё не записался ни на одну игру.</string>
     <string name="offline_banner">Нет соединения — показаны сохранённые игры.</string>
 
+    <!-- notifications -->
+    <string name="notifications_title">Уведомления</string>
+    <string name="notifications_empty">Пока нет уведомлений</string>
+
     <!-- game detail -->
     <string name="games_when">Когда</string>
     <string name="games_price">Цена</string>

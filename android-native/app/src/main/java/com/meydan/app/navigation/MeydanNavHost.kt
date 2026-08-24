@@ -24,6 +24,7 @@ import com.meydan.app.feature.createtournament.CreateTournamentScreen
 import com.meydan.app.feature.fielddetail.FieldDetailScreen
 import com.meydan.app.feature.gamedetail.GameDetailScreen
 import com.meydan.app.feature.main.MainScaffold
+import com.meydan.app.feature.notifications.NotificationsScreen
 import com.meydan.app.feature.teamdetail.TeamDetailScreen
 import com.meydan.app.feature.tournamentdetail.TournamentDetailScreen
 import com.meydan.app.feature.onboarding.OnboardingFlow
@@ -47,6 +48,7 @@ object Routes {
     fun teamDetail(id: String) = "team/$id"
     const val TOURNAMENT_DETAIL = "tournament/{tournamentId}"
     fun tournamentDetail(id: String) = "tournament/$id"
+    const val NOTIFICATIONS = "notifications"
 }
 
 /**
@@ -145,6 +147,14 @@ fun MeydanApp(container: AppContainer) {
                 onEditProfile = { navController.navigate(Routes.PROFILE_EDIT) },
                 onCreateTeam = { navController.navigate(Routes.CREATE_TEAM) },
                 onCreateTournament = { navController.navigate(Routes.CREATE_TOURNAMENT) },
+                onNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
+            )
+        }
+        composable(Routes.NOTIFICATIONS) {
+            NotificationsScreen(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onGameClick = { navController.navigate(Routes.gameDetail(it)) },
             )
         }
         composable(Routes.CREATE_TOURNAMENT) {

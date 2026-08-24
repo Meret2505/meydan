@@ -123,6 +123,10 @@
     <string name="empty_no_my_games">Heniz hiç oýna ýazylmadyňyz.</string>
     <string name="offline_banner">Birikme ýok — saklanan oýunlar görkezilýär.</string>
 
+    <!-- notifications -->
+    <string name="notifications_title">Habarnamalar</string>
+    <string name="notifications_empty">Häzirlikçe habarnama ýok</string>
+
     <!-- game detail -->
     <string name="games_when">Haçan</string>
     <string name="games_price">Bahasy</string>

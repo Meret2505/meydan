@@ -12,6 +12,7 @@ import com.meydan.app.core.network.NetworkModule
 import com.meydan.app.data.AuthRepository
 import com.meydan.app.data.FieldsRepository
 import com.meydan.app.data.GamesRepository
+import com.meydan.app.data.NotificationsRepository
 import com.meydan.app.data.TeamsRepository
 import com.meydan.app.data.TournamentsRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -79,4 +80,6 @@ class AppContainer(context: Context) {
         api = networkModule.meydanApi,
         tournamentsCache = tournamentsCache,
     )
+
+    val notificationsRepository = NotificationsRepository(networkModule.meydanApi)
 }

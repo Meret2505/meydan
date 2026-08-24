@@ -20,16 +20,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.BrightnessAuto
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.layout.ContentScale
@@ -308,7 +313,7 @@ fun ProfileScreen(
     }
 
     if (state.themeMenuOpen) {
-        ThemePickerDialog(
+        ThemePickerSheet(
             current = state.themeMode,
             onSelect = viewModel::setThemeMode,
             onDismiss = viewModel::dismissThemeMenu,
@@ -323,52 +328,86 @@ private fun themeLabelRes(mode: ThemeMode): Int = when (mode) {
     ThemeMode.DARK -> R.string.profile_theme_dark
 }
 
-/** Three-way appearance picker: follow system, force light, force dark. */
+/** Icon for a theme mode, shown in the picker. */
+private fun themeIcon(mode: ThemeMode): androidx.compose.ui.graphics.vector.ImageVector = when (mode) {
+    ThemeMode.SYSTEM -> Icons.Outlined.BrightnessAuto
+    ThemeMode.LIGHT -> Icons.Outlined.LightMode
+    ThemeMode.DARK -> Icons.Outlined.DarkMode
+}
+
+/**
+ * Appearance picker as a bottom sheet: one tappable card per mode with an icon,
+ * a label and a check on the selected one — the selected card is tinted and
+ * outlined in the brand green. Nicer and more native than a radio dialog.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ThemePickerDialog(
+private fun ThemePickerSheet(
     current: ThemeMode,
     onSelect: (ThemeMode) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        // M3 defaults a dialog to shapes.extraLarge, which this theme defines as
-        // a button pill — pin an explicit rounded rectangle.
-        shape = RoundedCornerShape(28.dp),
-        title = { Text(stringResource(R.string.profile_theme)) },
-        text = {
-            Column {
-                ThemeMode.entries.forEach { mode ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { onSelect(mode) }
-                            .padding(vertical = 12.dp, horizontal = 8.dp),
-                    ) {
-                        androidx.compose.material3.RadioButton(
-                            selected = mode == current,
-                            onClick = { onSelect(mode) },
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.profile_theme),
+                style = MaterialTheme.typography.headlineSmall,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(bottom = 6.dp),
+            )
+            ThemeMode.entries.forEach { mode ->
+                val selected = mode == current
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (selected) colors.primary.copy(alpha = 0.12f)
+                            else colors.surfaceVariant.copy(alpha = 0.45f),
                         )
-                        Text(
-                            text = stringResource(themeLabelRes(mode)),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.onSurface,
-                            modifier = Modifier.padding(start = 8.dp),
+                        .border(
+                            1.dp,
+                            if (selected) colors.primary.copy(alpha = 0.45f) else colors.outline,
+                            RoundedCornerShape(16.dp),
+                        )
+                        .clickable { onSelect(mode) }
+                        .padding(horizontal = 16.dp, vertical = 15.dp),
+                ) {
+                    Icon(
+                        imageVector = themeIcon(mode),
+                        contentDescription = null,
+                        tint = if (selected) colors.primary else colors.onSurfaceVariant,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Text(
+                        text = stringResource(themeLabelRes(mode)),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (selected) colors.primary else colors.onSurface,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 14.dp),
+                    )
+                    if (selected) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = colors.primary,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.common_back), fontWeight = FontWeight.Bold)
-            }
-        },
-    )
+        }
+    }
 }
 
 /**

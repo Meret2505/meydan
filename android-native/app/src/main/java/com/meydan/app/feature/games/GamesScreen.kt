@@ -69,6 +69,7 @@ fun GamesScreen(
     container: AppContainer,
     onGameClick: (String) -> Unit,
     onCreateGame: () -> Unit,
+    onNotifications: () -> Unit,
 ) {
     val viewModel: GamesViewModel = viewModel {
         GamesViewModel(container.gamesRepository)
@@ -89,7 +90,11 @@ fun GamesScreen(
             // Only the top inset — the bottom nav owns the bottom inset.
             .systemBarsPadding(),
     ) {
-        FeedHeader(unread = state.unread, onCreateGame = onCreateGame)
+        FeedHeader(
+            unread = state.unread,
+            onCreateGame = onCreateGame,
+            onNotifications = onNotifications,
+        )
         TabRow(tab = state.tab, onSelect = viewModel::selectTab)
         ChipRow(chip = state.chip, onToggle = viewModel::toggleChip)
 
@@ -135,7 +140,7 @@ fun GamesScreen(
 }
 
 @Composable
-private fun FeedHeader(unread: Int, onCreateGame: () -> Unit) {
+private fun FeedHeader(unread: Int, onCreateGame: () -> Unit, onNotifications: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -164,10 +169,10 @@ private fun FeedHeader(unread: Int, onCreateGame: () -> Unit) {
                 modifier = Modifier.size(22.dp),
             )
         }
-        Box {
+        Box(modifier = Modifier.clickable(onClick = onNotifications)) {
             Icon(
                 imageVector = Icons.Filled.Notifications,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.notifications_title),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(26.dp),
             )

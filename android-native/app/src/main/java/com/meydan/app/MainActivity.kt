@@ -27,8 +27,10 @@ class MainActivity : AppCompatActivity() {
             // Honour the user's saved theme choice (Profile → Тема). SYSTEM
             // falls back to the OS setting, so the default matches before any
             // choice is made.
+            // Dark is the default (matches the web app) — seed the initial value
+            // with it too, so there's no light flash before DataStore answers.
             val themeMode by container.settingsStore.themeMode
-                .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
+                .collectAsStateWithLifecycle(initialValue = ThemeMode.DARK)
             val darkTheme = when (themeMode) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 ThemeMode.LIGHT -> false
