@@ -111,6 +111,20 @@ fun MeydanTheme(
             onSurfaceVariant = colors.textMuted,
             error = colors.danger,
             outline = colors.borderStrong,
+            outlineVariant = colors.border,
+            // Menus, dropdowns, and bottom sheets read these container roles.
+            // Without them Material falls back to its purple-tinted baseline
+            // neutrals, which look nothing like the brand — so pin them to the
+            // app's own surface stack. surfaceTint neutralised so elevated
+            // surfaces don't pick up a green wash either.
+            surfaceTint = Color.Transparent,
+            surfaceBright = DarkSurface2,
+            surfaceDim = DarkBg,
+            surfaceContainerLowest = Color(0xFF090C0B),
+            surfaceContainerLow = colors.surface,
+            surfaceContainer = Color(0xFF171D1F),
+            surfaceContainerHigh = colors.surface2,
+            surfaceContainerHighest = Color(0xFF232A2C),
         )
     } else {
         lightColorScheme(
@@ -124,6 +138,15 @@ fun MeydanTheme(
             onSurfaceVariant = colors.textMuted,
             error = colors.danger,
             outline = colors.borderStrong,
+            outlineVariant = colors.border,
+            surfaceTint = Color.Transparent,
+            surfaceBright = Color(0xFFFFFFFF),
+            surfaceDim = Color(0xFFE2E8E4),
+            surfaceContainerLowest = Color(0xFFFFFFFF),
+            surfaceContainerLow = Color(0xFFFAFBFA),
+            surfaceContainer = colors.surface,
+            surfaceContainerHigh = colors.surface2,
+            surfaceContainerHighest = Color(0xFFE6ECE8),
         )
     }
 

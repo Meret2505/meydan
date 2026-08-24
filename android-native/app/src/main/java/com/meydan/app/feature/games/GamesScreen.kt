@@ -48,6 +48,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.ConfigurationCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
@@ -72,6 +74,12 @@ fun GamesScreen(
         GamesViewModel(container.gamesRepository)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // The feed VM survives the trip to the create-game screen, so re-fetch when
+    // this screen resumes (returning from create/detail, or app foreground) —
+    // that's what surfaces a just-created game under "Mine". ON_RESUME does not
+    // fire on the initial composition (already resumed), so no double load.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshOnResume() }
 
     // Logout lives in the Profile tab now; a forced logout (session expiry) is
     // still handled centrally by MeydanApp's sessionExpired collector.

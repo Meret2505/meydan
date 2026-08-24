@@ -75,6 +75,17 @@ class GamesViewModel(
         viewModelScope.launch { refresh(initial = false) }
     }
 
+    /**
+     * Silent re-fetch for when the feed is re-shown — e.g. returning after
+     * creating a game. The feed VM is scoped to the home back-stack entry and
+     * survives the trip to the create screen, so without this a freshly created
+     * game never lands in "Mine" until a manual pull. Unlike [pullRefresh] it
+     * leaves the pull spinner alone.
+     */
+    fun refreshOnResume() {
+        viewModelScope.launch { refresh(initial = false) }
+    }
+
     private suspend fun refresh(initial: Boolean) {
         when (val result = gamesRepository.refresh()) {
             is ApiResult.Success -> _state.update {

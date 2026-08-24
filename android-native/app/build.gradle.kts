@@ -13,6 +13,20 @@ plugins {
  */
 val keystorePassword: String? = System.getenv("MEYDAN_KEYSTORE_PASSWORD")
 
+/**
+ * Optional backend override for debug builds:
+ *
+ *   ./gradlew assembleDebug -PapiBase=https://meydan-chi.vercel.app/
+ *
+ * Debug normally points at the dev machine (see below), which needs
+ * `adb reverse` and a running dev server. This lets a debug APK be built
+ * against the real backend so it can be sideloaded and used anywhere, without
+ * the release keystore. Trailing slash is required by Retrofit.
+ */
+val apiBaseOverride: String? = (findProperty("apiBase") as String?)
+    ?.trim()
+    ?.let { if (it.endsWith("/")) it else "$it/" }
+
 android {
     namespace = "com.meydan.app"
     compileSdk = 36
@@ -59,8 +73,13 @@ android {
             // already trusts and Google Sign-In works during development.
             signingConfigs.findByName("upload")?.let { signingConfig = it }
             // Points at the dev machine via `adb reverse tcp:3000 tcp:3000`, so
-            // a phone or emulator reaches the Next.js dev server on localhost.
-            buildConfigField("String", "API_BASE_URL", "\"http://localhost:3000/\"")
+            // a phone or emulator reaches the Next.js dev server on localhost —
+            // unless -PapiBase overrides it (see above).
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"${apiBaseOverride ?: "http://localhost:3000/"}\"",
+            )
         }
         release {
             signingConfigs.findByName("upload")?.let { signingConfig = it }
@@ -71,7 +90,13 @@ android {
                 "proguard-rules.pro",
             )
             // Production backend. A later VPS move is a one-line change here.
-            buildConfigField("String", "API_BASE_URL", "\"https://meydan-chi.vercel.app/\"")
+            // -PapiBase overrides it (used to smoke-test a release build against
+            // a local backend without shipping that URL).
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"${apiBaseOverride ?: "https://meydan-chi.vercel.app/"}\"",
+            )
         }
     }
 

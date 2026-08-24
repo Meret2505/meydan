@@ -3,6 +3,7 @@ package com.meydan.app.core.designsystem
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,10 +42,12 @@ fun PrimaryButton(
             .height(58.dp),
     ) {
         if (loading) {
+            // size(), not height(): height alone leaves the indicator at its
+            // default 40dp width, so it renders as an off-centre oval.
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.onPrimary,
                 strokeWidth = 2.5.dp,
-                modifier = Modifier.height(22.dp),
+                modifier = Modifier.size(22.dp),
             )
         } else {
             Text(text = text, fontSize = 16.sp, fontWeight = FontWeight.Bold)
