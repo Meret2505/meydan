@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Language
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.meydan.app.core.common.GameTime
+import com.meydan.app.core.datastore.ThemeMode
 import com.meydan.app.core.network.dto.ProfileStatsDto
 import com.meydan.app.core.network.dto.RecentGameDto
 import com.meydan.app.feature.auth.errorTextRes
@@ -68,7 +70,9 @@ fun ProfileScreen(
     onToggleLanguage: () -> Unit,
     onEditProfile: () -> Unit,
 ) {
-    val viewModel: ProfileViewModel = viewModel { ProfileViewModel(container.authRepository) }
+    val viewModel: ProfileViewModel = viewModel {
+        ProfileViewModel(container.authRepository, container.settingsStore)
+    }
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     if (state.loggedOut) {
@@ -246,6 +250,13 @@ fun ProfileScreen(
             )
             androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
             SettingsRow(
+                icon = Icons.Outlined.DarkMode,
+                label = stringResource(R.string.profile_theme),
+                trailing = stringResource(themeLabelRes(state.themeMode)),
+                onClick = viewModel::openThemeMenu,
+            )
+            androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
+            SettingsRow(
                 icon = Icons.Outlined.Language,
                 label = stringResource(R.string.profile_language),
                 trailing = langLabel,
@@ -295,6 +306,69 @@ fun ProfileScreen(
             },
         )
     }
+
+    if (state.themeMenuOpen) {
+        ThemePickerDialog(
+            current = state.themeMode,
+            onSelect = viewModel::setThemeMode,
+            onDismiss = viewModel::dismissThemeMenu,
+        )
+    }
+}
+
+/** Localized label for the current theme mode, shown on the settings row. */
+private fun themeLabelRes(mode: ThemeMode): Int = when (mode) {
+    ThemeMode.SYSTEM -> R.string.profile_theme_system
+    ThemeMode.LIGHT -> R.string.profile_theme_light
+    ThemeMode.DARK -> R.string.profile_theme_dark
+}
+
+/** Three-way appearance picker: follow system, force light, force dark. */
+@Composable
+private fun ThemePickerDialog(
+    current: ThemeMode,
+    onSelect: (ThemeMode) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        // M3 defaults a dialog to shapes.extraLarge, which this theme defines as
+        // a button pill — pin an explicit rounded rectangle.
+        shape = RoundedCornerShape(28.dp),
+        title = { Text(stringResource(R.string.profile_theme)) },
+        text = {
+            Column {
+                ThemeMode.entries.forEach { mode ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onSelect(mode) }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                    ) {
+                        androidx.compose.material3.RadioButton(
+                            selected = mode == current,
+                            onClick = { onSelect(mode) },
+                        )
+                        Text(
+                            text = stringResource(themeLabelRes(mode)),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colors.onSurface,
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.common_back), fontWeight = FontWeight.Bold)
+            }
+        },
+    )
 }
 
 /**

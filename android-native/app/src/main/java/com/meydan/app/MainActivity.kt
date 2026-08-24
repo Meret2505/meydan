@@ -4,10 +4,14 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meydan.app.core.datastore.ThemeMode
 import com.meydan.app.core.designsystem.MeydanTheme
 import com.meydan.app.navigation.MeydanApp
 
@@ -20,7 +24,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val container = (application as MeydanApplication).container
         setContent {
-            MeydanTheme {
+            // Honour the user's saved theme choice (Profile → Тема). SYSTEM
+            // falls back to the OS setting, so the default matches before any
+            // choice is made.
+            val themeMode by container.settingsStore.themeMode
+                .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
+            val darkTheme = when (themeMode) {
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+            MeydanTheme(darkTheme = darkTheme) {
                 // A Surface root sets LocalContentColor from the theme, so Text
                 // without an explicit colour is legible in both themes. Without
                 // it, content colour defaults to black and vanishes on the dark

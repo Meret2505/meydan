@@ -3,6 +3,7 @@ package com.meydan.app.core.di
 import android.content.Context
 import com.meydan.app.core.datastore.FeedCache
 import com.meydan.app.core.datastore.FieldsCache
+import com.meydan.app.core.datastore.SettingsStore
 import com.meydan.app.core.datastore.TeamsCache
 import com.meydan.app.core.datastore.TokenStore
 import com.meydan.app.core.datastore.TournamentsCache
@@ -28,6 +29,7 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     val tokenStore = TokenStore(appContext)
+    val settingsStore = SettingsStore(appContext)
     val userCache = UserCache(appContext)
     val feedCache = FeedCache(appContext)
     val fieldsCache = FieldsCache(appContext)

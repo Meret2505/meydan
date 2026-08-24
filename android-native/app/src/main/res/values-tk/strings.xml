@@ -67,6 +67,10 @@
     <string name="profile_missed">Gelmedi</string>
     <string name="profile_settings">Sazlamalar</string>
     <string name="profile_language">Interfeýs dili</string>
+    <string name="profile_theme">Bezeg temasy</string>
+    <string name="profile_theme_system">Ulgamdaky ýaly</string>
+    <string name="profile_theme_light">Açyk</string>
+    <string name="profile_theme_dark">Garaňky</string>
     <string name="profile_logout_full">Hasapdan çyk</string>
 
     <!-- fields -->
@@ -248,6 +252,7 @@
     <string name="error_wrong_password">Parol nädogry</string>
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>
     <string name="error_team_in_use">Toparyň oýunlary bar — ony dargadyp bolmaýar.</string>
+    <string name="error_phone_taken">Bu belgi başga hasaba baglanan</string>
     <string name="error_auth_failed">Girip bolmady</string>
     <string name="error_rate_limited">Örän köp synanyşyk. Soňrak synanyşyň.</string>
     <string name="error_offline_title">Birikme ýok</string>

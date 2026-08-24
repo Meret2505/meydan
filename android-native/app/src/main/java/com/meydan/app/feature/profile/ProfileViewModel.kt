@@ -3,6 +3,8 @@ package com.meydan.app.feature.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.datastore.SettingsStore
+import com.meydan.app.core.datastore.ThemeMode
 import com.meydan.app.core.network.dto.ProfileStatsDto
 import com.meydan.app.core.network.dto.UserDto
 import com.meydan.app.data.AuthRepository
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
  */
 class ProfileViewModel(
     private val authRepository: AuthRepository,
+    private val settingsStore: SettingsStore,
 ) : ViewModel() {
 
     data class UiState(
@@ -31,6 +34,9 @@ class ProfileViewModel(
         val avatarErrorCode: String? = null,
         /** True while the change/remove sheet is open (only with an avatar set). */
         val avatarMenuOpen: Boolean = false,
+        /** True while the theme-picker sheet is open. */
+        val themeMenuOpen: Boolean = false,
+        val themeMode: ThemeMode = ThemeMode.SYSTEM,
         val loggedOut: Boolean = false,
     )
 
@@ -45,10 +51,22 @@ class ProfileViewModel(
                 if (u != null) _state.update { it.copy(user = u) }
             }
         }
+        viewModelScope.launch {
+            settingsStore.themeMode.collect { mode -> _state.update { it.copy(themeMode = mode) } }
+        }
         // Refresh from the server; getMe writes the cache, so the collector above
         // picks up the result.
         viewModelScope.launch { authRepository.getMe() }
         loadStats()
+    }
+
+    fun openThemeMenu() = _state.update { it.copy(themeMenuOpen = true) }
+
+    fun dismissThemeMenu() = _state.update { it.copy(themeMenuOpen = false) }
+
+    fun setThemeMode(mode: ThemeMode) {
+        _state.update { it.copy(themeMenuOpen = false) }
+        viewModelScope.launch { settingsStore.setThemeMode(mode) }
     }
 
     private fun loadStats() {
