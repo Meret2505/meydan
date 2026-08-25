@@ -11,11 +11,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,8 +85,19 @@ fun NotificationsScreen(
             Text(
                 text = stringResource(R.string.notifications_title),
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
             )
+            // Badge count beside the title, like the web header's unread total.
+            if (state.unreadCount > 0) {
+                Text(
+                    text = state.unreadCount.toString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
 
         when {
@@ -111,32 +135,84 @@ fun NotificationsScreen(
 @Composable
 private fun NotificationRow(notification: NotificationDto, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Column(
+    val unread = !notification.isRead
+    val badge = badgeFor(notification.type)
+    // Cancellation-type events use the error tint; everything else the primary
+    // accent — mirroring the web TYPE_STYLE colour split.
+    val tint = if (badge.alert) colors.error else colors.primary
+
+    Row(
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(colors.surface)
+            // Unread rows carry a faint primary wash; read rows sit on surface.
+            .background(if (unread) colors.primary.copy(alpha = 0.06f) else colors.surface)
             .clickable(onClick = onClick)
             .padding(16.dp),
     ) {
-        Text(
-            text = notification.title,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            text = notification.body,
-            fontSize = 14.sp,
-            color = colors.onSurface.copy(alpha = 0.8f),
-            modifier = Modifier.padding(top = 4.dp),
-        )
-        Text(
-            text = relativeTime(notification.createdAt),
-            fontSize = 12.sp,
-            color = colors.onSurfaceVariant,
-            modifier = Modifier.padding(top = 8.dp),
-        )
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(tint.copy(alpha = 0.14f)),
+        ) {
+            Icon(
+                imageVector = badge.icon,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = notification.title,
+                fontSize = 15.sp,
+                fontWeight = if (unread) FontWeight.Bold else FontWeight.SemiBold,
+            )
+            Text(
+                text = notification.body,
+                fontSize = 14.sp,
+                color = colors.onSurface.copy(alpha = 0.8f),
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            Text(
+                text = relativeTime(notification.createdAt),
+                fontSize = 12.sp,
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+        if (unread) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .size(9.dp)
+                    .clip(CircleShape)
+                    .background(colors.primary),
+            )
+        }
     }
+}
+
+/** A row's badge icon plus whether it reads as an alert (cancellation). */
+private data class TypeBadge(val icon: ImageVector, val alert: Boolean)
+
+/**
+ * Maps a notification `type` to a Material icon, mirroring the web page's
+ * TYPE_STYLE map. Unknown/future types fall back to the bell.
+ */
+private fun badgeFor(type: String): TypeBadge = when (type) {
+    "GAME_INVITE" -> TypeBadge(Icons.Filled.SportsSoccer, alert = false)
+    "PLAYER_JOINED" -> TypeBadge(Icons.Filled.Check, alert = false)
+    "SPOT_OPENED" -> TypeBadge(Icons.Filled.PersonAdd, alert = false)
+    "GAME_REMINDER" -> TypeBadge(Icons.Filled.Schedule, alert = false)
+    "RESULT_NEEDED" -> TypeBadge(Icons.Filled.Edit, alert = false)
+    "GAME_CANCELLED" -> TypeBadge(Icons.Filled.Close, alert = true)
+    "TEAM_INVITE" -> TypeBadge(Icons.Filled.Groups, alert = false)
+    else -> TypeBadge(Icons.Filled.Notifications, alert = false)
 }
 
 @Composable

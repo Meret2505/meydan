@@ -64,6 +64,10 @@ fun OnboardingFlow(
     val viewModel: OnboardingViewModel =
         viewModel { OnboardingViewModel(container.authRepository) }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // Current app language, persisted with the completing patch so server push
+    // text matches the UI — the same locale the web onboarding sends.
+    val androidLanguageTag = ConfigurationCompat.getLocales(LocalConfiguration.current)
+        .get(0)?.toLanguageTag() ?: "ru"
 
     if (state.finished) {
         // Navigation is a side effect of the state flag so process death or
@@ -143,11 +147,11 @@ fun OnboardingFlow(
                 ),
                 loading = state.loading,
                 enabled = state.canProceed,
-                onClick = viewModel::next,
+                onClick = { viewModel.next(androidLanguageTag) },
             )
             if (state.step == OnboardingViewModel.STEP_COUNT) {
                 TextButton(
-                    onClick = viewModel::skipAge,
+                    onClick = { viewModel.skipAge(androidLanguageTag) },
                     enabled = !state.loading,
                     modifier = Modifier
                         .fillMaxWidth()

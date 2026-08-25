@@ -24,6 +24,7 @@ class NotificationsViewModel(
     data class UiState(
         val loading: Boolean = true,
         val items: List<NotificationDto> = emptyList(),
+        val unreadCount: Int = 0,
         val error: Boolean = false,
     )
 
@@ -44,7 +45,12 @@ class NotificationsViewModel(
             when (val result = repository.list()) {
                 is ApiResult.Success -> {
                     _state.update {
-                        it.copy(loading = false, items = result.data.notifications, error = false)
+                        it.copy(
+                            loading = false,
+                            items = result.data.notifications,
+                            unreadCount = result.data.unreadCount,
+                            error = false,
+                        )
                     }
                     repository.markAllRead()
                 }

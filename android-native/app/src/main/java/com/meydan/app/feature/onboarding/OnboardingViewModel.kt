@@ -3,6 +3,7 @@ package com.meydan.app.feature.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.LocaleMapper
 import com.meydan.app.core.common.Position
 import com.meydan.app.core.common.normalizePhone
 import com.meydan.app.core.network.dto.ProfilePatch
@@ -103,8 +104,13 @@ class OnboardingViewModel(
         }
     }
 
-    /** Saves the current step's field; advances (or finishes) on success. */
-    fun next() {
+    /**
+     * Saves the current step's field; advances (or finishes) on success. The
+     * final (age) step also persists the chosen language, like the web's
+     * saveAge, so server-sent push text uses it. [androidLanguageTag] is the
+     * current app locale tag (ru/tk), mapped to the API code here.
+     */
+    fun next(androidLanguageTag: String) {
         val s = _state.value
         if (s.loading || !s.canProceed) return
 
@@ -120,15 +126,26 @@ class OnboardingViewModel(
             }
             3 -> ProfilePatch(position = s.position!!.name)
             4 -> ProfilePatch(district = s.district)
-            5 -> ProfilePatch(age = s.ageMid.toString())
+            5 -> ProfilePatch(
+                age = s.ageMid.toString(),
+                locale = LocaleMapper.toApiLocale(androidLanguageTag),
+            )
             else -> return
         }
         submit(patch)
     }
 
-    /** The age step's skip: nothing to save, onboarding is already complete. */
-    fun skipAge() {
+    /**
+     * The age step's skip: onboarding is already complete, but — like the web's
+     * skipAge — it must still persist the language choice for push text. Fire
+     * and forget so skip stays instant.
+     */
+    fun skipAge(androidLanguageTag: String) {
         if (_state.value.step != STEP_COUNT || _state.value.loading) return
+        val apiLocale = LocaleMapper.toApiLocale(androidLanguageTag)
+        viewModelScope.launch {
+            runCatching { authRepository.updateProfile(ProfilePatch(locale = apiLocale)) }
+        }
         _state.update { it.copy(finished = true) }
     }
 
