@@ -25,6 +25,8 @@ class CreateGameViewModel(
     private val gamesRepository: GamesRepository,
     private val fieldsRepository: FieldsRepository,
     now: LocalDateTime,
+    /** When opened from a field's detail, the field to preselect once loaded. */
+    private val preselectFieldId: String? = null,
 ) : ViewModel() {
 
     companion object {
@@ -69,7 +71,15 @@ class CreateGameViewModel(
 
     private fun applyFields(fields: List<FieldCardDto>) {
         _state.update {
-            it.copy(fields = fields, useCustomField = it.useCustomField || fields.isEmpty())
+            // Preselect the field passed from its detail (catalogue mode), but only
+            // if it exists in the loaded list and the user hasn't picked yet.
+            val preselect = preselectFieldId
+                ?.takeIf { id -> it.selectedFieldId == null && fields.any { f -> f.id == id } }
+            it.copy(
+                fields = fields,
+                selectedFieldId = preselect ?: it.selectedFieldId,
+                useCustomField = if (preselect != null) false else it.useCustomField || fields.isEmpty(),
+            )
         }
     }
 

@@ -170,6 +170,8 @@
     <string name="fields_amenities">Amatlyklar</string>
     <string name="fields_contacts">Aragatnaşyklar</string>
     <string name="fields_call">Jaň etmek</string>
+    <string name="field_whatsapp" translatable="false">WhatsApp</string>
+    <string name="field_start_game">Şu ýerde oýun döret</string>
     <string name="fields_closed">Dynç gün</string>
     <string name="day_monday">Du</string>
     <string name="day_tuesday">Si</string>

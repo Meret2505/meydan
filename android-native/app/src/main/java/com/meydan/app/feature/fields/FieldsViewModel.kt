@@ -26,6 +26,10 @@ class FieldsViewModel(
     data class UiState(
         val fields: List<FieldCardDto> = emptyList(),
         val query: String = "",
+        /** Active district filter, or null for all — single-select like the web. */
+        val district: String? = null,
+        /** Active surface filter (raw surface value), or null for all. */
+        val surface: String? = null,
         val loading: Boolean = true,
         val refreshing: Boolean = false,
         val offline: Boolean = false,
@@ -44,6 +48,14 @@ class FieldsViewModel(
     }
 
     fun onQueryChange(q: String) = _state.update { it.copy(query = q) }
+
+    /** Toggle a district filter; tapping the active one clears it (web parity). */
+    fun onDistrictToggle(d: String) =
+        _state.update { it.copy(district = if (it.district == d) null else d) }
+
+    /** Toggle a surface filter; tapping the active one clears it (web parity). */
+    fun onSurfaceToggle(s: String) =
+        _state.update { it.copy(surface = if (it.surface == s) null else s) }
 
     fun pullRefresh() {
         _state.update { it.copy(refreshing = true) }
@@ -84,26 +96,38 @@ class FieldsViewModel(
         map { if (it.id == id) it.copy(favorite = favorite) else it }
 
     companion object {
+        /** The three known surface values, matching the web's SURFACES list. */
+        val SURFACES = listOf("Искусственная трава", "Резиновое", "Грунт")
+
         /** Localized display name — Turkmen or Russian, falling back to base. */
         fun displayName(field: FieldCardDto, isTurkmen: Boolean): String =
             (if (isTurkmen) field.nameTm else field.nameRu) ?: field.name
 
+        /** Distinct districts present in the loaded fields, sorted — like the web chip row. */
+        fun districtsOf(fields: List<FieldCardDto>): List<String> =
+            fields.map { it.district }.distinct().sorted()
+
         /**
-         * Search filters on localized name + district; results are
-         * favorites-first then alphabetic — identical to the web FieldsView.
+         * Search filters on localized name + district, then the district and
+         * surface chip filters are AND-ed on top; results are favorites-first
+         * then alphabetic — identical to the web FieldsView.
          * Pure and locale-parameterized so it is unit-testable.
          */
         fun filterAndSort(
             fields: List<FieldCardDto>,
             query: String,
             isTurkmen: Boolean,
+            district: String? = null,
+            surface: String? = null,
         ): List<FieldCardDto> {
             val q = query.trim().lowercase()
             return fields
                 .filter {
-                    q.isEmpty() ||
+                    (q.isEmpty() ||
                         displayName(it, isTurkmen).lowercase().contains(q) ||
-                        it.district.lowercase().contains(q)
+                        it.district.lowercase().contains(q)) &&
+                        (district == null || it.district == district) &&
+                        (surface == null || it.surface == surface)
                 }
                 .sortedWith(
                     compareBy({ !it.favorite }, { displayName(it, isTurkmen).lowercase() }),

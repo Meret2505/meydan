@@ -2,6 +2,7 @@ package com.meydan.app.feature.fields
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -65,8 +67,11 @@ fun FieldsScreen(container: AppContainer, onFieldClick: (String) -> Unit) {
     val isTurkmen = ConfigurationCompat.getLocales(LocalConfiguration.current)
         .get(0)?.language == "tk"
 
-    val visible = remember(state.fields, state.query, isTurkmen) {
-        FieldsViewModel.filterAndSort(state.fields, state.query, isTurkmen)
+    val districts = remember(state.fields) { FieldsViewModel.districtsOf(state.fields) }
+    val visible = remember(state.fields, state.query, state.district, state.surface, isTurkmen) {
+        FieldsViewModel.filterAndSort(
+            state.fields, state.query, isTurkmen, state.district, state.surface,
+        )
     }
 
     Column(
@@ -93,6 +98,41 @@ fun FieldsScreen(container: AppContainer, onFieldClick: (String) -> Unit) {
             ),
             modifier = Modifier.fillMaxWidth(),
         )
+
+        // District chips: one per distinct district in the loaded fields, plus a
+        // surface chip row — both single-select, tapping the active one clears it.
+        if (districts.isNotEmpty()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(top = 12.dp),
+            ) {
+                districts.forEach { d ->
+                    FilterChip(
+                        label = d,
+                        active = state.district == d,
+                        onClick = { viewModel.onDistrictToggle(d) },
+                    )
+                }
+            }
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(top = 8.dp),
+        ) {
+            FieldsViewModel.SURFACES.forEach { s ->
+                FilterChip(
+                    label = surfaceLabel(s),
+                    active = state.surface == s,
+                    onClick = { viewModel.onSurfaceToggle(s) },
+                )
+            }
+        }
 
         PullToRefreshBox(
             isRefreshing = state.refreshing,
@@ -191,6 +231,29 @@ private fun FieldCard(
                 Chip(stringResource(R.string.fields_capacity_chip, field.capacity))
             }
         }
+    }
+}
+
+/** Rounded pill filter chip — primary tint when active, matching GamesScreen. */
+@Composable
+private fun FilterChip(label: String, active: Boolean, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(
+                if (active) colors.primary.copy(alpha = 0.13f)
+                else colors.surfaceVariant.copy(alpha = 0.5f),
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            style = MaterialTheme.typography.titleSmall,
+            color = if (active) colors.primary else colors.onSurfaceVariant,
+        )
     }
 }
 

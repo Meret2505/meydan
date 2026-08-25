@@ -10,9 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
@@ -38,7 +40,11 @@ object Routes {
     const val HOME = "home"
     const val GAME_DETAIL = "game/{gameId}"
     fun gameDetail(id: String) = "game/$id"
-    const val CREATE_GAME = "create-game"
+    const val CREATE_GAME = "create-game?fieldId={fieldId}"
+
+    /** Optional fieldId preselects that field; no arg keeps the plain form. */
+    fun createGame(fieldId: String? = null) =
+        if (fieldId != null) "create-game?fieldId=$fieldId" else "create-game"
     const val PROFILE_EDIT = "profile-edit"
     const val CREATE_TEAM = "create-team"
     const val CREATE_TOURNAMENT = "create-tournament"
@@ -143,7 +149,7 @@ fun MeydanApp(container: AppContainer) {
                 onFieldClick = { navController.navigate(Routes.fieldDetail(it)) },
                 onTeamClick = { navController.navigate(Routes.teamDetail(it)) },
                 onTournamentClick = { navController.navigate(Routes.tournamentDetail(it)) },
-                onCreateGame = { navController.navigate(Routes.CREATE_GAME) },
+                onCreateGame = { navController.navigate(Routes.createGame()) },
                 onEditProfile = { navController.navigate(Routes.PROFILE_EDIT) },
                 onCreateTeam = { navController.navigate(Routes.CREATE_TEAM) },
                 onCreateTournament = { navController.navigate(Routes.CREATE_TOURNAMENT) },
@@ -189,7 +195,12 @@ fun MeydanApp(container: AppContainer) {
                 onSaved = { navController.popBackStack() },
             )
         }
-        composable(Routes.CREATE_GAME) {
+        composable(
+            Routes.CREATE_GAME,
+            arguments = listOf(
+                navArgument("fieldId") { type = NavType.StringType; nullable = true; defaultValue = null },
+            ),
+        ) { entry ->
             CreateGameScreen(
                 container = container,
                 onBack = { navController.popBackStack() },
@@ -200,6 +211,7 @@ fun MeydanApp(container: AppContainer) {
                         popUpTo(Routes.CREATE_GAME) { inclusive = true }
                     }
                 },
+                preselectFieldId = entry.arguments?.getString("fieldId"),
             )
         }
         composable(Routes.GAME_DETAIL) { entry ->
@@ -210,10 +222,12 @@ fun MeydanApp(container: AppContainer) {
             )
         }
         composable(Routes.FIELD_DETAIL) { entry ->
+            val fieldId = entry.arguments?.getString("fieldId").orEmpty()
             FieldDetailScreen(
                 container = container,
-                fieldId = entry.arguments?.getString("fieldId").orEmpty(),
+                fieldId = fieldId,
                 onBack = { navController.popBackStack() },
+                onStartGame = { navController.navigate(Routes.createGame(fieldId)) },
             )
         }
         composable(Routes.TEAM_DETAIL) { entry ->

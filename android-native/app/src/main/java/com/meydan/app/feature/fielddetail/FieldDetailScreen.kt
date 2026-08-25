@@ -56,7 +56,12 @@ import com.meydan.app.feature.detail.DetailStateBox
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun FieldDetailScreen(container: AppContainer, fieldId: String, onBack: () -> Unit) {
+fun FieldDetailScreen(
+    container: AppContainer,
+    fieldId: String,
+    onBack: () -> Unit,
+    onStartGame: () -> Unit,
+) {
     val viewModel: DetailViewModel<FieldDetailDto> = viewModel {
         DetailViewModel { container.fieldsRepository.detail(fieldId) }
     }
@@ -69,13 +74,13 @@ fun FieldDetailScreen(container: AppContainer, fieldId: String, onBack: () -> Un
         onBack = onBack,
         onRetry = viewModel::retry,
     ) {
-        Content(field = state.data!!, onBack = onBack)
+        Content(field = state.data!!, onBack = onBack, onStartGame = onStartGame)
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Content(field: FieldDetailDto, onBack: () -> Unit) {
+private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val isTm = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)?.language == "tk"
     val name = (if (isTm) field.nameTm else field.nameRu) ?: field.name
@@ -135,6 +140,15 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit) {
                 InfoRow(stringResource(R.string.fields_games_played_label), field.gamesPlayed.toString(), divider = false)
             }
 
+            // About — localized body text; the web may store simple HTML, so
+            // strip tags to plain text. Nothing renders when empty.
+            val body = stripHtml((if (isTm) field.bodyTm else field.bodyRu).orEmpty())
+            if (body.isNotEmpty()) {
+                Section(stringResource(R.string.fields_about)) {
+                    Text(body, fontSize = 14.sp, color = colors.onSurface.copy(alpha = 0.9f))
+                }
+            }
+
             field.hours?.let { hours ->
                 Section(stringResource(R.string.fields_schedule)) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -167,10 +181,30 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit) {
                     }
                 }
             }
-            if (phone != null) CallButton(phone)
+            if (phone != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    CallButton(phone, Modifier.weight(1f))
+                    WhatsappButton(phone, Modifier.weight(1f))
+                }
+            }
+
+            StartGameButton(onStartGame)
         }
     }
 }
+
+/** Strip simple HTML from the web-stored body into plain text with paragraph breaks. */
+private fun stripHtml(html: String): String =
+    html
+        .replace(Regex("(?i)<br\\s*/?>"), "\n")
+        .replace(Regex("(?i)</p\\s*>"), "\n\n")
+        .replace(Regex("<[^>]+>"), "")
+        .replace("&nbsp;", " ")
+        .replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace(Regex("\\n{3,}"), "\n\n")
+        .trim()
 
 @Composable
 private fun Card(content: @Composable () -> Unit) {
@@ -244,8 +278,40 @@ private fun ContactRow(type: String, value: String) {
 }
 
 @Composable
-private fun CallButton(phone: String) {
+private fun CallButton(phone: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val colors = MaterialTheme.colorScheme
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(colors.primary)
+            .clickable { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))) },
+    ) {
+        Text("📞 ${stringResource(R.string.fields_call)}", color = colors.onPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+    }
+}
+
+@Composable
+private fun WhatsappButton(phone: String, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val colors = MaterialTheme.colorScheme
+    val digits = phone.filter { it.isDigit() }
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(colors.surface)
+            .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$digits"))) },
+    ) {
+        Text("💬 ${stringResource(R.string.field_whatsapp)}", color = colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+    }
+}
+
+@Composable
+private fun StartGameButton(onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     Box(
         contentAlignment = Alignment.Center,
@@ -253,9 +319,9 @@ private fun CallButton(phone: String) {
             .fillMaxWidth()
             .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(colors.primary)
-            .clickable { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))) },
+            .background(colors.surface)
+            .clickable(onClick = onClick),
     ) {
-        Text("📞 ${stringResource(R.string.fields_call)}", color = colors.onPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+        Text(stringResource(R.string.field_start_game), color = colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }
 }

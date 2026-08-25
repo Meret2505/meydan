@@ -182,6 +182,8 @@
     <string name="fields_amenities">Удобства</string>
     <string name="fields_contacts">Контакты</string>
     <string name="fields_call">Позвонить</string>
+    <string name="field_whatsapp" translatable="false">WhatsApp</string>
+    <string name="field_start_game">Создать игру здесь</string>
     <string name="fields_closed">Выходной</string>
     <string name="day_monday">Пн</string>
     <string name="day_tuesday">Вт</string>

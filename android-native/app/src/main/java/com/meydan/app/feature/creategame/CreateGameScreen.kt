@@ -74,10 +74,11 @@ fun CreateGameScreen(
     container: AppContainer,
     onBack: () -> Unit,
     onCreated: (String) -> Unit,
+    preselectFieldId: String? = null,
 ) {
     val now = remember { LocalDateTime.now() }
     val viewModel: CreateGameViewModel = viewModel {
-        CreateGameViewModel(container.gamesRepository, container.fieldsRepository, now)
+        CreateGameViewModel(container.gamesRepository, container.fieldsRepository, now, preselectFieldId)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
