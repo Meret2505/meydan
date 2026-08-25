@@ -58,10 +58,15 @@ import java.util.Locale
  * Tournament detail — port of tournaments/[id]/page.tsx: header (name, dates,
  * status, description), registered teams, the standings table, and the match
  * list, plus the two write flows: a captain entering or withdrawing their own
- * team, and the creator recording a result. Cancelling is still web-only.
+ * team, the creator recording a result, and the creator cancelling.
  */
 @Composable
-fun TournamentDetailScreen(container: AppContainer, tournamentId: String, onBack: () -> Unit) {
+fun TournamentDetailScreen(
+    container: AppContainer,
+    tournamentId: String,
+    onBack: () -> Unit,
+    onTeamClick: (String) -> Unit,
+) {
     val viewModel: TournamentDetailViewModel = viewModel {
         TournamentDetailViewModel(container.tournamentsRepository, tournamentId)
     }
@@ -82,6 +87,7 @@ fun TournamentDetailScreen(container: AppContainer, tournamentId: String, onBack
             onToggleRegistration = viewModel::toggleRegistration,
             onRecord = viewModel::openRecord,
             onCancel = viewModel::askCancel,
+            onTeamClick = onTeamClick,
         )
     }
 
@@ -116,6 +122,7 @@ fun TournamentDetailScreen(container: AppContainer, tournamentId: String, onBack
             onAway = viewModel::setAway,
             onScoreHome = viewModel::setScoreHome,
             onScoreAway = viewModel::setScoreAway,
+            onRound = viewModel::setRound,
             onSubmit = viewModel::submitRecord,
             onDismiss = viewModel::closeRecord,
         )
@@ -131,6 +138,7 @@ private fun RecordResultDialog(
     onAway: (String) -> Unit,
     onScoreHome: (String) -> Unit,
     onScoreAway: (String) -> Unit,
+    onRound: (String) -> Unit,
     onSubmit: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -165,6 +173,19 @@ private fun RecordResultDialog(
                     ScoreField(form.scoreHome, onScoreHome, Modifier.weight(1f))
                     ScoreField(form.scoreAway, onScoreAway, Modifier.weight(1f))
                 }
+                OutlinedTextField(
+                    value = form.round,
+                    onValueChange = onRound,
+                    singleLine = true,
+                    label = { Text(stringResource(R.string.tournaments_round)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = MaterialTheme.shapes.large,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = colors.primary,
+                        unfocusedBorderColor = colors.outline,
+                    ),
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                )
             }
         },
         confirmButton = {
@@ -241,6 +262,7 @@ private fun Content(
     onToggleRegistration: (ViewerTeamDto) -> Unit,
     onRecord: () -> Unit,
     onCancel: () -> Unit,
+    onTeamClick: (String) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0) ?: Locale.forLanguageTag("ru")
@@ -284,7 +306,7 @@ private fun Content(
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.onSurface,
-                                modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(colors.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 12.dp, vertical = 6.dp),
+                                modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(colors.surfaceVariant.copy(alpha = 0.5f)).clickable { onTeamClick(t.id) }.padding(horizontal = 12.dp, vertical = 6.dp),
                             )
                         }
                     }
@@ -417,6 +439,7 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 private fun StandingsTable(rows: List<StandingsRowDto>) {
     val colors = MaterialTheme.colorScheme
     val num = Modifier.width(26.dp)
+    val goals = Modifier.width(42.dp)
     Column {
         Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
             Text(stringResource(R.string.tournaments_col_team), fontSize = 11.sp, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant, modifier = Modifier.weight(1f))
@@ -424,6 +447,7 @@ private fun StandingsTable(rows: List<StandingsRowDto>) {
             HeadCell(stringResource(R.string.tournaments_col_won), num)
             HeadCell(stringResource(R.string.tournaments_col_drawn), num)
             HeadCell(stringResource(R.string.tournaments_col_lost), num)
+            HeadCell(stringResource(R.string.tournaments_col_diff), goals)
             HeadCell(stringResource(R.string.tournaments_col_points), num, colors.primary)
         }
         rows.forEachIndexed { i, r ->
@@ -440,6 +464,7 @@ private fun StandingsTable(rows: List<StandingsRowDto>) {
                 BodyCell("${r.won}", num)
                 BodyCell("${r.drawn}", num)
                 BodyCell("${r.lost}", num)
+                BodyCell("${r.goalsFor}:${r.goalsAgainst}", goals)
                 Text("${r.points}", fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = colors.primary, textAlign = TextAlign.Center, modifier = num)
             }
         }

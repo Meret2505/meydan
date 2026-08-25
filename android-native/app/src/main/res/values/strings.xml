@@ -242,6 +242,7 @@
     <string name="tournaments_record_title">Результат матча</string>
     <string name="tournaments_record_home">Хозяева</string>
     <string name="tournaments_record_away">Гости</string>
+    <string name="tournaments_round">Тур</string>
     <string name="tournaments_record_save">Сохранить</string>
     <string name="tournaments_table">Таблица</string>
     <string name="tournaments_col_team">Команда</string>

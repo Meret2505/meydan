@@ -43,6 +43,8 @@ class TournamentDetailViewModel(
         val awayTeamId: String? = null,
         val scoreHome: String = "",
         val scoreAway: String = "",
+        /** Optional round/stage label, e.g. "1" or a group name; blank sends null. */
+        val round: String = "",
     ) {
         val canSubmit: Boolean
             get() = homeTeamId != null &&
@@ -115,6 +117,10 @@ class TournamentDetailViewModel(
         it.copy(recording = it.recording?.copy(scoreAway = digits(v)))
     }
 
+    fun setRound(v: String) = _state.update {
+        it.copy(recording = it.recording?.copy(round = digits(v)))
+    }
+
     private fun digits(v: String) = v.filter { it.isDigit() }.take(3)
 
     fun submitRecord() {
@@ -127,6 +133,7 @@ class TournamentDetailViewModel(
                 awayTeamId = form.awayTeamId!!,
                 scoreHome = form.scoreHome.toInt(),
                 scoreAway = form.scoreAway.toInt(),
+                round = form.round.trim().ifBlank { null },
             )
             applyWrite(tournamentsRepository.recordMatch(tournamentId, req))
         }

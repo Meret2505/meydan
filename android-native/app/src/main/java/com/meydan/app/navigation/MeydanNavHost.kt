@@ -242,6 +242,7 @@ fun MeydanApp(container: AppContainer) {
                 container = container,
                 tournamentId = entry.arguments?.getString("tournamentId").orEmpty(),
                 onBack = { navController.popBackStack() },
+                onTeamClick = { navController.navigate(Routes.teamDetail(it)) },
             )
         }
     }

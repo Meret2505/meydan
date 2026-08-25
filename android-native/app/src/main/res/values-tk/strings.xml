@@ -230,6 +230,7 @@
     <string name="tournaments_record_title">Oýnuň netijesi</string>
     <string name="tournaments_record_home">Öý eýeleri</string>
     <string name="tournaments_record_away">Myhmanlar</string>
+    <string name="tournaments_round">Tapgyr</string>
     <string name="tournaments_record_save">Ýatda sakla</string>
     <string name="tournaments_table">Tablisa</string>
     <string name="tournaments_col_team">Komanda</string>
