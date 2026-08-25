@@ -49,6 +49,7 @@ fun NotificationsScreen(
     container: AppContainer,
     onBack: () -> Unit,
     onGameClick: (String) -> Unit,
+    onTeamClick: (String) -> Unit,
 ) {
     val viewModel: NotificationsViewModel = viewModel {
         NotificationsViewModel(container.notificationsRepository)
@@ -92,7 +93,14 @@ fun NotificationsScreen(
                 items(state.items, key = { it.id }) { notification ->
                     NotificationRow(
                         notification = notification,
-                        onClick = { gameIdOf(notification)?.let(onGameClick) },
+                        // A game notification opens the game; a team one (e.g.
+                        // TEAM_INVITE, which carries teamId not gameId) opens the
+                        // team — mirroring the web's notificationHref routing.
+                        onClick = {
+                            val gameId = gameIdOf(notification)
+                            if (gameId != null) onGameClick(gameId)
+                            else teamIdOf(notification)?.let(onTeamClick)
+                        },
                     )
                 }
             }
@@ -175,6 +183,10 @@ private fun ErrorRetry(onRetry: () -> Unit) {
 /** The `gameId` a game-related notification carries, or null for others. */
 private fun gameIdOf(notification: NotificationDto): String? =
     notification.data?.get("gameId")?.jsonPrimitive?.contentOrNull
+
+/** The `teamId` a team-related notification (e.g. TEAM_INVITE) carries. */
+private fun teamIdOf(notification: NotificationDto): String? =
+    notification.data?.get("teamId")?.jsonPrimitive?.contentOrNull
 
 /** System-localized "5 min ago" style label from the ISO createdAt instant. */
 private fun relativeTime(createdAt: String): String {

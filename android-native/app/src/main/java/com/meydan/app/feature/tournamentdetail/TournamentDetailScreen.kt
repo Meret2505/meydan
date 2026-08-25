@@ -350,8 +350,11 @@ private fun Content(
                 }
             }
 
-            // Record result — creator only, and only once two teams are in.
-            if (tr.isCreator && tr.teams.size >= 2 && tr.status != "cancelled") {
+            // Record result — creator only, once two teams are in, and only
+            // while the tournament is still live (not ended or cancelled), as web.
+            if (tr.isCreator && tr.teams.size >= 2 &&
+                tr.status != "cancelled" && tr.status != "ended"
+            ) {
                 Text(
                     text = stringResource(R.string.tournaments_record_cta),
                     fontSize = 14.sp,
@@ -381,7 +384,7 @@ private fun Content(
             }
 
             // Cancel — creator only, and only while it is still live.
-            if (tr.isCreator && tr.status != "cancelled") {
+            if (tr.isCreator && tr.status != "cancelled" && tr.status != "ended") {
                 Text(
                     text = stringResource(R.string.tournaments_cancel_cta),
                     fontSize = 14.sp,

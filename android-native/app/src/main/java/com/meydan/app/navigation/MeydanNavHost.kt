@@ -155,6 +155,7 @@ fun MeydanApp(container: AppContainer) {
                 container = container,
                 onBack = { navController.popBackStack() },
                 onGameClick = { navController.navigate(Routes.gameDetail(it)) },
+                onTeamClick = { navController.navigate(Routes.teamDetail(it)) },
             )
         }
         composable(Routes.CREATE_TOURNAMENT) {

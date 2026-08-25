@@ -92,6 +92,7 @@ fun GameDetailScreen(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = viewModel::retry)
                             .background(colors.primary.copy(alpha = 0.12f))
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     )
