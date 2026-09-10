@@ -144,12 +144,12 @@ fun MeydanTheme(
             outlineVariant = colors.border,
             surfaceTint = Color.Transparent,
             surfaceBright = Color(0xFFFFFFFF),
-            surfaceDim = Color(0xFFE2E8E4),
+            surfaceDim = Color(0xFFD3D9D5),
             surfaceContainerLowest = Color(0xFFFFFFFF),
-            surfaceContainerLow = Color(0xFFFAFBFA),
+            surfaceContainerLow = Color(0xFFF6F8F6),
             surfaceContainer = colors.surface,
             surfaceContainerHigh = colors.surface2,
-            surfaceContainerHighest = Color(0xFFE6ECE8),
+            surfaceContainerHighest = Color(0xFFCFD6D1),
         )
     }
 

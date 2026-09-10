@@ -348,7 +348,17 @@ private fun ThemePickerSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface) {
+    // Sheet sits on `surfaceVariant` (the darker/lighter tier in each theme) so
+    // the white/dark card fills below actually read as raised — a white sheet
+    // with white cards made the options blend into one blob in light mode.
+    // Explicit shape: M3 defaults a sheet's top corners to shapes.extraLarge,
+    // which this theme repurposes as a 999.dp button pill — leaving the
+    // default would draw the sheet as a giant dome.
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = colors.surfaceVariant,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -371,7 +381,7 @@ private fun ThemePickerSheet(
                         .clip(RoundedCornerShape(16.dp))
                         .background(
                             if (selected) colors.primary.copy(alpha = 0.12f)
-                            else colors.surfaceVariant.copy(alpha = 0.45f),
+                            else colors.surface,
                         )
                         .border(
                             1.dp,
