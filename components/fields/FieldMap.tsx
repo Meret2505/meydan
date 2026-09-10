@@ -20,11 +20,11 @@ const pinIcon = L.divIcon({
   className: "",
   html: `<div style="
     width:30px;height:30px;border-radius:50% 50% 50% 0;
-    background:#1FD16B;border:2px solid #06210F;transform:rotate(-45deg);
+    background:var(--primary);border:2px solid var(--primary-text);transform:rotate(-45deg);
     box-shadow:0 4px 10px rgba(0,0,0,.5);
   ">
     <div style="
-      width:10px;height:10px;border-radius:50%;background:#06210F;
+      width:10px;height:10px;border-radius:50%;background:var(--primary-text);
       position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(45deg);
     "></div>
   </div>`,

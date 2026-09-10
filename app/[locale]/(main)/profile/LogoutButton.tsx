@@ -23,7 +23,7 @@ export function LogoutButton({
         height="19"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#E0556A"
+        stroke="var(--danger)"
         strokeWidth="1.9"
         strokeLinecap="round"
         strokeLinejoin="round"

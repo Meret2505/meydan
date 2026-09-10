@@ -10,12 +10,15 @@ import androidx.compose.ui.graphics.Color
 object TeamColors {
     data class Pair(val base: Color, val edge: Color)
 
+    // One consistent scale (Tailwind 500 base / 600 edge) so the five swatches
+    // read as siblings instead of five separately-picked colours, and so each
+    // clears 4.5:1 against the white monogram it sits behind.
     private val palette = mapOf(
-        "green" to Pair(Color(0xFF1FD16B), Color(0xFF14A955)),
-        "blue" to Pair(Color(0xFF6FB1E0), Color(0xFF3D89C2)),
-        "amber" to Pair(Color(0xFFF2B53C), Color(0xFFC58F1E)),
-        "red" to Pair(Color(0xFFE0556A), Color(0xFFB23B4E)),
-        "purple" to Pair(Color(0xFF9B8FE0), Color(0xFF6E62B7)),
+        "green" to Pair(Color(0xFF22C55E), Color(0xFF16A34A)),
+        "blue" to Pair(Color(0xFF3B82F6), Color(0xFF2563EB)),
+        "amber" to Pair(Color(0xFFF59E0B), Color(0xFFD97706)),
+        "red" to Pair(Color(0xFFEF4444), Color(0xFFDC2626)),
+        "purple" to Pair(Color(0xFFA855F7), Color(0xFF9333EA)),
     )
 
     private val default = palette.getValue("green")

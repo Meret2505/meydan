@@ -71,7 +71,7 @@ export default async function ProfilePage(
               }`}
             />
             <div
-              className={`absolute top-[2px] w-4 h-4 rounded-full bg-[#06210F] transition-all ${
+              className={`absolute top-[2px] w-4 h-4 rounded-full bg-[var(--primary-text)] transition-all ${
                 user.isOpenToInvite ? "right-[2px]" : "left-[2px]"
               }`}
             />
@@ -145,7 +145,7 @@ export default async function ProfilePage(
               height="19"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#8A938E"
+              stroke="var(--text-muted)"
               strokeWidth="1.9"
               strokeLinecap="round"
               strokeLinejoin="round"

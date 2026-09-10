@@ -23,12 +23,12 @@ function relativeTime(d: Date, locale: string) {
 }
 
 const TYPE_STYLE: Record<NotificationType, { icon: string; bg: string; color: string }> = {
-  GAME_INVITE: { icon: "⚽", bg: "rgba(31,209,107,.14)", color: "#5BE39A" },
-  PLAYER_JOINED: { icon: "✓", bg: "rgba(31,209,107,.14)", color: "#5BE39A" },
-  SPOT_OPENED: { icon: "+", bg: "rgba(31,209,107,.14)", color: "#5BE39A" },
-  GAME_REMINDER: { icon: "⏱", bg: "rgba(242,181,60,.16)", color: "#F2B53C" },
+  GAME_INVITE: { icon: "⚽", bg: "rgba(31,209,107,.14)", color: "var(--primary-soft)" },
+  PLAYER_JOINED: { icon: "✓", bg: "rgba(31,209,107,.14)", color: "var(--primary-soft)" },
+  SPOT_OPENED: { icon: "+", bg: "rgba(31,209,107,.14)", color: "var(--primary-soft)" },
+  GAME_REMINDER: { icon: "⏱", bg: "rgba(242,181,60,.16)", color: "var(--warning)" },
   RESULT_NEEDED: { icon: "✎", bg: "rgba(108,177,224,.16)", color: "#8FC4EE" },
-  GAME_CANCELLED: { icon: "✕", bg: "rgba(224,85,106,.14)", color: "#E0556A" },
+  GAME_CANCELLED: { icon: "✕", bg: "rgba(224,85,106,.14)", color: "var(--danger)" },
   TEAM_INVITE: { icon: "★", bg: "rgba(155,143,224,.16)", color: "#B3A8EC" },
 };
 

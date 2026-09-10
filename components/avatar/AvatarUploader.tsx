@@ -94,9 +94,9 @@ export function AvatarUploader({
       >
         {/* Always-visible gradient + initials placeholder */}
         <div
-          className="absolute inset-0 flex items-center justify-center font-display font-extrabold text-[#06210F]"
+          className="absolute inset-0 flex items-center justify-center font-display font-extrabold text-[var(--primary-text)]"
           style={{
-            background: "linear-gradient(140deg,#1FD16B,#14a955)",
+            background: "var(--primary)",
             fontSize: Math.round(size * 0.36),
           }}
         >

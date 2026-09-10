@@ -52,6 +52,7 @@ import coil.compose.AsyncImage
 import com.meydan.app.R
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.FieldCardDto
+import com.meydan.app.core.designsystem.MeydanTheme
 
 /**
  * Fields tab — port of the web FieldsView list mode: search, favorites-first
@@ -184,7 +185,7 @@ private fun FieldCard(
                 .fillMaxWidth()
                 .height(96.dp)
                 .background(
-                    Brush.linearGradient(listOf(Color(0xFF1C7A45), Color(0xFF0F5530))),
+                    Brush.linearGradient(listOf(MeydanTheme.colors.pitchTop, MeydanTheme.colors.pitchBottom)),
                 ),
         ) {
             if (field.photo != null) {
@@ -195,23 +196,31 @@ private fun FieldCard(
                     modifier = Modifier.fillMaxSize(),
                 )
             }
-            // Favorite star, top-right over the banner.
+            // Favorite star, top-right over the banner. 48.dp hit area (Material
+            // minimum) with the 36.dp scrim disc drawn inside it.
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(10.dp)
-                    .size(36.dp)
+                    .padding(4.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.45f))
                     .clickable(onClick = onToggleFavorite),
             ) {
-                Icon(
-                    imageVector = if (field.favorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
-                    contentDescription = null,
-                    tint = if (field.favorite) Color(0xFFF59E0B) else Color.White,
-                    modifier = Modifier.size(20.dp),
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.45f)),
+                ) {
+                    Icon(
+                        imageVector = if (field.favorite) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                        contentDescription = stringResource(R.string.fields_favorites),
+                        tint = if (field.favorite) MeydanTheme.colors.warning else Color.White,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
         Column(modifier = Modifier.padding(horizontal = 15.dp, vertical = 13.dp)) {

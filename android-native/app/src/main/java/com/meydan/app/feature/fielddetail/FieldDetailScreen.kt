@@ -47,6 +47,7 @@ import com.meydan.app.core.network.dto.FieldDetailDto
 import com.meydan.app.core.network.dto.FieldHoursDto
 import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
+import com.meydan.app.core.designsystem.MeydanTheme
 
 /**
  * Field detail — port of fields/[id]/page.tsx: photo (or pitch gradient)
@@ -103,7 +104,7 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
             } else {
                 Box(
                     Modifier.fillMaxSize().background(
-                        Brush.linearGradient(listOf(Color(0xFF1C7A45), Color(0xFF0F5530))),
+                        Brush.linearGradient(listOf(MeydanTheme.colors.pitchTop, MeydanTheme.colors.pitchBottom)),
                     ),
                 )
             }
@@ -119,8 +120,8 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
                         text = field.surface,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF06210F),
-                        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(Color(0xFF1FD16B)).padding(horizontal = 10.dp, vertical = 3.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(MaterialTheme.colorScheme.primary).padding(horizontal = 10.dp, vertical = 3.dp),
                     )
                     Text(field.district, color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp))
                 }

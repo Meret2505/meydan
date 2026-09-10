@@ -14,7 +14,7 @@ export function OnboardingProgress({ step, total = 5 }: { step: number; total?: 
           />
         ))}
       </div>
-      <span className="font-display font-bold text-[13px] text-[#8A938E] whitespace-nowrap">
+      <span className="font-display font-bold text-[13px] text-[var(--text-muted)] whitespace-nowrap">
         {step}/{total}
       </span>
     </div>

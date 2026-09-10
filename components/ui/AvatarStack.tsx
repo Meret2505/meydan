@@ -32,7 +32,7 @@ export function AvatarStack({
       {shown.map((p, i) => (
         <div
           key={p.id}
-          className="rounded-full border-2 border-surface flex items-center justify-center font-display font-extrabold text-[10px] text-[#06210F]"
+          className="rounded-full border-2 border-surface flex items-center justify-center font-display font-extrabold text-[10px] text-[var(--primary-text)]"
           style={{
             width: size,
             height: size,

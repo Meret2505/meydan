@@ -207,7 +207,7 @@ export function CreateGameForm({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-[13px] font-semibold text-[#8A938E]">{label}</span>
+      <span className="text-[13px] font-semibold text-[var(--text-muted)]">{label}</span>
       {children}
     </div>
   );

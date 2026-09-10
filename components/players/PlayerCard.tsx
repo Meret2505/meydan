@@ -17,10 +17,10 @@ export interface PlayerCardData {
 }
 
 const ATT_COLOR: Record<ReturnType<typeof attendanceTier>, string> = {
-  reliable: "#1FD16B",
-  ok: "#F2B53C",
-  poor: "#E0556A",
-  new: "#8A938E",
+  reliable: "var(--primary)",
+  ok: "var(--warning)",
+  poor: "var(--danger)",
+  new: "var(--text-muted)",
 };
 
 export function PlayerCard({ player }: { player: PlayerCardData }) {

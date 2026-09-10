@@ -97,7 +97,7 @@ async function TeamsList({ userId, locale }: { userId: string; locale: string })
                 className="flex items-center gap-3.5 bg-surface border border-border rounded-[18px] p-[15px]"
               >
                 <div
-                  className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center font-display font-extrabold text-[16px] text-[#06210F] shrink-0"
+                  className="w-[50px] h-[50px] rounded-[14px] flex items-center justify-center font-display font-extrabold text-[16px] text-[var(--primary-text)] shrink-0"
                   style={{ background: teamGradient(team.color) }}
                 >
                   {monogram}

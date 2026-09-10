@@ -53,6 +53,7 @@ import com.meydan.app.core.network.dto.TeamMemberDto
 import com.meydan.app.feature.auth.errorTextRes
 import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
+import com.meydan.app.core.designsystem.MeydanTheme
 
 /**
  * Team detail — port of teams/[id]/page.tsx: pitch header with the team badge,
@@ -162,7 +163,7 @@ private fun Content(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .background(Brush.linearGradient(listOf(Color(0xFF1C7A45), Color(0xFF0F5530)))),
+                    .background(Brush.linearGradient(listOf(MeydanTheme.colors.pitchTop, MeydanTheme.colors.pitchBottom))),
             ) {
                 DetailBackButton(onBack, Modifier.systemBarsPadding().padding(start = 16.dp, top = 8.dp), onDark = true)
             }
@@ -178,7 +179,7 @@ private fun Content(
                         .clip(RoundedCornerShape(20.dp))
                         .background(Brush.linearGradient(listOf(palette.base, palette.edge))),
                 ) {
-                    Text(TeamColors.monogram(team.name), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF06210F))
+                    Text(TeamColors.monogram(team.name), fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimary)
                 }
                 Text(team.name, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
@@ -192,7 +193,7 @@ private fun Content(
                 Row(modifier = Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Stat(team.wins.toString(), stringResource(R.string.teams_wins), colors.primary, Modifier.weight(1f))
                     Stat(team.losses.toString(), stringResource(R.string.teams_losses), colors.onSurface, Modifier.weight(1f))
-                    Stat(team.points.toString(), stringResource(R.string.teams_points), Color(0xFFF2B53C), Modifier.weight(1f))
+                    Stat(team.points.toString(), stringResource(R.string.teams_points), MeydanTheme.colors.warning, Modifier.weight(1f))
                 }
                 MembershipCta(
                     team = team,
@@ -340,9 +341,9 @@ private fun MemberRow(
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.size(38.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Color(0xFF1FD16B), Color(0xFF14A955)))),
+            modifier = Modifier.size(38.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
         ) {
-            Text(TeamColors.monogram(m.name), fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF06210F))
+            Text(TeamColors.monogram(m.name), fontSize = 13.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimary)
         }
         Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -352,8 +353,8 @@ private fun MemberRow(
                         text = stringResource(R.string.teams_captain_badge),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFFF2B53C),
-                        modifier = Modifier.padding(start = 8.dp).clip(RoundedCornerShape(6.dp)).background(Color(0xFFF2B53C).copy(alpha = 0.15f)).padding(horizontal = 7.dp, vertical = 2.dp),
+                        color = MeydanTheme.colors.warning,
+                        modifier = Modifier.padding(start = 8.dp).clip(RoundedCornerShape(6.dp)).background(MeydanTheme.colors.warning.copy(alpha = 0.15f)).padding(horizontal = 7.dp, vertical = 2.dp),
                     )
                 }
             }
@@ -378,11 +379,13 @@ private fun MemberRow(
     }
 }
 
+/** Traffic-light colour for a member's attendance rate; theme-aware, so @Composable. */
+@Composable
 private fun attendanceColor(rate: Int?): Color = when {
-    rate == null -> Color(0xFF8A938E)
-    rate >= 75 -> Color(0xFF5BE39A)
-    rate >= 50 -> Color(0xFFF2B53C)
-    else -> Color(0xFFE0556A)
+    rate == null -> MaterialTheme.colorScheme.onSurfaceVariant
+    rate >= 75 -> MeydanTheme.colors.primarySoft
+    rate >= 50 -> MeydanTheme.colors.warning
+    else -> MaterialTheme.colorScheme.error
 }
 
 @Composable

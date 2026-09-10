@@ -28,7 +28,7 @@ export function TeamCard({ team }: { team: TeamCardData }) {
       className="flex items-center gap-3 p-3 rounded-2xl bg-surface border border-border active:scale-[0.99] transition-transform"
     >
       <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center font-display font-extrabold text-[16px] text-[#06210F] shrink-0"
+        className="w-14 h-14 rounded-2xl flex items-center justify-center font-display font-extrabold text-[16px] text-[var(--primary-text)] shrink-0"
         style={{ background: teamGradient(team.color) }}
       >
         {monogram}

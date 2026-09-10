@@ -59,6 +59,7 @@ import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.errorTextRes
 import com.meydan.app.feature.fields.FieldsViewModel
+import com.meydan.app.core.designsystem.MeydanTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
@@ -323,7 +324,7 @@ private fun SpotChip(n: Int, active: Boolean, onClick: () -> Unit, modifier: Mod
 
 @Composable
 private fun PositionChip(label: String, active: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val warning = Color(0xFFF2B53C)
+    val warning = MeydanTheme.colors.warning
     val colors = MaterialTheme.colorScheme
     Box(
         contentAlignment = Alignment.Center,

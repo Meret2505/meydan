@@ -20,10 +20,10 @@ function initials(name: string) {
 }
 
 const ATT_COLOR: Record<ReturnType<typeof attendanceTier>, string> = {
-  reliable: "#5BE39A",
-  ok: "#F2B53C",
-  poor: "#E0556A",
-  new: "#8A938E",
+  reliable: "var(--primary-soft)",
+  ok: "var(--warning)",
+  poor: "var(--danger)",
+  new: "var(--text-muted)",
 };
 
 export default async function TeamDetailPage(
@@ -125,7 +125,7 @@ export default async function TeamDetailPage(
             `relative z-10` forces the badge above the pitch header's own
             stacking context so it isn't clipped. */}
         <div
-          className="relative z-10 w-[72px] h-[72px] rounded-[20px] flex items-center justify-center font-display font-extrabold text-[22px] text-[#06210F] -mt-[18px]"
+          className="relative z-10 w-[72px] h-[72px] rounded-[20px] flex items-center justify-center font-display font-extrabold text-[22px] text-[var(--primary-text)] -mt-[18px]"
           style={{
             background: `linear-gradient(140deg, ${teamColor.base}, ${teamColor.edge})`,
             border: "3px solid var(--bg)",
@@ -166,8 +166,8 @@ export default async function TeamDetailPage(
                 className="flex items-center gap-3 bg-surface border border-border rounded-[14px] px-3.5 py-3"
               >
                 <div
-                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center font-display font-extrabold text-[13px] text-[#06210F] shrink-0"
-                  style={{ background: "linear-gradient(140deg,#1FD16B,#14a955)" }}
+                  className="w-[38px] h-[38px] rounded-full flex items-center justify-center font-display font-extrabold text-[13px] text-[var(--primary-text)] shrink-0"
+                  style={{ background: "var(--primary)" }}
                 >
                   {initials(m.user.name)}
                 </div>

@@ -216,7 +216,7 @@ fun ProfileScreen(
                         .padding(horizontal = 2.dp)
                         .size(16.dp)
                         .clip(CircleShape)
-                        .background(androidx.compose.ui.graphics.Color(0xFF06210F)),
+                        .background(MaterialTheme.colorScheme.onPrimary),
                 )
             }
             Text(

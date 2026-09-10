@@ -43,6 +43,7 @@ import com.meydan.app.R
 import com.meydan.app.core.common.TeamColors
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.TeamCardDto
+import com.meydan.app.core.designsystem.MeydanTheme
 
 /**
  * Teams tab — port of the web teams page: the user's teams as cards (monogram
@@ -188,7 +189,7 @@ private fun MyTeamCard(team: TeamCardDto, rank: Int, onClick: () -> Unit) {
                 text = TeamColors.monogram(team.name),
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 16.sp,
-                color = Color(0xFF06210F),
+                color = MaterialTheme.colorScheme.onPrimary,
             )
         }
         Column(modifier = Modifier.weight(1f).padding(horizontal = 14.dp)) {
@@ -221,7 +222,7 @@ private fun MyTeamCard(team: TeamCardDto, rank: Int, onClick: () -> Unit) {
                 text = "#$rank",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFFF59E0B),
+                color = MeydanTheme.colors.warning,
             )
             Text(
                 text = stringResource(R.string.teams_ranking),

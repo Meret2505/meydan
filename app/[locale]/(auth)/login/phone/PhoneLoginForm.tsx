@@ -47,7 +47,7 @@ export function PhoneLoginForm({ labels }: { labels: Labels }) {
     <form action={action} className="flex flex-col flex-1 px-7 pt-8">
       <div className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold text-[#8A938E]">
+          <span className="text-[13px] font-semibold text-[var(--text-muted)]">
             {labels.phone}
           </span>
           <div className="flex items-center gap-2.5 h-14 rounded-[15px] bg-surface border border-border-strong px-4 focus-within:border-primary">
@@ -69,7 +69,7 @@ export function PhoneLoginForm({ labels }: { labels: Labels }) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold text-[#8A938E]">
+          <span className="text-[13px] font-semibold text-[var(--text-muted)]">
             {labels.password}
           </span>
           <input

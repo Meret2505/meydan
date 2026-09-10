@@ -31,7 +31,7 @@ export function Avatar({
 }) {
   const placeholder = (
     <div
-      className="absolute inset-0 rounded-full flex items-center justify-center font-display font-extrabold text-[#06210F]"
+      className="absolute inset-0 rounded-full flex items-center justify-center font-display font-extrabold text-[var(--primary-text)]"
       style={{
         fontSize: Math.round(size * 0.36),
         background: `linear-gradient(140deg, hsl(${hue(seed)} 70% 55%), hsl(${

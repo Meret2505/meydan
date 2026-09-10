@@ -176,7 +176,7 @@ export default async function PlayerPublicProfile(
                   className="flex items-center gap-3 bg-surface border border-border rounded-[14px] px-3.5 py-3"
                 >
                   <div
-                    className="w-[38px] h-[38px] rounded-[11px] flex items-center justify-center font-display font-extrabold text-[13px] text-[#06210F]"
+                    className="w-[38px] h-[38px] rounded-[11px] flex items-center justify-center font-display font-extrabold text-[13px] text-[var(--primary-text)]"
                     style={{ background: teamGradient(tm.team.color) }}
                   >
                     {tm.team.name.slice(0, 2).toUpperCase()}

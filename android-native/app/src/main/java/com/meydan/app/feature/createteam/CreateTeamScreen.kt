@@ -115,7 +115,7 @@ fun CreateTeamScreen(
                     text = TeamColors.monogram(state.name.ifBlank { "?" }),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF06210F),
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
 

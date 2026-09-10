@@ -2,31 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Neutral slate surfaces + one green accent. Every surface, border and text
+ * tier is a true neutral; the brand green appears only on primary actions,
+ * selected states and success. Tinting the greys with the brand hue (which the
+ * previous palette did) left the accent nothing to stand out against.
+ * Kept in sync with android-native .../core/designsystem/Color.kt.
+ */
 :root, :root.dark {
-  /* Brand greys (matches prototype exactly) */
-  --bg: #0B0E0D;
-  --surface: #13181A;
-  --surface-2: #1B2123;
-  --nav-bg: #0E1312;
+  /* Neutral surface ramp */
+  --bg: #0A0C10;
+  --surface: #14181F;
+  --surface-2: #1E242D;
+  --nav-bg: #0C1015;
 
   /* Brand green family */
-  --primary: #1FD16B;
-  --primary-text: #06210F;
-  --primary-soft: #5BE39A;
+  --primary: #22C55E;
+  --primary-text: #052E16;
+  --primary-soft: #4ADE80;
 
   /* Status */
-  --warning: #F2B53C;
-  --danger:  #E0556A;
+  --warning: #FBBF24;
+  --danger:  #F87171;
 
-  /* Text */
-  --text:       #F2F5F3;
-  --text-soft:  #C7CEC9;
-  --text-muted: #8A938E;
-  --text-faint: #5f665f;
+  /* Text — slate ramp */
+  --text:       #F8FAFC;
+  --text-soft:  #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-faint: #64748B;
 
   /* Lines / surfaces */
   --border:     rgba(255,255,255,.08);
-  --border-strong: rgba(255,255,255,.12);
+  --border-strong: rgba(255,255,255,.14);
   --overlay:    rgba(255,255,255,.05);
   --overlay-strong: rgba(255,255,255,.08);
 
@@ -46,28 +53,30 @@
 }
 
 :root.light {
-  --bg: #F5F7F5;
+  /* Same ramp inverted. A neutral grey, NOT a mint tint, so white cards read
+     as raised without the whole page looking green. */
+  --bg: #F6F7F9;
   --surface: #FFFFFF;
-  --surface-2: #EDF1EE;
+  --surface-2: #EFF1F4;
   --nav-bg: #FFFFFF;
 
-  /* Brand greens stay the same — they're readable on both backgrounds */
-  --primary: #14A85A;
+  /* Darker greens so labels clear 4.5:1 on white */
+  --primary: #16A34A;
   --primary-text: #FFFFFF;
-  --primary-soft: #0D8A47;
+  --primary-soft: #15803D;
 
-  --warning: #C48A15;
-  --danger:  #C13548;
+  --warning: #D97706;
+  --danger:  #DC2626;
 
-  --text:       #0B1410;
-  --text-soft:  #2E3A34;
-  --text-muted: #626E67;
-  --text-faint: #97A19A;
+  --text:       #0F172A;
+  --text-soft:  #334155;
+  --text-muted: #64748B;
+  --text-faint: #94A3B8;
 
-  --border:     rgba(11,20,16,.10);
-  --border-strong: rgba(11,20,16,.16);
-  --overlay:    rgba(11,20,16,.05);
-  --overlay-strong: rgba(11,20,16,.08);
+  --border:     rgba(15,23,42,.08);
+  --border-strong: rgba(15,23,42,.14);
+  --overlay:    rgba(15,23,42,.05);
+  --overlay-strong: rgba(15,23,42,.08);
 }
 
 html, body {

@@ -34,7 +34,7 @@ function Login() {
       </div>
       <div className="relative flex-1 flex flex-col items-center justify-center text-center px-9">
         <div className="w-[86px] h-[86px] rounded-[26px] bg-primary flex items-center justify-center shadow-[0_16px_34px_-10px_rgba(34,197,94,.55)]">
-          <div className="w-[34px] h-[34px] rounded-full bg-[#06210F] relative">
+          <div className="w-[34px] h-[34px] rounded-full bg-[var(--primary-text)] relative">
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[14px] h-[14px] border-[3px] border-primary rounded-full" />
           </div>
         </div>

@@ -142,7 +142,7 @@ private fun LogoMark() {
             modifier = Modifier
                 .size(34.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF06210F)),
+                .background(MaterialTheme.colorScheme.onPrimary),
             contentAlignment = Alignment.Center,
         ) {
             Box(

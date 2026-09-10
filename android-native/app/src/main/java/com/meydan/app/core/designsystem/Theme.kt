@@ -39,6 +39,13 @@ data class MeydanColors(
     val textFaint: Color,
     val border: Color,
     val borderStrong: Color,
+    /**
+     * The "pitch" hero gradient — stands in for a missing field/team/game photo
+     * and always carries white text over a dark scrim, so it stays deep green in
+     * both themes rather than following the surface ramp.
+     */
+    val pitchTop: Color,
+    val pitchBottom: Color,
 )
 
 private val DarkColors = MeydanColors(
@@ -57,6 +64,8 @@ private val DarkColors = MeydanColors(
     textFaint = DarkTextFaint,
     border = DarkBorder,
     borderStrong = DarkBorderStrong,
+    pitchTop = PitchTop,
+    pitchBottom = PitchBottom,
 )
 
 private val LightColors = MeydanColors(
@@ -75,6 +84,8 @@ private val LightColors = MeydanColors(
     textFaint = LightTextFaint,
     border = LightBorder,
     borderStrong = LightBorderStrong,
+    pitchTop = PitchTop,
+    pitchBottom = PitchBottom,
 )
 
 private val LocalMeydanColors = staticCompositionLocalOf { DarkColors }
@@ -123,11 +134,11 @@ fun MeydanTheme(
             surfaceTint = Color.Transparent,
             surfaceBright = DarkSurface2,
             surfaceDim = DarkBg,
-            surfaceContainerLowest = Color(0xFF090C0B),
+            surfaceContainerLowest = Color(0xFF06080B),
             surfaceContainerLow = colors.surface,
-            surfaceContainer = Color(0xFF171D1F),
+            surfaceContainer = Color(0xFF191E26),
             surfaceContainerHigh = colors.surface2,
-            surfaceContainerHighest = Color(0xFF232A2C),
+            surfaceContainerHighest = Color(0xFF262D37),
         )
     } else {
         lightColorScheme(
@@ -144,12 +155,12 @@ fun MeydanTheme(
             outlineVariant = colors.border,
             surfaceTint = Color.Transparent,
             surfaceBright = Color(0xFFFFFFFF),
-            surfaceDim = Color(0xFFE2E8E4),
+            surfaceDim = Color(0xFFE2E5EA),
             surfaceContainerLowest = Color(0xFFFFFFFF),
-            surfaceContainerLow = Color(0xFFFAFBFA),
+            surfaceContainerLow = Color(0xFFFAFBFC),
             surfaceContainer = colors.surface,
             surfaceContainerHigh = colors.surface2,
-            surfaceContainerHighest = Color(0xFFE6ECE8),
+            surfaceContainerHighest = Color(0xFFE6E9EE),
         )
     }
 

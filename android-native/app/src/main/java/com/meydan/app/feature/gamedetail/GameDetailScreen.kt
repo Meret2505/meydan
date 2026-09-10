@@ -55,6 +55,7 @@ import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.errorTextRes
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.ParticipantDto
+import com.meydan.app.core.designsystem.MeydanTheme
 import java.util.Locale
 
 /**
@@ -217,7 +218,7 @@ private fun PitchHeader(game: GameDetailDto, isOver: Boolean, onBack: () -> Unit
         modifier = Modifier
             .fillMaxWidth()
             .height(208.dp)
-            .background(Brush.linearGradient(listOf(Color(0xFF1C7A45), Color(0xFF0F5530)))),
+            .background(Brush.linearGradient(listOf(MeydanTheme.colors.pitchTop, MeydanTheme.colors.pitchBottom))),
     ) {
         // Bottom darkening for text legibility.
         Box(
@@ -249,10 +250,10 @@ private fun PitchHeader(game: GameDetailDto, isOver: Boolean, onBack: () -> Unit
                 text = "${game.format} · ${stringResource(bannerRes)}",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF06210F),
+                color = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier
                     .clip(RoundedCornerShape(999.dp))
-                    .background(Color(0xFF1FD16B).copy(alpha = 0.92f))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.92f))
                     .padding(horizontal = 10.dp, vertical = 5.dp),
             )
             Text(
@@ -387,7 +388,7 @@ private fun ParticipantAvatar(p: ParticipantDto) {
 
 @Composable
 private fun NeededNote(position: String) {
-    val warning = Color(0xFFF2B53C)
+    val warning = MeydanTheme.colors.warning
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier

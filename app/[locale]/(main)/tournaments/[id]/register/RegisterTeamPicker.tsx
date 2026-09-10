@@ -83,7 +83,7 @@ export function RegisterTeamPicker({
                 )}
               >
                 <div
-                  className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center font-display font-extrabold text-[15px] text-[#06210F] shrink-0"
+                  className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center font-display font-extrabold text-[15px] text-[var(--primary-text)] shrink-0"
                   style={{ background: teamGradient(team.color) }}
                 >
                   {monogram(team.name)}

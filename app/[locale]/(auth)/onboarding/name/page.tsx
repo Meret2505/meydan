@@ -35,8 +35,8 @@ export default async function NamePage(props: { params: Promise<{ locale: string
         <p className="text-[15px] text-text-muted mt-2">{t("onboarding.name_sub")}</p>
       </div>
       <div className="flex flex-col items-center px-7 pt-9">
-        <div className="relative w-[104px] h-[104px] rounded-full flex items-center justify-center font-display font-extrabold text-[38px] text-[#06210F]"
-          style={{ background: "linear-gradient(140deg,#1FD16B,#14a955)" }}>
+        <div className="relative w-[104px] h-[104px] rounded-full flex items-center justify-center font-display font-extrabold text-[38px] text-[var(--primary-text)]"
+          style={{ background: "var(--primary)" }}>
           {initials}
         </div>
       </div>

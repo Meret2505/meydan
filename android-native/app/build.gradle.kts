@@ -39,8 +39,8 @@ android {
         applicationId = "com.meydan.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.1.2"
+        versionCode = 6
+        versionName = "1.2.0"
 
         // The OAuth *web* client ID (public by design, safe to embed). Used as
         // Credential Manager's serverClientId so the minted ID token's audience

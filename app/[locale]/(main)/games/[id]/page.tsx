@@ -86,7 +86,7 @@ export default async function GameDetailPage(
         <div className="absolute left-6 right-6 bottom-[18px]">
           <span
             className="px-[10px] py-[5px] rounded-full font-display font-extrabold text-[11px] uppercase tracking-wide"
-            style={{ background: "rgba(31,209,107,.92)", color: "#06210F" }}
+            style={{ background: "rgba(31,209,107,.92)", color: "var(--primary-text)" }}
           >
             {gameFormat(game)} ·{" "}
             {isOver
@@ -150,7 +150,7 @@ export default async function GameDetailPage(
               >
                 {p.userId === userId ? (
                   <div
-                    className="w-[34px] h-[34px] flex items-center justify-center font-display font-extrabold text-[12px] text-[#06210F] bg-primary"
+                    className="w-[34px] h-[34px] flex items-center justify-center font-display font-extrabold text-[12px] text-[var(--primary-text)] bg-primary"
                   >
                     {t("games.you_short")}
                   </div>

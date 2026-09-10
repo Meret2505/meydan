@@ -48,7 +48,7 @@ export function CreateTeamForm({
 
       <div className="flex flex-col items-center gap-3.5">
         <div
-          className="w-[84px] h-[84px] rounded-[24px] flex items-center justify-center font-display font-extrabold text-[26px] text-[#06210F]"
+          className="w-[84px] h-[84px] rounded-[24px] flex items-center justify-center font-display font-extrabold text-[26px] text-[var(--primary-text)]"
           style={{ background: `linear-gradient(140deg, ${color.base}, ${color.edge})` }}
         >
           {monogram(name)}
@@ -112,7 +112,7 @@ export function CreateTeamForm({
           height="20"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#5BE39A"
+          stroke="var(--primary-soft)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"

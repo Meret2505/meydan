@@ -146,7 +146,7 @@ export function ResultForm({
                 className="sr-only"
               />
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center font-display font-extrabold text-[13px] text-[#06210F]"
+                className="w-9 h-9 rounded-full flex items-center justify-center font-display font-extrabold text-[13px] text-[var(--primary-text)]"
                 style={{
                   background: `linear-gradient(140deg, hsl(${hue(p.userId)} 70% 55%), hsl(${
                     (hue(p.userId) + 30) % 360

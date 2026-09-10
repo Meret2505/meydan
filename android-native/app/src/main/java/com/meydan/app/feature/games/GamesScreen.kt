@@ -56,6 +56,7 @@ import com.meydan.app.R
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.GameCardDto
+import com.meydan.app.core.designsystem.MeydanTheme
 import java.util.Locale
 
 /**
@@ -152,24 +153,38 @@ private fun FeedHeader(unread: Int, onCreateGame: () -> Unit, onNotifications: (
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.weight(1f),
         )
-        // Create-game entry point.
+        // Create-game entry point. The tappable Box is a full 48.dp (Material's
+        // minimum) with the 34.dp disc drawn inside it, so the hit area clears
+        // the guideline without the button looking oversized.
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .padding(end = 4.dp)
-                .size(34.dp)
+                .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
                 .clickable(onClick = onCreateGame),
         ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.games_create),
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(22.dp),
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.games_create),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
         }
-        Box(modifier = Modifier.clickable(onClick = onNotifications)) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .clickable(onClick = onNotifications),
+        ) {
             Icon(
                 imageVector = Icons.Filled.Notifications,
                 contentDescription = stringResource(R.string.notifications_title),
@@ -181,7 +196,7 @@ private fun FeedHeader(unread: Int, onCreateGame: () -> Unit, onNotifications: (
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .offset(x = 6.dp, y = (-4).dp)
+                        .offset(x = (-6).dp, y = 8.dp)
                         .size(16.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary),
@@ -463,7 +478,7 @@ private fun NeededStrip(positions: List<String>) {
     val text = positions.mapNotNull { labels[it] }
         .map { stringResource(R.string.games_needed, stringResource(it).lowercase()) }
         .joinToString(" · ")
-    val warning = androidx.compose.ui.graphics.Color(0xFFF59E0B)
+    val warning = MeydanTheme.colors.warning
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
