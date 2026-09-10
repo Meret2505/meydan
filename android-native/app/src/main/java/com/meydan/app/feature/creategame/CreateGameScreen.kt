@@ -314,8 +314,8 @@ private fun SpotChip(n: Int, active: Boolean, onClick: () -> Unit, modifier: Mod
         modifier = modifier
             .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (active) colors.primary.copy(alpha = 0.10f) else colors.surface)
-            .border(1.dp, if (active) colors.primary else colors.outline, RoundedCornerShape(12.dp))
+            .background(if (active) colors.primary.copy(alpha = 0.16f) else colors.surface)
+            .border(if (active) 1.5.dp else 1.dp, if (active) colors.primary else colors.outline, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
     ) {
         Text("$n", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = if (active) colors.primary else colors.onSurface)
@@ -331,8 +331,8 @@ private fun PositionChip(label: String, active: Boolean, onClick: () -> Unit, mo
         modifier = modifier
             .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (active) warning.copy(alpha = 0.12f) else colors.surface)
-            .border(1.dp, if (active) warning.copy(alpha = 0.4f) else colors.outline, RoundedCornerShape(12.dp))
+            .background(if (active) warning.copy(alpha = 0.16f) else colors.surface)
+            .border(if (active) 1.5.dp else 1.dp, if (active) warning else colors.outline, RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
     ) {
         Text(label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = if (active) warning else colors.onSurfaceVariant)

@@ -1,6 +1,7 @@
 package com.meydan.app.feature.fields
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -247,20 +248,27 @@ private fun FieldCard(
 @Composable
 private fun FilterChip(label: String, active: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    // Same selected recipe as the games feed: tonal fill + accent outline +
+    // bolder accent label.
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(999.dp))
             .background(
-                if (active) colors.primary.copy(alpha = 0.13f)
-                else colors.surfaceVariant.copy(alpha = 0.5f),
+                if (active) colors.primary.copy(alpha = 0.16f) else colors.surfaceVariant,
+            )
+            .border(
+                width = if (active) 1.5.dp else 1.dp,
+                color = if (active) colors.primary else colors.outline,
+                shape = RoundedCornerShape(999.dp),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
         Text(
             text = label,
             fontSize = 13.sp,
             style = MaterialTheme.typography.titleSmall,
+            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
             color = if (active) colors.primary else colors.onSurfaceVariant,
         )
     }

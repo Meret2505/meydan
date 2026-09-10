@@ -98,7 +98,8 @@ fun TournamentsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                // Full opacity so the trough reads against the selected segment.
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(4.dp),
         ) {
             TabButton(stringResource(R.string.tournaments_tab_upcoming), state.tab == TournamentsViewModel.Tab.UPCOMING, { viewModel.selectTab(TournamentsViewModel.Tab.UPCOMING) }, Modifier.weight(1f))
@@ -130,19 +131,21 @@ fun TournamentsScreen(
 
 @Composable
 private fun TabButton(label: String, active: Boolean, onClick: () -> Unit, modifier: Modifier) {
+    // Same segmented recipe as the games feed: solid accent fill for the
+    // selected segment, plus a weight change so it isn't colour alone.
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(if (active) MaterialTheme.colorScheme.background else Color.Transparent)
+            .background(if (active) MaterialTheme.colorScheme.primary else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp),
     ) {
         Text(
             text = label,
             fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (active) MaterialTheme.colorScheme.onBackground
+            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+            color = if (active) MaterialTheme.colorScheme.onPrimary
             else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

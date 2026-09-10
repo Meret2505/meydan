@@ -274,12 +274,12 @@ private fun ChoiceChip(
         modifier = modifier
             .height(52.dp)
             .border(
-                width = 1.dp,
+                width = if (active) 1.5.dp else 1.dp,
                 color = if (active) colors.primary else colors.outline,
                 shape = RoundedCornerShape(14.dp),
             )
             .background(
-                color = if (active) colors.primary.copy(alpha = 0.08f) else colors.surface,
+                color = if (active) colors.primary.copy(alpha = 0.16f) else colors.surface,
                 shape = RoundedCornerShape(14.dp),
             )
             .clickable(onClick = onClick)

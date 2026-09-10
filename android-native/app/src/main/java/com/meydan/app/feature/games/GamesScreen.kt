@@ -1,6 +1,7 @@
 package com.meydan.app.feature.games
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -220,7 +222,9 @@ private fun TabRow(tab: GamesViewModel.Tab, onSelect: (GamesViewModel.Tab) -> Un
             .padding(horizontal = 24.dp)
             .padding(top = 16.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            // Full opacity so the trough actually reads as a trough — at 50%
+            // it washed out and the selected segment had nothing to sit against.
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(4.dp),
     ) {
         TabButton(
@@ -245,12 +249,16 @@ private fun TabButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // A mode switch is the loudest state on the screen, so the selected segment
+    // is a solid accent fill rather than a tint: fill + label colour + weight
+    // all change, and it reads the same in both themes (an elevation-based pill
+    // would need to get lighter in dark and darker in light).
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(
-                if (active) MaterialTheme.colorScheme.background
+                if (active) MaterialTheme.colorScheme.primary
                 else androidx.compose.ui.graphics.Color.Transparent,
             )
             .clickable(onClick = onClick)
@@ -260,7 +268,8 @@ private fun TabButton(
             text = label,
             fontSize = 14.sp,
             style = MaterialTheme.typography.titleMedium,
-            color = if (active) MaterialTheme.colorScheme.onBackground
+            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
+            color = if (active) MaterialTheme.colorScheme.onPrimary
             else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -297,20 +306,28 @@ private fun ChipRow(chip: GamesViewModel.Chip?, onToggle: (GamesViewModel.Chip) 
 @Composable
 private fun FilterChip(label: String, active: Boolean, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    // Selected chips carry three cues, not one: a tonal fill, a solid accent
+    // outline, and a bolder accent label. The fill alone (it used to be 13%)
+    // was too faint to tell apart from the unselected grey.
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(999.dp))
             .background(
-                if (active) colors.primary.copy(alpha = 0.13f)
-                else colors.surfaceVariant.copy(alpha = 0.5f),
+                if (active) colors.primary.copy(alpha = 0.16f) else colors.surfaceVariant,
+            )
+            .border(
+                width = if (active) 1.5.dp else 1.dp,
+                color = if (active) colors.primary else colors.outline,
+                shape = RoundedCornerShape(999.dp),
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
         Text(
             text = label,
             fontSize = 13.sp,
             style = MaterialTheme.typography.titleSmall,
+            fontWeight = if (active) FontWeight.Bold else FontWeight.Medium,
             color = if (active) colors.primary else colors.onSurfaceVariant,
         )
     }
