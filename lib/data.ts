@@ -1,29 +1,30 @@
 import type { Position } from "@prisma/client";
+import type { Locale } from "@/i18n";
 
 export const POSITIONS: {
   value: Position;
-  abbr: { ru: string; tm: string };
-  sub: { ru: string; tm: string };
+  abbr: Record<Locale, string>;
+  sub: Record<Locale, string>;
 }[] = [
   {
     value: "GOALKEEPER",
-    abbr: { ru: "ВР", tm: "DM" },
-    sub: { ru: "Под штангой", tm: "Derwezede" },
+    abbr: { ru: "ВР", tm: "DM", en: "GK" },
+    sub: { ru: "Под штангой", tm: "Derwezede", en: "In goal" },
   },
   {
     value: "DEFENDER",
-    abbr: { ru: "ЗАЩ", tm: "GR" },
-    sub: { ru: "Сзади", tm: "Yzda" },
+    abbr: { ru: "ЗАЩ", tm: "GR", en: "DEF" },
+    sub: { ru: "Сзади", tm: "Yzda", en: "At the back" },
   },
   {
     value: "MIDFIELDER",
-    abbr: { ru: "ПЗ", tm: "ÝG" },
-    sub: { ru: "В центре", tm: "Merkezde" },
+    abbr: { ru: "ПЗ", tm: "ÝG", en: "MID" },
+    sub: { ru: "В центре", tm: "Merkezde", en: "In the middle" },
   },
   {
     value: "FORWARD",
-    abbr: { ru: "НАП", tm: "HJ" },
-    sub: { ru: "Впереди", tm: "Öňde" },
+    abbr: { ru: "НАП", tm: "HJ", en: "FWD" },
+    sub: { ru: "Впереди", tm: "Öňde", en: "Up front" },
   },
 ];
 
