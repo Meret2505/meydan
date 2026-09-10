@@ -10,7 +10,7 @@ import { createMobileSession } from "@/lib/services/session";
 const schema = z.object({
   phone: z.string().min(1),
   password: z.string().min(1),
-  locale: z.enum(["ru", "tm"]).default("ru"),
+  locale: z.enum(["ru", "tm", "en"]).default("ru"),
 });
 
 /**
