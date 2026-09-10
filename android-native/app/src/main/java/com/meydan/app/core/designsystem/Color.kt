@@ -29,14 +29,12 @@ internal val DarkTextFaint = Color(0xFF5F665F)
 internal val DarkBorder = Color(0x14FFFFFF) // rgba(255,255,255,.08)
 internal val DarkBorderStrong = Color(0x1FFFFFFF) // rgba(255,255,255,.12)
 
-// Light
-// Tiered so white surfaces read as raised over the page and the sheet's own
-// container reads as raised over that. Borders carry real weight because
-// several components (cards on the theme sheet, list rows) rely on the
-// outline alone to separate from their container.
-internal val LightBg = Color(0xFFE8ECEA)
+// Light — verbatim from globals.css `.light` block, same as before. The picker
+// sheet contrast problem is solved in ProfileScreen (sheet on surfaceVariant,
+// cards on surface), not by darkening the whole page.
+internal val LightBg = Color(0xFFF5F7F5)
 internal val LightSurface = Color(0xFFFFFFFF)
-internal val LightSurface2 = Color(0xFFDBE1DD)
+internal val LightSurface2 = Color(0xFFEDF1EE)
 internal val LightNavBg = Color(0xFFFFFFFF) // globals.css --nav-bg
 internal val LightPrimary = Color(0xFF14A85A)
 internal val LightPrimaryText = Color(0xFFFFFFFF)
@@ -45,7 +43,7 @@ internal val LightWarning = Color(0xFFC48A15)
 internal val LightDanger = Color(0xFFC13548)
 internal val LightText = Color(0xFF0B1410)
 internal val LightTextSoft = Color(0xFF2E3A34)
-internal val LightTextMuted = Color(0xFF525C56)
-internal val LightTextFaint = Color(0xFF868F89)
-internal val LightBorder = Color(0x330B1410) // rgba(11,20,16,.20)
-internal val LightBorderStrong = Color(0x520B1410) // rgba(11,20,16,.32)
+internal val LightTextMuted = Color(0xFF626E67)
+internal val LightTextFaint = Color(0xFF97A19A)
+internal val LightBorder = Color(0x1A0B1410) // rgba(11,20,16,.10)
+internal val LightBorderStrong = Color(0x290B1410) // rgba(11,20,16,.16)
