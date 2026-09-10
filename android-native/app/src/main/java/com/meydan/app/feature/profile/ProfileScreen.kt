@@ -72,7 +72,7 @@ import com.meydan.app.core.di.AppContainer
 fun ProfileScreen(
     container: AppContainer,
     onLoggedOut: () -> Unit,
-    onToggleLanguage: () -> Unit,
+    onPickLanguage: (String) -> Unit,
     onEditProfile: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = viewModel {
@@ -104,7 +104,7 @@ fun ProfileScreen(
     }
     val currentLangTag = ConfigurationCompat.getLocales(LocalConfiguration.current)
         .get(0)?.language ?: "ru"
-    val langLabel = if (currentLangTag == "tk") "Türkmen" else "Русский"
+    val langLabel = languageLabel(currentLangTag)
 
     Column(
         modifier = Modifier
@@ -265,7 +265,7 @@ fun ProfileScreen(
                 icon = Icons.Outlined.Language,
                 label = stringResource(R.string.profile_language),
                 trailing = langLabel,
-                onClick = onToggleLanguage,
+                onClick = viewModel::openLanguageMenu,
             )
             androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
             SettingsRow(
@@ -319,6 +319,24 @@ fun ProfileScreen(
             onDismiss = viewModel::dismissThemeMenu,
         )
     }
+
+    if (state.languageMenuOpen) {
+        LanguagePickerSheet(
+            current = currentLangTag,
+            onSelect = { tag ->
+                viewModel.onLanguagePicked()
+                onPickLanguage(tag)
+            },
+            onDismiss = viewModel::dismissLanguageMenu,
+        )
+    }
+}
+
+/** Native label for each supported language, used on the settings row and in the picker. */
+private fun languageLabel(androidTag: String): String = when {
+    androidTag.startsWith("tk") -> "Türkmen"
+    androidTag.startsWith("en") -> "English"
+    else -> "Русский"
 }
 
 /** Localized label for the current theme mode, shown on the settings row. */
@@ -399,6 +417,86 @@ private fun ThemePickerSheet(
                     )
                     Text(
                         text = stringResource(themeLabelRes(mode)),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (selected) colors.primary else colors.onSurface,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 14.dp),
+                    )
+                    if (selected) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = colors.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Language picker as a bottom sheet, mirroring [ThemePickerSheet]. Three cards
+ * (Russian / Türkmen / English) each drawn in their own script — the label is
+ * always the language's native name, never a translated string, so a user who
+ * accidentally landed in a language they don't read can still recover.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguagePickerSheet(
+    current: String,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = colors.surfaceVariant,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.profile_language),
+                style = MaterialTheme.typography.headlineSmall,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(bottom = 6.dp),
+            )
+            LocaleMapper.supportedAndroidTags.forEach { tag ->
+                val selected = current.startsWith(tag)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (selected) colors.primary.copy(alpha = 0.12f)
+                            else colors.surface,
+                        )
+                        .border(
+                            1.dp,
+                            if (selected) colors.primary.copy(alpha = 0.45f) else colors.outline,
+                            RoundedCornerShape(16.dp),
+                        )
+                        .clickable { onSelect(tag) }
+                        .padding(horizontal = 16.dp, vertical = 15.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Language,
+                        contentDescription = null,
+                        tint = if (selected) colors.primary else colors.onSurfaceVariant,
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Text(
+                        text = languageLabel(tag),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = if (selected) colors.primary else colors.onSurface,

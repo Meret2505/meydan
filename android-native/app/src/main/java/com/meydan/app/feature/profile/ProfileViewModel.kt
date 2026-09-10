@@ -37,6 +37,8 @@ class ProfileViewModel(
         /** True while the theme-picker sheet is open. */
         val themeMenuOpen: Boolean = false,
         val themeMode: ThemeMode = ThemeMode.SYSTEM,
+        /** True while the language-picker sheet is open. */
+        val languageMenuOpen: Boolean = false,
         val loggedOut: Boolean = false,
     )
 
@@ -68,6 +70,13 @@ class ProfileViewModel(
         _state.update { it.copy(themeMenuOpen = false) }
         viewModelScope.launch { settingsStore.setThemeMode(mode) }
     }
+
+    fun openLanguageMenu() = _state.update { it.copy(languageMenuOpen = true) }
+
+    fun dismissLanguageMenu() = _state.update { it.copy(languageMenuOpen = false) }
+
+    /** Called after the sheet has issued setApplicationLocales; just closes it. */
+    fun onLanguagePicked() = _state.update { it.copy(languageMenuOpen = false) }
 
     private fun loadStats() {
         viewModelScope.launch {

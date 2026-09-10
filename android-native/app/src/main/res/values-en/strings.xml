@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English. Ported from values/strings.xml (Russian) and values-tk/strings.xml
+     (Turkmen). Tone matches the other two: short, direct, casual. -->
+<resources>
+    <!-- auth -->
+    <string name="auth_tagline">Find an open game nearby. Come and play.</string>
+    <string name="auth_google">Continue with Google</string>
+    <string name="auth_phone">Continue with phone number</string>
+    <string name="auth_phone_title">Sign in with phone</string>
+    <string name="auth_phone_sub">No SMS — just your number and a password.</string>
+    <string name="auth_phone_label">Phone number</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_login">Sign in</string>
+    <string name="auth_logout">Sign out</string>
+    <string name="auth_terms">By continuing you accept the terms of use and privacy policy</string>
+
+    <!-- onboarding -->
+    <string name="onboarding_name_title">What\'s your name?</string>
+    <string name="onboarding_name_sub">You can change the name from Google.</string>
+    <string name="onboarding_phone_title">Your number</string>
+    <string name="onboarding_phone_sub">So people can invite you to games. Your number stays hidden — others only see it if they tap “show contact.”</string>
+    <string name="onboarding_private_hint">Private. No SMS verification needed.</string>
+    <string name="onboarding_position_title">Your position</string>
+    <string name="onboarding_position_sub">Which position do you usually play?</string>
+    <string name="onboarding_district_title">Your district</string>
+    <string name="onboarding_district_sub">We\'ll show games near you.</string>
+    <string name="onboarding_age_title">Age</string>
+    <string name="onboarding_age_sub">Optional — helps match you with players your age.</string>
+    <string name="onboarding_finish">Done — to the games</string>
+    <string name="onboarding_age_under">under 18</string>
+
+    <!-- positions -->
+    <string name="position_goalkeeper">Goalkeeper</string>
+    <string name="position_defender">Defender</string>
+    <string name="position_midfielder">Midfielder</string>
+    <string name="position_forward">Forward</string>
+
+    <!-- bottom navigation -->
+    <string name="nav_games">Games</string>
+    <string name="nav_teams">Teams</string>
+    <string name="nav_fields">Fields</string>
+    <string name="nav_tournaments">Tournaments</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- profile -->
+    <string name="profile_open_invites">Open to game invites</string>
+    <string name="profile_closed_invites">Not open to invites</string>
+    <string name="profile_edit">Edit profile</string>
+    <string name="profile_edit_title">Edit profile</string>
+    <string name="profile_edit_name">Name</string>
+    <string name="profile_edit_district">District</string>
+    <string name="profile_edit_skill">Skill level</string>
+    <string name="profile_edit_save">Save</string>
+    <string name="skill_beginner">Beginner</string>
+    <string name="skill_intermediate">Intermediate</string>
+    <string name="skill_advanced">Advanced</string>
+    <string name="profile_photo_title">Profile photo</string>
+    <string name="profile_photo_change">Replace</string>
+    <string name="profile_photo_remove">Remove</string>
+    <string name="profile_attendance">Attendance</string>
+    <string name="profile_attendance_detail">%1$d of %2$d games</string>
+    <string name="profile_games_played">Played</string>
+    <string name="profile_total_joined">Sign-ups</string>
+    <string name="profile_recent_games">Recent games</string>
+    <string name="profile_attended">Attended</string>
+    <string name="profile_missed">Missed</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_language">Interface language</string>
+    <string name="profile_theme">Appearance</string>
+    <string name="profile_theme_system">System</string>
+    <string name="profile_theme_light">Light</string>
+    <string name="profile_theme_dark">Dark</string>
+    <string name="profile_logout_full">Sign out of account</string>
+
+    <!-- fields -->
+    <string name="fields_search_placeholder">Search a field or district</string>
+    <string name="fields_favorites">Favorites</string>
+    <string name="fields_capacity_chip">up to %1$d</string>
+    <string name="fields_no_results">Nothing found</string>
+    <string name="fields_no_results_sub">Clear the filters or check back later.</string>
+    <string name="fields_surface_turf">Artificial turf</string>
+    <string name="fields_surface_rubber">Rubber</string>
+    <string name="fields_surface_dirt">Dirt</string>
+
+    <!-- teams -->
+    <string name="teams_my_teams">My teams</string>
+    <string name="teams_city_teams">City teams</string>
+    <string name="teams_not_in_team">You aren\'t on a team yet.</string>
+    <string name="teams_members_count">%1$d in the roster</string>
+    <string name="teams_captain_short">cap. %1$s</string>
+    <string name="teams_ranking">in the ranking</string>
+    <string name="teams_matches_hint">The number is matches played</string>
+
+    <!-- tournaments -->
+    <string name="tournaments_tab_upcoming">Upcoming</string>
+    <string name="tournaments_tab_ongoing">Ongoing</string>
+    <string name="tournaments_tab_ended">Ended</string>
+    <string name="tournaments_status_upcoming">upcoming</string>
+    <string name="tournaments_status_ongoing">ongoing</string>
+    <string name="tournaments_status_ended">ended</string>
+    <string name="tournaments_status_cancelled">cancelled</string>
+    <string name="tournaments_teams_count">teams</string>
+    <string name="tournaments_matches_count">matches</string>
+    <string name="tournaments_empty_title">No tournaments yet</string>
+    <string name="tournaments_empty_upcoming">Start the first one — gather teams and schedule matches.</string>
+    <string name="tournaments_empty_ongoing">Nothing running right now.</string>
+    <string name="tournaments_empty_ended">Nothing finished to look back on.</string>
+
+    <!-- games feed -->
+    <string name="games_feed_title">Games nearby</string>
+    <string name="games_open">Open games</string>
+    <string name="games_mine">My games</string>
+    <string name="games_today">Today</string>
+    <string name="games_tomorrow">Tomorrow</string>
+    <string name="games_chip_goalie">Needs a goalkeeper</string>
+    <string name="games_full">Full</string>
+    <string name="games_spots">%1$d/%2$d players</string>
+    <string name="games_needed">Need a %1$s</string>
+    <string name="games_your_game">Yours</string>
+    <string name="games_create_first_sub">Create the first — and invite players from your district.</string>
+    <string name="empty_no_games">No games nearby yet. Start the first!</string>
+    <string name="empty_no_my_games">You haven\'t joined any games yet.</string>
+    <string name="offline_banner">No connection — showing saved games.</string>
+
+    <!-- notifications -->
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_empty">No notifications yet</string>
+
+    <!-- game detail -->
+    <string name="games_when">When</string>
+    <string name="games_price">Price</string>
+    <string name="games_price_per_player">%1$d man / person</string>
+    <string name="games_roster">Roster</string>
+    <string name="games_organizer">Organizer</string>
+    <string name="games_you_short">You</string>
+    <string name="games_joined_banner">You\'re in! %1$s %2$s, %3$s.</string>
+    <string name="games_needed_note">Need a %1$s. The team is short on this position.</string>
+    <string name="games_attendance_pct">attendance %1$d%%</string>
+    <string name="games_games_count">%1$d games</string>
+    <string name="games_join_cta">Join · take a spot</string>
+    <string name="games_joined_cta">✓ You\'re in · cancel sign-up</string>
+    <string name="games_is_past">Game is over</string>
+    <string name="games_completed">Game finished</string>
+    <string name="games_cancelled_full">Game cancelled</string>
+    <string name="games_cancel_cta">Cancel game</string>
+    <string name="games_cancel_title">Cancel this game?</string>
+    <string name="games_cancel_body">Everyone signed up will be notified. This can\'t be undone.</string>
+    <string name="games_cancel_confirm">Cancel game</string>
+    <string name="games_cancel_dismiss">Keep it</string>
+    <string name="games_banner_over">GAME OVER</string>
+    <string name="games_banner_cancelled">GAME CANCELLED</string>
+    <string name="games_banner_yours">YOUR GAME</string>
+    <string name="games_banner_open">OPEN GAME</string>
+    <string name="games_show_contact">Show organizer\'s contact</string>
+    <string name="games_join_failed">Couldn\'t join. Try again</string>
+    <string name="pos_short_goalkeeper">GK</string>
+    <string name="pos_short_defender">DEF</string>
+    <string name="pos_short_midfielder">MID</string>
+    <string name="pos_short_forward">FWD</string>
+
+    <!-- field detail -->
+    <string name="fields_address">Address</string>
+    <string name="fields_surface_label">Surface</string>
+    <string name="fields_capacity_label">Capacity</string>
+    <string name="fields_capacity_value">up to %1$d players</string>
+    <string name="fields_games_played_label">Games played</string>
+    <string name="fields_about">About the field</string>
+    <string name="fields_schedule">Schedule</string>
+    <string name="fields_amenities">Amenities</string>
+    <string name="fields_contacts">Contacts</string>
+    <string name="fields_call">Call</string>
+    <string name="field_start_game">Start a game here</string>
+    <string name="fields_closed">Closed</string>
+    <string name="day_monday">Mon</string>
+    <string name="day_tuesday">Tue</string>
+    <string name="day_wednesday">Wed</string>
+    <string name="day_thursday">Thu</string>
+    <string name="day_friday">Fri</string>
+    <string name="day_saturday">Sat</string>
+    <string name="day_sunday">Sun</string>
+
+    <!-- team detail -->
+    <string name="teams_wins">wins</string>
+    <string name="teams_losses">losses</string>
+    <string name="teams_points">points</string>
+    <string name="teams_roster">Roster</string>
+    <string name="teams_join_cta">Join team</string>
+    <string name="teams_leave_cta">Leave team</string>
+    <string name="teams_you_are_captain">You\'re the captain</string>
+    <string name="teams_remove_title">Remove player?</string>
+    <string name="teams_remove_body">%1$s will no longer be on the team.</string>
+    <string name="teams_remove_confirm">Remove</string>
+    <string name="teams_disband_cta">Disband team</string>
+    <string name="teams_disband_title">Disband the team?</string>
+    <string name="teams_disband_body">The team will be deleted along with its roster. This can\'t be undone.</string>
+    <string name="teams_disband_confirm">Disband</string>
+    <string name="teams_create">Create team</string>
+    <string name="teams_create_title">New team</string>
+    <string name="teams_create_cta">Create team</string>
+    <string name="teams_create_name">Name</string>
+    <string name="teams_create_name_placeholder">For example: Ýyldyz</string>
+    <string name="teams_create_color">Color</string>
+    <string name="teams_captain_badge">C</string>
+    <string name="teams_you_paren">(you)</string>
+
+    <!-- tournament detail -->
+    <string name="tournaments_teams_section">Teams (%1$d)</string>
+    <string name="tournaments_matches_section">Matches (%1$d)</string>
+    <string name="tournaments_no_registered">Nobody has signed up yet.</string>
+    <string name="tournaments_no_matches">Matches will appear after the first result.</string>
+    <string name="tournaments_my_teams">My teams</string>
+    <string name="tournaments_create">Create tournament</string>
+    <string name="tournaments_create_title">New tournament</string>
+    <string name="tournaments_create_cta">Create tournament</string>
+    <string name="tournaments_create_name">Name</string>
+    <string name="tournaments_create_name_placeholder">For example: Spring Cup</string>
+    <string name="tournaments_create_start">Start date</string>
+    <string name="tournaments_create_end">End date</string>
+    <string name="tournaments_create_end_optional">Not set</string>
+    <string name="tournaments_create_description">Description</string>
+    <string name="tournaments_cancel_cta">Cancel tournament</string>
+    <string name="tournaments_cancel_title">Cancel this tournament?</string>
+    <string name="tournaments_cancel_body">Registered teams will see that the tournament is cancelled. This can\'t be undone.</string>
+    <string name="tournaments_cancel_confirm">Cancel tournament</string>
+    <string name="tournaments_enter">Enter</string>
+    <string name="tournaments_withdraw">Withdraw</string>
+    <string name="tournaments_record_cta">Record result</string>
+    <string name="tournaments_record_title">Match result</string>
+    <string name="tournaments_record_home">Home</string>
+    <string name="tournaments_record_away">Away</string>
+    <string name="tournaments_round">Round</string>
+    <string name="tournaments_record_save">Save</string>
+    <string name="tournaments_table">Standings</string>
+    <string name="tournaments_col_team">Team</string>
+    <!-- Standings column letters — overridden per language because the default's
+         Cyrillic И/В/Н/П means nothing to an English reader. -->
+    <string name="tournaments_col_played">P</string>
+    <string name="tournaments_col_won">W</string>
+    <string name="tournaments_col_drawn">D</string>
+    <string name="tournaments_col_lost">L</string>
+    <string name="tournaments_col_diff">±</string>
+    <string name="tournaments_col_points">Pts</string>
+
+    <!-- create game -->
+    <string name="games_create_title">Create game</string>
+    <string name="games_create">Create game</string>
+    <string name="games_create_when">When</string>
+    <string name="games_create_total">Total players</string>
+    <string name="games_create_needed">Positions still needed</string>
+    <string name="games_create_notes">Notes</string>
+    <string name="games_create_price">Price per player (man, optional)</string>
+    <string name="games_create_field_label">Field</string>
+    <string name="games_create_field_free">Or type the field\'s name</string>
+    <string name="games_create_field_choose">pick from catalog</string>
+    <string name="games_create_field_placeholder">“Olimp” field, court 2</string>
+    <string name="games_create_notes_placeholder">For example: bring water, ball provided</string>
+
+    <!-- errors -->
+    <string name="error_wrong_password">Wrong password</string>
+    <string name="error_invalid_input">Fill in both fields (at least 6 characters)</string>
+    <string name="error_team_in_use">The team has games — it can\'t be disbanded.</string>
+    <string name="error_phone_taken">This number is already linked to another account</string>
+    <string name="error_auth_failed">Couldn\'t sign in</string>
+    <string name="error_rate_limited">Too many attempts. Try again later.</string>
+    <string name="error_offline_title">No connection</string>
+    <string name="error_generic_title">Something went wrong</string>
+    <string name="error_try_again">Try again</string>
+
+    <!-- common -->
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_next">Next</string>
+    <string name="common_skip">Skip</string>
+    <string name="common_loading">Loading…</string>
+</resources>

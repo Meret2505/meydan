@@ -12,10 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
-import com.meydan.app.R
 import com.meydan.app.core.common.LocaleMapper
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.ProfilePatch
@@ -50,8 +47,6 @@ fun MainScaffold(
     onNotifications: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.GAMES) }
-    val currentLang = ConfigurationCompat.getLocales(LocalConfiguration.current)
-        .get(0)?.language ?: "ru"
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -85,8 +80,8 @@ fun MainScaffold(
                 MainTab.PROFILE -> ProfileScreen(
                     container = container,
                     onLoggedOut = onLoggedOut,
-                    onToggleLanguage = {
-                        toggleLanguage(currentLang, scope, container.authRepository)
+                    onPickLanguage = { tag ->
+                        applyLanguage(tag, scope, container.authRepository)
                     },
                     onEditProfile = onEditProfile,
                 )
@@ -96,26 +91,26 @@ fun MainScaffold(
 }
 
 /**
- * Flips the app language ru <-> tk. setApplicationLocales recreates the
- * activity with the new locale and (via the manifest service) persists it.
+ * Applies the picked language. setApplicationLocales recreates the activity
+ * with the new locale and (via the manifest service) persists it — the same
+ * app-level persistence AppCompat uses everywhere else.
  *
  * The choice is also PATCHed to /me so server-sent push text uses it, matching
  * the web. That call is fire-and-forget on a separate scope: the locale switch
- * below must not block on the network, and a failed PATCH only means the next
+ * must not block on the network, and a failed PATCH only means the next
  * language change (or login) re-syncs it.
  */
-private fun toggleLanguage(
-    currentLang: String,
+private fun applyLanguage(
+    androidTag: String,
     scope: CoroutineScope,
     authRepository: AuthRepository,
 ) {
-    val next = if (currentLang == "tk") "ru" else "tk"
     scope.launch {
         runCatching {
             authRepository.updateProfile(
-                ProfilePatch(locale = LocaleMapper.toApiLocale(next)),
+                ProfilePatch(locale = LocaleMapper.toApiLocale(androidTag)),
             )
         }
     }
-    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(next))
+    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(androidTag))
 }
