@@ -303,29 +303,39 @@ private fun FilterChip(label: String, active: Boolean, onClick: () -> Unit) {
 
 @Composable
 private fun EmptyFeed(tab: GamesViewModel.Tab) {
-    Column(
+    // A LazyColumn (rather than a plain Column) so PullToRefreshBox has a
+    // scrollable child to attach the pull gesture to — without it, an empty
+    // feed captures no drag and users can't refresh from nothing.
+    LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 40.dp),
+        modifier = Modifier.fillMaxSize(),
     ) {
-        Text(
-            text = stringResource(
-                if (tab == GamesViewModel.Tab.OPEN) R.string.empty_no_games
-                else R.string.empty_no_my_games,
-            ),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-        )
-        if (tab == GamesViewModel.Tab.OPEN) {
-            Text(
-                text = stringResource(R.string.games_create_first_sub),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+        item {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillParentMaxSize()
+                    .padding(horizontal = 40.dp),
+            ) {
+                Text(
+                    text = stringResource(
+                        if (tab == GamesViewModel.Tab.OPEN) R.string.empty_no_games
+                        else R.string.empty_no_my_games,
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                )
+                if (tab == GamesViewModel.Tab.OPEN) {
+                    Text(
+                        text = stringResource(R.string.games_create_first_sub),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            }
         }
     }
 }
