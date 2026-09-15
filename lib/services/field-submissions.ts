@@ -192,54 +192,64 @@ export async function approveFieldSubmission(
   adminId: string,
   submissionId: string,
 ): Promise<ApproveResult> {
-  return prisma.$transaction(async (tx) => {
-    const submission = await tx.fieldSubmission.findUnique({ where: { id: submissionId } });
-    if (!submission) return { ok: false as const, error: "not_found" as const };
-    if (submission.status !== "PENDING") {
-      return { ok: false as const, error: "already_reviewed" as const };
-    }
+  return prisma.$transaction(
+    async (tx) => {
+      const submission = await tx.fieldSubmission.findUnique({ where: { id: submissionId } });
+      if (!submission) return { ok: false as const, error: "not_found" as const };
+      if (submission.status !== "PENDING") {
+        return { ok: false as const, error: "already_reviewed" as const };
+      }
 
-    const field = await tx.field.create({
-      data: {
-        name: submission.name,
-        nameRu: submission.name,
-        address: submission.address,
-        addressRu: submission.address,
-        bodyRu: submission.description,
-        district: submission.district,
-        surface: submission.surface,
-        capacity: submission.capacity,
-        phone: submission.phone,
-        // Already absolute storage URLs (see addSubmissionPhoto) — carried
-        // across verbatim, no re-upload.
-        image: submission.photos[0] ?? null,
-        photos: submission.photos,
-        isActive: true,
-      },
-    });
+      const field = await tx.field.create({
+        data: {
+          name: submission.name,
+          nameRu: submission.name,
+          address: submission.address,
+          addressRu: submission.address,
+          bodyRu: submission.description,
+          district: submission.district,
+          surface: submission.surface,
+          capacity: submission.capacity,
+          phone: submission.phone,
+          // Already absolute storage URLs (see addSubmissionPhoto) — carried
+          // across verbatim, no re-upload.
+          image: submission.photos[0] ?? null,
+          photos: submission.photos,
+          isActive: true,
+        },
+      });
 
-    await tx.fieldSubmission.update({
-      where: { id: submissionId },
-      data: {
-        status: "APPROVED",
-        reviewedById: adminId,
-        reviewedAt: new Date(),
-        fieldId: field.id,
-      },
-    });
+      await tx.fieldSubmission.update({
+        where: { id: submissionId },
+        data: {
+          status: "APPROVED",
+          reviewedById: adminId,
+          reviewedAt: new Date(),
+          fieldId: field.id,
+        },
+      });
 
-    await tx.notification.create({
-      data: {
-        userId: submission.submittedById,
-        type: "FIELD_APPROVED",
-        title: "Поле одобрено",
-        body: `Твоё поле «${submission.name}» теперь в списке полей.`,
-        data: { fieldId: field.id },
-      },
-    });
+      await tx.notification.create({
+        data: {
+          userId: submission.submittedById,
+          type: "FIELD_APPROVED",
+          title: "Поле одобрено",
+          body: `Твоё поле «${submission.name}» теперь в списке полей.`,
+          data: { fieldId: field.id },
+        },
+      });
 
-    return { ok: true as const, fieldId: field.id };
-  });
+      return { ok: true as const, fieldId: field.id };
+    },
+    // Three sequential writes over Supabase's pooled connection (which has
+    // shown latency spikes — see the pooler timeouts investigated Sep 14)
+    // routinely outran Prisma's 5s default transaction timeout. The route
+    // handler still caught the resulting error and returned clean JSON, but by
+    // then the client's own request had already been sitting long enough that
+    // it read as a dropped connection ("no connection") rather than a real
+    // failure — reject, with only two writes, usually finished in time.
+    { maxWait: 10_000, timeout: 15_000 },
+  );
 }
 
 export type RejectResult = { ok: true } | { ok: false; error: ReviewError };
@@ -249,35 +259,39 @@ export async function rejectFieldSubmission(
   submissionId: string,
   reason?: string | null,
 ): Promise<RejectResult> {
-  return prisma.$transaction(async (tx) => {
-    const submission = await tx.fieldSubmission.findUnique({ where: { id: submissionId } });
-    if (!submission) return { ok: false as const, error: "not_found" as const };
-    if (submission.status !== "PENDING") {
-      return { ok: false as const, error: "already_reviewed" as const };
-    }
+  return prisma.$transaction(
+    async (tx) => {
+      const submission = await tx.fieldSubmission.findUnique({ where: { id: submissionId } });
+      if (!submission) return { ok: false as const, error: "not_found" as const };
+      if (submission.status !== "PENDING") {
+        return { ok: false as const, error: "already_reviewed" as const };
+      }
 
-    await tx.fieldSubmission.update({
-      where: { id: submissionId },
-      data: {
-        status: "REJECTED",
-        reviewedById: adminId,
-        reviewedAt: new Date(),
-        rejectionReason: reason?.trim() || null,
-      },
-    });
+      await tx.fieldSubmission.update({
+        where: { id: submissionId },
+        data: {
+          status: "REJECTED",
+          reviewedById: adminId,
+          reviewedAt: new Date(),
+          rejectionReason: reason?.trim() || null,
+        },
+      });
 
-    await tx.notification.create({
-      data: {
-        userId: submission.submittedById,
-        type: "FIELD_REJECTED",
-        title: "Поле отклонено",
-        body: reason?.trim()
-          ? `Заявка «${submission.name}» отклонена: ${reason.trim()}`
-          : `Заявка «${submission.name}» отклонена.`,
-        data: {},
-      },
-    });
+      await tx.notification.create({
+        data: {
+          userId: submission.submittedById,
+          type: "FIELD_REJECTED",
+          title: "Поле отклонено",
+          body: reason?.trim()
+            ? `Заявка «${submission.name}» отклонена: ${reason.trim()}`
+            : `Заявка «${submission.name}» отклонена.`,
+          data: {},
+        },
+      });
 
-    return { ok: true as const };
-  });
+      return { ok: true as const };
+    },
+    // Same pooled-connection headroom as approve, for consistency.
+    { maxWait: 10_000, timeout: 15_000 },
+  );
 }
