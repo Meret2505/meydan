@@ -1,6 +1,7 @@
 package com.meydan.app.feature.moderation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,9 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.meydan.app.R
+import com.meydan.app.core.designsystem.FullscreenImageViewer
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.FieldSubmissionDto
 import com.meydan.app.feature.auth.errorTextRes
@@ -149,6 +154,7 @@ private fun SubmissionCard(
     onReject: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
+    var viewerIndex by remember { mutableStateOf<Int?>(null) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -164,14 +170,15 @@ private fun SubmissionCard(
                     .horizontalScroll(rememberScrollState())
                     .padding(bottom = 12.dp),
             ) {
-                submission.photos.forEach { url ->
+                submission.photos.forEachIndexed { index, url ->
                     AsyncImage(
                         model = url,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(84.dp)
-                            .clip(RoundedCornerShape(12.dp)),
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { viewerIndex = index },
                     )
                 }
             }
@@ -252,6 +259,14 @@ private fun SubmissionCard(
                 }
             }
         }
+    }
+
+    viewerIndex?.let { index ->
+        FullscreenImageViewer(
+            images = submission.photos,
+            initialIndex = index,
+            onDismiss = { viewerIndex = null },
+        )
     }
 }
 

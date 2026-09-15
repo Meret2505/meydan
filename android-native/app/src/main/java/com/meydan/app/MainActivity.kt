@@ -1,6 +1,8 @@
 package com.meydan.app
 
+import android.graphics.Color as AndroidColor
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +10,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,6 +38,21 @@ class MainActivity : AppCompatActivity() {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
+            }
+            // enableEdgeToEdge()'s one-shot call above only guessed the status/
+            // navigation bar icon colour from the SYSTEM's light/dark setting —
+            // not from `darkTheme`, which can (and by default does) disagree
+            // with it. That mismatch drew dark status-bar icons over this app's
+            // dark background, making the clock/signal/battery unreadable. Redo
+            // it here every time the resolved theme changes so the icons always
+            // match what's actually on screen.
+            SideEffect {
+                val style = if (darkTheme) {
+                    SystemBarStyle.dark(AndroidColor.TRANSPARENT)
+                } else {
+                    SystemBarStyle.light(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT)
+                }
+                enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
             }
             MeydanTheme(darkTheme = darkTheme) {
                 // A Surface root sets LocalContentColor from the theme, so Text

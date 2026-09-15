@@ -22,6 +22,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -319,7 +321,7 @@ private fun JoinedBanner(text: String) {
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(34.dp).clip(CircleShape).background(colors.primary),
         ) {
-            Text("✓", color = colors.onPrimary, fontWeight = FontWeight.Black, fontSize = 17.sp)
+            Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
         }
         Text(text, fontSize = 13.5.sp, color = colors.onSurface, modifier = Modifier.padding(start = 12.dp))
     }
@@ -456,7 +458,7 @@ private fun ContactRow(name: String, phone: String) {
             }
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
-        Text("📞", fontSize = 16.sp)
+        Icon(imageVector = Icons.Filled.Call, contentDescription = null, tint = colors.onBackground, modifier = Modifier.size(18.dp))
         Text(
             text = "$phone · $name",
             fontSize = 14.sp,

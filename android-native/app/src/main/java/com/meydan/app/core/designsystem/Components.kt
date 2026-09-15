@@ -33,10 +33,27 @@ fun PrimaryButton(
         onClick = onClick,
         enabled = enabled && !loading,
         shape = MaterialTheme.shapes.extraLarge, // pill
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-        ),
+        colors = if (loading) {
+            // Loading disables the button (see `enabled` above), and Material3's
+            // default disabled colors are a near-invisible grey overlay — that
+            // washed out the spinner entirely. Keep the branded colors here so
+            // the spinner stays visible while submitting. This branch is
+            // loading-only: a plain invalid-form disable (loading == false)
+            // must still show the normal washed-out disabled look, or the
+            // button reads as active — and unresponsive — before the form is
+            // actually valid.
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary,
+                disabledContentColor = MaterialTheme.colorScheme.onPrimary,
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            )
+        },
         modifier = modifier
             .fillMaxWidth()
             .height(58.dp),

@@ -54,11 +54,7 @@ class GamesViewModel(
             }
             refresh(initial = true)
         }
-        viewModelScope.launch {
-            (gamesRepository.unreadCount() as? ApiResult.Success)?.let { r ->
-                _state.update { it.copy(unread = r.data) }
-            }
-        }
+        viewModelScope.launch { refreshUnread() }
     }
 
     fun selectTab(tab: Tab) {
@@ -84,6 +80,17 @@ class GamesViewModel(
      */
     fun refreshOnResume() {
         viewModelScope.launch { refresh(initial = false) }
+        // The bell badge was only ever fetched once, at VM init — a notification
+        // that arrived later (e.g. a field submission getting approved) never
+        // showed up on the badge until the process restarted. Re-fetch it every
+        // time the feed resumes, same as the game list.
+        viewModelScope.launch { refreshUnread() }
+    }
+
+    private suspend fun refreshUnread() {
+        (gamesRepository.unreadCount() as? ApiResult.Success)?.let { r ->
+            _state.update { it.copy(unread = r.data) }
+        }
     }
 
     private suspend fun refresh(initial: Boolean) {

@@ -14,15 +14,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +57,7 @@ import com.meydan.app.core.network.dto.FieldDetailDto
 import com.meydan.app.core.network.dto.FieldHoursDto
 import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
+import com.meydan.app.core.designsystem.FullscreenImageViewer
 import com.meydan.app.core.designsystem.MeydanTheme
 
 /**
@@ -86,14 +97,21 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
     val isTm = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)?.language == "tk"
     val name = (if (isTm) field.nameTm else field.nameRu) ?: field.name
     val address = (if (isTm) field.addressTm else field.addressRu) ?: field.address
+    var viewerOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        // Photo / pitch header.
-        Box(modifier = Modifier.fillMaxWidth().height(208.dp)) {
+        // Photo / pitch header. Tapping it opens every field photo full-screen,
+        // not just the crop shown here.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(208.dp)
+                .let { if (field.photos.isNotEmpty()) it.clickable { viewerOpen = true } else it },
+        ) {
             if (field.photos.isNotEmpty()) {
                 AsyncImage(
                     model = field.photos.first(),
@@ -192,6 +210,14 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
             StartGameButton(onStartGame)
         }
     }
+
+    if (viewerOpen) {
+        FullscreenImageViewer(
+            images = field.photos,
+            initialIndex = 0,
+            onDismiss = { viewerOpen = false },
+        )
+    }
 }
 
 /** Strip simple HTML from the web-stored body into plain text with paragraph breaks. */
@@ -262,9 +288,9 @@ private fun HoursRow(h: FieldHoursDto) {
 private fun ContactRow(type: String, value: String) {
     val context = LocalContext.current
     val (icon, display, uri) = when (type) {
-        "phone" -> Triple("📞", value, "tel:$value")
-        "instagram" -> Triple("📷", "@$value", "https://instagram.com/$value")
-        else -> Triple("🎵", "@$value", "https://tiktok.com/@$value")
+        "phone" -> Triple(Icons.Filled.Call, value, "tel:$value")
+        "instagram" -> Triple(Icons.Filled.PhotoCamera, "@$value", "https://instagram.com/$value")
+        else -> Triple(Icons.Filled.MusicNote, "@$value", "https://tiktok.com/@$value")
     }
     Row(
         modifier = Modifier
@@ -272,8 +298,9 @@ private fun ContactRow(type: String, value: String) {
             .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(uri))) }
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(icon, fontSize = 14.sp)
+        Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         Text(display, fontSize = 14.sp, fontWeight = FontWeight.Bold)
     }
 }
@@ -282,15 +309,17 @@ private fun ContactRow(type: String, value: String) {
 private fun CallButton(phone: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
-    Box(
-        contentAlignment = Alignment.Center,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(colors.primary)
             .clickable { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))) },
     ) {
-        Text("📞 ${stringResource(R.string.fields_call)}", color = colors.onPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+        Icon(imageVector = Icons.Filled.Call, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
+        Text(stringResource(R.string.fields_call), color = colors.onPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
     }
 }
 
@@ -299,15 +328,17 @@ private fun WhatsappButton(phone: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
     val digits = phone.filter { it.isDigit() }
-    Box(
-        contentAlignment = Alignment.Center,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(colors.surface)
             .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$digits"))) },
     ) {
-        Text("💬 ${stringResource(R.string.field_whatsapp)}", color = colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Icon(imageVector = Icons.AutoMirrored.Filled.Chat, contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(18.dp))
+        Text(stringResource(R.string.field_whatsapp), color = colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
     }
 }
 

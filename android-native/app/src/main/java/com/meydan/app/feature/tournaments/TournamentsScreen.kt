@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -172,7 +173,7 @@ private fun TournamentCard(t: TournamentCardDto, onClick: () -> Unit) {
                 .clip(RoundedCornerShape(12.dp))
                 .background(colors.primary.copy(alpha = 0.15f)),
         ) {
-            Text(text = "🏆", fontSize = 20.sp)
+            Icon(imageVector = Icons.Filled.EmojiEvents, contentDescription = null, tint = colors.primary, modifier = Modifier.size(22.dp))
         }
         Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(
@@ -228,7 +229,12 @@ private fun EmptyTournaments(tab: TournamentsViewModel.Tab) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize().padding(40.dp),
     ) {
-        Text(text = "🏆", fontSize = 32.sp)
+        Icon(
+            imageVector = Icons.Filled.EmojiEvents,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(40.dp),
+        )
         Text(
             text = stringResource(R.string.tournaments_empty_title),
             style = MaterialTheme.typography.titleMedium,

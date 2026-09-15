@@ -8,6 +8,7 @@ import com.meydan.app.core.datastore.ThemeMode
 import com.meydan.app.core.network.dto.ProfileStatsDto
 import com.meydan.app.core.network.dto.UserDto
 import com.meydan.app.data.AuthRepository
+import com.meydan.app.data.FieldSubmissionsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(
     private val authRepository: AuthRepository,
     private val settingsStore: SettingsStore,
+    private val fieldSubmissionsRepository: FieldSubmissionsRepository,
 ) : ViewModel() {
 
     data class UiState(
@@ -40,6 +42,10 @@ class ProfileViewModel(
         /** True while the language-picker sheet is open. */
         val languageMenuOpen: Boolean = false,
         val loggedOut: Boolean = false,
+        /** Admin-only: PENDING field submissions, shown as a badge on the
+         *  moderation row so a new one doesn't sit unnoticed until the admin
+         *  happens to open that screen. */
+        val pendingModerationCount: Int = 0,
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -50,7 +56,10 @@ class ProfileViewModel(
         // writes the cache) are reflected the moment we return here.
         viewModelScope.launch {
             authRepository.cachedUserFlow.collect { u ->
-                if (u != null) _state.update { it.copy(user = u) }
+                if (u != null) {
+                    _state.update { it.copy(user = u) }
+                    if (u.isAdmin) refreshModerationCount()
+                }
             }
         }
         viewModelScope.launch {
@@ -60,6 +69,20 @@ class ProfileViewModel(
         // picks up the result.
         viewModelScope.launch { authRepository.getMe() }
         loadStats()
+    }
+
+    /** Re-checks the queue whenever the tab is resumed, so approving/rejecting
+     *  a submission (or a new one arriving) updates the badge without needing
+     *  to leave and re-enter the Profile tab. */
+    fun refreshOnResume() {
+        viewModelScope.launch { refreshModerationCount() }
+    }
+
+    private suspend fun refreshModerationCount() {
+        if (_state.value.user?.isAdmin != true) return
+        (fieldSubmissionsRepository.listPending() as? ApiResult.Success)?.let { r ->
+            _state.update { it.copy(pendingModerationCount = r.data.size) }
+        }
     }
 
     fun openThemeMenu() = _state.update { it.copy(themeMenuOpen = true) }

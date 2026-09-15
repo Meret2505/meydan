@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -206,6 +207,13 @@ private fun FeedHeader(unread: Int, onCreateGame: () -> Unit, onNotifications: (
                     Text(
                         text = if (unread > 9) "9+" else unread.toString(),
                         fontSize = 9.sp,
+                        // Without an explicit lineHeight, Text reserves its
+                        // font's default leading (extra space below the
+                        // baseline) — that pushed the digit visibly above
+                        // center of the 16dp circle despite the Box already
+                        // centering the text block itself.
+                        lineHeight = 9.sp,
+                        textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
@@ -345,10 +353,15 @@ private fun EmptyFeed(tab: GamesViewModel.Tab) {
         item {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                // Top, not Center: centering in the leftover space below the
+                // chips (which also has to leave room for the bottom nav)
+                // stranded this text near the middle of the screen with a
+                // large dead gap above it. A fixed top offset instead keeps it
+                // close to the filters, where the eye already is.
+                verticalArrangement = Arrangement.Top,
                 modifier = Modifier
                     .fillParentMaxSize()
-                    .padding(horizontal = 40.dp),
+                    .padding(horizontal = 40.dp, vertical = 48.dp),
             ) {
                 Text(
                     text = stringResource(
@@ -482,7 +495,7 @@ private fun Badge(text: String, primary: Boolean) {
     )
 }
 
-/** The "⚠ Нужен вратарь · нужен защитник" warning strip. */
+/** The "Нужен вратарь · нужен защитник" warning strip. */
 @Composable
 private fun NeededStrip(positions: List<String>) {
     val labels = mapOf(
@@ -504,7 +517,8 @@ private fun NeededStrip(positions: List<String>) {
             .background(warning.copy(alpha = 0.12f))
             .padding(horizontal = 10.dp, vertical = 5.dp),
     ) {
-        Text(text = "⚠ $text", fontSize = 12.sp, color = warning)
+        Icon(imageVector = Icons.Filled.WarningAmber, contentDescription = null, tint = warning, modifier = Modifier.size(14.dp))
+        Text(text = text, fontSize = 12.sp, color = warning, modifier = Modifier.padding(start = 6.dp))
     }
 }
 

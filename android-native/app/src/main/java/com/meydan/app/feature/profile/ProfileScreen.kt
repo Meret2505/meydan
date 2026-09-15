@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -80,9 +81,16 @@ fun ProfileScreen(
     onModerateFields: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = viewModel {
-        ProfileViewModel(container.authRepository, container.settingsStore)
+        ProfileViewModel(
+            container.authRepository,
+            container.settingsStore,
+            container.fieldSubmissionsRepository,
+        )
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshOnResume()
+    }
 
     if (state.loggedOut) {
         LaunchedEffect(Unit) { onLoggedOut() }
@@ -284,6 +292,7 @@ fun ProfileScreen(
                     icon = Icons.Outlined.AdminPanelSettings,
                     label = stringResource(R.string.fields_moderation),
                     trailing = null,
+                    badgeCount = state.pendingModerationCount,
                     onClick = onModerateFields,
                 )
             }
@@ -685,6 +694,7 @@ private fun SettingsRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     trailing: String?,
+    badgeCount: Int = 0,
     destructive: Boolean = false,
     onClick: () -> Unit,
 ) {
@@ -707,6 +717,26 @@ private fun SettingsRow(
                 .weight(1f)
                 .padding(start = 12.dp),
         )
+        if (badgeCount > 0) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(end = if (trailing != null) 8.dp else 0.dp)
+                    .defaultMinSize(minWidth = 20.dp, minHeight = 20.dp)
+                    .clip(CircleShape)
+                    .background(colors.primary)
+                    .padding(horizontal = 6.dp),
+            ) {
+                Text(
+                    text = if (badgeCount > 99) "99+" else badgeCount.toString(),
+                    fontSize = 11.sp,
+                    lineHeight = 11.sp,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onPrimary,
+                )
+            }
+        }
         if (trailing != null) {
             Text(text = trailing, fontSize = 13.5.sp, color = colors.onSurfaceVariant)
         }

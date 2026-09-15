@@ -299,7 +299,7 @@ private fun SubmittedConfirmation(onDone: () -> Unit) {
             .padding(horizontal = 24.dp),
     ) {
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -321,6 +321,7 @@ private fun SubmittedConfirmation(onDone: () -> Unit) {
                 text = stringResource(R.string.fields_submit_success_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontSize = 20.sp,
+                textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 20.dp),
             )
             Text(
