@@ -7,9 +7,9 @@ import { StatusBar } from "@/components/ui/StatusBar";
 import { Skeleton, FieldCardSkeleton } from "@/components/ui/Skeleton";
 import { FieldsView, type FieldItem } from "@/components/fields/FieldsView";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
+import { SURFACES } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
-const SURFACES = ["Искусственная трава", "Резиновое", "Грунт"] as const;
 const SURFACE_KEY: Record<string, string> = {
   "Искусственная трава": "fields.surface_turf",
   "Резиновое": "fields.surface_rubber",

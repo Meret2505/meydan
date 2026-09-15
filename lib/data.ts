@@ -40,3 +40,9 @@ export const DISTRICTS = [
 ];
 
 export const AGE_RANGES = ["до 18", "18–24", "25–34", "35+"] as const;
+
+// Canonical, in Russian — this is the exact string stored on Field.surface,
+// not a translation key. The list/filter UI maps each value to a translated
+// label (fields.surface_turf etc.); a field-submission form validates against
+// this array directly.
+export const SURFACES = ["Искусственная трава", "Резиновое", "Грунт"] as const;
