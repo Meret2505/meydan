@@ -162,5 +162,8 @@ internal fun errorTextRes(code: String): Int = when (code) {
     "team_in_use" -> R.string.error_team_in_use
     "phone_taken" -> R.string.error_phone_taken
     "network" -> R.string.error_offline_title
+    "too_many_pending" -> R.string.error_too_many_pending
+    "too_many_photos" -> R.string.error_too_many_photos
+    "forbidden" -> R.string.error_forbidden
     else -> R.string.error_auth_failed
 }

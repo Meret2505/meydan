@@ -63,6 +63,15 @@ class FieldsViewModel(
     }
 
     /**
+     * Re-runs whenever the tab is entered, so a field approved while the user
+     * was on the submit form (or just away) shows up without waiting for a
+     * manual pull — the one list tab that was missing this (see Teams/Games).
+     */
+    fun refreshOnEnter() {
+        viewModelScope.launch { load() }
+    }
+
+    /**
      * Flips the star immediately, then reconciles with the server; on failure
      * the optimistic change is rolled back so the UI never lies about state.
      */

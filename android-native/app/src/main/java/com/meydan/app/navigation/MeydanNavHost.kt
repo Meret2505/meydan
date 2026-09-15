@@ -26,7 +26,9 @@ import com.meydan.app.feature.createtournament.CreateTournamentScreen
 import com.meydan.app.feature.fielddetail.FieldDetailScreen
 import com.meydan.app.feature.gamedetail.GameDetailScreen
 import com.meydan.app.feature.main.MainScaffold
+import com.meydan.app.feature.moderation.FieldModerationScreen
 import com.meydan.app.feature.notifications.NotificationsScreen
+import com.meydan.app.feature.submitfield.SubmitFieldScreen
 import com.meydan.app.feature.teamdetail.TeamDetailScreen
 import com.meydan.app.feature.tournamentdetail.TournamentDetailScreen
 import com.meydan.app.feature.onboarding.OnboardingFlow
@@ -55,6 +57,8 @@ object Routes {
     const val TOURNAMENT_DETAIL = "tournament/{tournamentId}"
     fun tournamentDetail(id: String) = "tournament/$id"
     const val NOTIFICATIONS = "notifications"
+    const val SUBMIT_FIELD = "submit-field"
+    const val MODERATE_FIELDS = "moderate-fields"
 }
 
 /**
@@ -154,6 +158,21 @@ fun MeydanApp(container: AppContainer) {
                 onCreateTeam = { navController.navigate(Routes.CREATE_TEAM) },
                 onCreateTournament = { navController.navigate(Routes.CREATE_TOURNAMENT) },
                 onNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
+                onSubmitField = { navController.navigate(Routes.SUBMIT_FIELD) },
+                onModerateFields = { navController.navigate(Routes.MODERATE_FIELDS) },
+            )
+        }
+        composable(Routes.SUBMIT_FIELD) {
+            SubmitFieldScreen(
+                container = container,
+                onBack = { navController.popBackStack() },
+                onDone = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.MODERATE_FIELDS) {
+            FieldModerationScreen(
+                container = container,
+                onBack = { navController.popBackStack() },
             )
         }
         composable(Routes.NOTIFICATIONS) {

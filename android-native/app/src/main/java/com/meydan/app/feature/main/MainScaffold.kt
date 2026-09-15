@@ -45,6 +45,8 @@ fun MainScaffold(
     onCreateTeam: () -> Unit,
     onCreateTournament: () -> Unit,
     onNotifications: () -> Unit,
+    onSubmitField: () -> Unit,
+    onModerateFields: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.GAMES) }
     val scope = rememberCoroutineScope()
@@ -71,7 +73,11 @@ fun MainScaffold(
                     onTeamClick = onTeamClick,
                     onCreateTeam = onCreateTeam,
                 )
-                MainTab.FIELDS -> FieldsScreen(container = container, onFieldClick = onFieldClick)
+                MainTab.FIELDS -> FieldsScreen(
+                    container = container,
+                    onFieldClick = onFieldClick,
+                    onSubmitField = onSubmitField,
+                )
                 MainTab.TOURNAMENTS -> TournamentsScreen(
                     container = container,
                     onTournamentClick = onTournamentClick,
@@ -84,6 +90,8 @@ fun MainScaffold(
                         applyLanguage(tag, scope, container.authRepository)
                     },
                     onEditProfile = onEditProfile,
+                    onSubmitField = onSubmitField,
+                    onModerateFields = onModerateFields,
                 )
             }
         }

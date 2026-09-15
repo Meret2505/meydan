@@ -21,6 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.AddLocationAlt
+import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.BrightnessAuto
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Edit
@@ -74,6 +76,8 @@ fun ProfileScreen(
     onLoggedOut: () -> Unit,
     onPickLanguage: (String) -> Unit,
     onEditProfile: () -> Unit,
+    onSubmitField: () -> Unit,
+    onModerateFields: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = viewModel {
         ProfileViewModel(container.authRepository, container.settingsStore)
@@ -255,6 +259,13 @@ fun ProfileScreen(
             )
             androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
             SettingsRow(
+                icon = Icons.Outlined.AddLocationAlt,
+                label = stringResource(R.string.fields_submit),
+                trailing = null,
+                onClick = onSubmitField,
+            )
+            androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
+            SettingsRow(
                 icon = Icons.Outlined.DarkMode,
                 label = stringResource(R.string.profile_theme),
                 trailing = stringResource(themeLabelRes(state.themeMode)),
@@ -267,6 +278,15 @@ fun ProfileScreen(
                 trailing = langLabel,
                 onClick = viewModel::openLanguageMenu,
             )
+            if (user?.isAdmin == true) {
+                androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
+                SettingsRow(
+                    icon = Icons.Outlined.AdminPanelSettings,
+                    label = stringResource(R.string.fields_moderation),
+                    trailing = null,
+                    onClick = onModerateFields,
+                )
+            }
             androidx.compose.material3.HorizontalDivider(color = colors.outlineVariant)
             SettingsRow(
                 icon = Icons.AutoMirrored.Filled.Logout,

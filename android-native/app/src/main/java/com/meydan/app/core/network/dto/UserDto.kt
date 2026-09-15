@@ -21,6 +21,9 @@ data class UserDto(
     val isOpenToInvite: Boolean,
     val locale: String,
     val onboardingComplete: Boolean,
+    /** Drives UI gating only (e.g. the field-moderation entry point) — every
+     * admin route re-checks the database independently. */
+    val isAdmin: Boolean = false,
 )
 
 /** Response of GET /me and PATCH /me. PATCH includes a token when onboarding flips. */

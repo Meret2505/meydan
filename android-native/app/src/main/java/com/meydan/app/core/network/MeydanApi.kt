@@ -7,6 +7,12 @@ import okhttp3.MultipartBody
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.core.network.dto.CreateTournamentRequest
+import com.meydan.app.core.network.dto.ApproveSubmissionResponse
+import com.meydan.app.core.network.dto.CreateFieldSubmissionRequest
+import com.meydan.app.core.network.dto.CreateSubmissionResponse
+import com.meydan.app.core.network.dto.FieldSubmissionsResponse
+import com.meydan.app.core.network.dto.RejectSubmissionRequest
+import com.meydan.app.core.network.dto.SubmissionPhotosResponse
 import com.meydan.app.core.network.dto.DisbandedDto
 import com.meydan.app.core.network.dto.MatchResultRequest
 import com.meydan.app.core.network.dto.RegisterTeamRequest
@@ -185,4 +191,35 @@ interface MeydanApi {
     /** Marks every unread notification read, clearing the bell badge. */
     @POST("api/v1/notifications")
     suspend fun markNotificationsRead(): Response<ApiResponse<Unit>>
+
+    /** Submits a new field for admin review. */
+    @POST("api/v1/field-submissions")
+    suspend fun createFieldSubmission(
+        @Body body: CreateFieldSubmissionRequest,
+    ): Response<ApiResponse<CreateSubmissionResponse>>
+
+    /** Multipart, same shape as uploadAvatar. Author-only, PENDING-only (403/404 otherwise). */
+    @Multipart
+    @POST("api/v1/field-submissions/{id}/photos")
+    suspend fun addSubmissionPhoto(
+        @Path("id") id: String,
+        @Part file: MultipartBody.Part,
+    ): Response<ApiResponse<SubmissionPhotosResponse>>
+
+    /** Admin only (403 otherwise). PENDING submissions, oldest first. */
+    @GET("api/v1/admin/field-submissions")
+    suspend fun getPendingFieldSubmissions(): Response<ApiResponse<FieldSubmissionsResponse>>
+
+    /** Admin only. Creates the real Field and notifies the author. */
+    @POST("api/v1/admin/field-submissions/{id}/approve")
+    suspend fun approveFieldSubmission(
+        @Path("id") id: String,
+    ): Response<ApiResponse<ApproveSubmissionResponse>>
+
+    /** Admin only. Notifies the author, with an optional reason. */
+    @POST("api/v1/admin/field-submissions/{id}/reject")
+    suspend fun rejectFieldSubmission(
+        @Path("id") id: String,
+        @Body body: RejectSubmissionRequest,
+    ): Response<ApiResponse<Unit>>
 }

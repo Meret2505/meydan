@@ -82,6 +82,39 @@
     <string name="fields_surface_rubber">Rubber</string>
     <string name="fields_surface_dirt">Dirt</string>
 
+    <!-- field submission (player-submitted, admin-moderated) -->
+    <string name="fields_submit">Suggest a field</string>
+    <string name="fields_submit_title">New field</string>
+    <string name="fields_submit_cta">Send for review</string>
+    <string name="fields_submit_name">Name</string>
+    <string name="fields_submit_name_placeholder">For example: "Olimp" stadium</string>
+    <string name="fields_submit_address">Address</string>
+    <string name="fields_submit_address_placeholder">For example: Görogly street, 12</string>
+    <string name="fields_submit_surface">Surface</string>
+    <string name="fields_submit_capacity">Capacity (players)</string>
+    <string name="fields_submit_capacity_placeholder">12</string>
+    <string name="fields_submit_phone">Phone (optional)</string>
+    <string name="fields_submit_description">Description (optional)</string>
+    <string name="fields_submit_description_placeholder">Price, hours, features…</string>
+    <string name="fields_submit_photos">Photos (up to 3)</string>
+    <string name="fields_submit_photos_hint">Add photos of the field — makes it easier to review.</string>
+    <string name="fields_submit_success_title">Submitted</string>
+    <string name="fields_submit_success_body">We\'ll review it and let you know.</string>
+    <string name="fields_submit_done">Done</string>
+
+    <!-- field moderation (admin only) -->
+    <string name="fields_moderation">Field submissions</string>
+    <string name="fields_moderation_title">Field submissions</string>
+    <string name="fields_moderation_empty">No submissions</string>
+    <string name="fields_moderation_empty_sub">New submissions will show up here.</string>
+    <string name="fields_moderation_approve">Approve</string>
+    <string name="fields_moderation_reject">Reject</string>
+    <string name="fields_moderation_reject_title">Reject this submission?</string>
+    <string name="fields_moderation_reject_reason">Reason (optional)</string>
+    <string name="fields_moderation_reject_confirm">Reject</string>
+    <string name="fields_moderation_reject_cancel">Cancel</string>
+    <string name="fields_moderation_submitted_by">From: %1$s</string>
+
     <!-- teams -->
     <string name="teams_my_teams">My teams</string>
     <string name="teams_city_teams">City teams</string>
@@ -264,6 +297,9 @@
     <string name="error_rate_limited">Too many attempts. Try again later.</string>
     <string name="error_offline_title">No connection</string>
     <string name="error_generic_title">Something went wrong</string>
+    <string name="error_too_many_pending">You already have 3 submissions pending</string>
+    <string name="error_too_many_photos">You can attach at most 3 photos</string>
+    <string name="error_forbidden">You don\'t have permission</string>
     <string name="error_try_again">Try again</string>
 
     <!-- common -->

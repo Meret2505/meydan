@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.StarBorder
@@ -31,6 +32,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,11 +65,19 @@ import com.meydan.app.core.designsystem.MeydanTheme
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FieldsScreen(container: AppContainer, onFieldClick: (String) -> Unit) {
+fun FieldsScreen(
+    container: AppContainer,
+    onFieldClick: (String) -> Unit,
+    onSubmitField: () -> Unit,
+) {
     val viewModel: FieldsViewModel = viewModel { FieldsViewModel(container.fieldsRepository) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val isTurkmen = ConfigurationCompat.getLocales(LocalConfiguration.current)
         .get(0)?.language == "tk"
+
+    // So a field approved while the user was away (or on the submit form)
+    // appears without a manual pull — see FieldsViewModel.refreshOnEnter.
+    LaunchedEffect(Unit) { viewModel.refreshOnEnter() }
 
     val districts = remember(state.fields) { FieldsViewModel.districtsOf(state.fields) }
     val visible = remember(state.fields, state.query, state.district, state.surface, isTurkmen) {
@@ -82,11 +92,31 @@ fun FieldsScreen(container: AppContainer, onFieldClick: (String) -> Unit) {
             .systemBarsPadding()
             .padding(horizontal = 24.dp),
     ) {
-        Text(
-            text = stringResource(R.string.nav_fields),
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(top = 16.dp, bottom = 12.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.nav_fields),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.weight(1f),
+            )
+            // Same 44.dp filled-circle affordance as Teams' create button.
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable(onClick = onSubmitField),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.fields_submit),
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
+        }
         OutlinedTextField(
             value = state.query,
             onValueChange = viewModel::onQueryChange,
@@ -311,9 +341,13 @@ private fun NoResults() {
     }
 }
 
-/** The three known surface strings map to localized labels; unknowns pass through. */
+/**
+ * The three known surface strings map to localized labels; unknowns pass
+ * through. Internal (not private) so feature/submitfield reuses the exact
+ * same mapping rather than drifting from it.
+ */
 @Composable
-private fun surfaceLabel(surface: String): String = when (surface) {
+internal fun surfaceLabel(surface: String): String = when (surface) {
     "Искусственная трава" -> stringResource(R.string.fields_surface_turf)
     "Резиновое" -> stringResource(R.string.fields_surface_rubber)
     "Грунт" -> stringResource(R.string.fields_surface_dirt)

@@ -94,6 +94,39 @@
     <string name="fields_surface_rubber">Резиновое</string>
     <string name="fields_surface_dirt">Грунт</string>
 
+    <!-- field submission (player-submitted, admin-moderated) -->
+    <string name="fields_submit">Предложить поле</string>
+    <string name="fields_submit_title">Новое поле</string>
+    <string name="fields_submit_cta">Отправить на модерацию</string>
+    <string name="fields_submit_name">Название</string>
+    <string name="fields_submit_name_placeholder">Например: Стадион «Олимп»</string>
+    <string name="fields_submit_address">Адрес</string>
+    <string name="fields_submit_address_placeholder">Например: ул. Гёроглы, 12</string>
+    <string name="fields_submit_surface">Покрытие</string>
+    <string name="fields_submit_capacity">Вместимость (игроков)</string>
+    <string name="fields_submit_capacity_placeholder">12</string>
+    <string name="fields_submit_phone">Телефон (опционально)</string>
+    <string name="fields_submit_description">Описание (опционально)</string>
+    <string name="fields_submit_description_placeholder">Цена, часы работы, особенности…</string>
+    <string name="fields_submit_photos">Фото (до 3)</string>
+    <string name="fields_submit_photos_hint">Добавь фото поля — модератору будет проще проверить.</string>
+    <string name="fields_submit_success_title">Заявка отправлена</string>
+    <string name="fields_submit_success_body">Проверим её и сообщим о решении.</string>
+    <string name="fields_submit_done">Готово</string>
+
+    <!-- field moderation (admin only) -->
+    <string name="fields_moderation">Модерация полей</string>
+    <string name="fields_moderation_title">Заявки на поля</string>
+    <string name="fields_moderation_empty">Заявок нет</string>
+    <string name="fields_moderation_empty_sub">Новые заявки появятся здесь.</string>
+    <string name="fields_moderation_approve">Одобрить</string>
+    <string name="fields_moderation_reject">Отклонить</string>
+    <string name="fields_moderation_reject_title">Отклонить заявку?</string>
+    <string name="fields_moderation_reject_reason">Причина (опционально)</string>
+    <string name="fields_moderation_reject_confirm">Отклонить</string>
+    <string name="fields_moderation_reject_cancel">Отмена</string>
+    <string name="fields_moderation_submitted_by">От: %1$s</string>
+
     <!-- teams -->
     <string name="teams_my_teams">Мои команды</string>
     <string name="teams_city_teams">Команды города</string>
@@ -276,6 +309,9 @@
     <string name="error_rate_limited">Слишком много попыток. Попробуйте позже.</string>
     <string name="error_offline_title">Нет соединения</string>
     <string name="error_generic_title">Что-то пошло не так</string>
+    <string name="error_too_many_pending">У тебя уже 3 заявки на рассмотрении</string>
+    <string name="error_too_many_photos">Можно приложить максимум 3 фото</string>
+    <string name="error_forbidden">Недостаточно прав</string>
     <string name="error_try_again">Попробовать снова</string>
 
     <!-- common -->
