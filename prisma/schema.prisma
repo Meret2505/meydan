@@ -41,6 +41,14 @@ enum NotificationType {
   PLAYER_JOINED
   GAME_CANCELLED
   TEAM_INVITE
+  FIELD_APPROVED
+  FIELD_REJECTED
+}
+
+enum FieldSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model User {
@@ -57,19 +65,25 @@ model User {
   isOpenToInvite Boolean    @default(true)
   fcmToken       String?
   locale         String     @default("ru")
+  // DB-backed admin flag — set manually (see migration comment). Kept off the
+  // access token (15-minute TTL) so a revoked admin loses power immediately
+  // rather than at token expiry; admin-only routes pay one extra query.
+  isAdmin        Boolean    @default(false)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
-  accounts         Account[]
-  sessions         Session[]
-  organizedGames   Game[]            @relation("Organizer")
-  gameParticipants GameParticipant[]
-  teamMemberships  TeamMember[]
-  notifications    Notification[]
-  sentInvites      GameInvite[]      @relation("InviteSender")
-  receivedInvites  GameInvite[]      @relation("InviteReceiver")
-  favoriteFields   FieldFavorite[]
-  refreshTokens    RefreshToken[]
+  accounts                 Account[]
+  sessions                 Session[]
+  organizedGames           Game[]            @relation("Organizer")
+  gameParticipants         GameParticipant[]
+  teamMemberships          TeamMember[]
+  notifications            Notification[]
+  sentInvites              GameInvite[]      @relation("InviteSender")
+  receivedInvites          GameInvite[]      @relation("InviteReceiver")
+  favoriteFields           FieldFavorite[]
+  refreshTokens            RefreshToken[]
+  fieldSubmissions         FieldSubmission[] @relation("FieldSubmissionAuthor")
+  reviewedFieldSubmissions FieldSubmission[] @relation("FieldSubmissionReviewer")
 
   @@map("users")
 }
@@ -141,6 +155,7 @@ model Field {
 
   games       Game[]
   favoritedBy FieldFavorite[]
+  submissions FieldSubmission[]
 
   @@map("fields")
 }
@@ -156,6 +171,44 @@ model FieldFavorite {
   @@id([userId, fieldId])
   @@index([userId])
   @@map("field_favorites")
+}
+
+// A player-submitted pitch, held for admin review before it becomes a real
+// `Field` row. Deliberately a separate table rather than a `status` column on
+// `Field`: every existing field read path (list, detail, game-creation picker,
+// favorites) filters only on `isActive`, which defaults to `true` — a pending
+// row inserted straight into `fields` would be publicly visible immediately.
+// Approval is an explicit `Field.create`, so `fields` never contains
+// unmoderated content and an approved submission becomes admin-owned (the
+// author has no further write path to it).
+model FieldSubmission {
+  id              String                @id @default(cuid())
+  submittedById   String
+  name            String
+  address         String
+  district        String
+  surface         String
+  capacity        Int
+  phone           String?
+  description     String?
+  // Storage keys, same form as Field.photos. Capped at 3 by the service.
+  photos          String[]
+  status          FieldSubmissionStatus @default(PENDING)
+  reviewedById    String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  // Set on approve — the Field row this submission became.
+  fieldId         String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  submittedBy User   @relation("FieldSubmissionAuthor", fields: [submittedById], references: [id], onDelete: Cascade)
+  reviewedBy  User?  @relation("FieldSubmissionReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  field       Field? @relation(fields: [fieldId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([submittedById])
+  @@map("field_submissions")
 }
 
 model Game {
