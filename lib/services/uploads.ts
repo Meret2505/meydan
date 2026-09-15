@@ -40,7 +40,8 @@ export type UploadResult =
   | { ok: true; url: string }
   | { ok: false; error: UploadError };
 
-function extFor(name: string | undefined, mime: string) {
+/** Shared with field-submissions.ts so a submission photo gets the same extension logic. */
+export function extFor(name: string | undefined, mime: string) {
   const fromName = name?.split(".").pop()?.toLowerCase();
   if (fromName && ["jpg", "jpeg", "png", "webp"].includes(fromName)) {
     return fromName === "jpeg" ? "jpg" : fromName;
@@ -50,8 +51,15 @@ function extFor(name: string | undefined, mime: string) {
   return "jpg";
 }
 
-/** Shared shape checks; the caller supplies already-decoded bytes. */
-function validate(input: UploadInput): UploadError | null {
+/**
+ * Shared shape checks; the caller supplies already-decoded bytes. Exported
+ * for field-submissions.ts, whose photo error union is a superset of this
+ * one (it also has too_many_photos, not_found, forbidden as submission-review
+ * states) — this only ever returns the four shape-check members.
+ */
+export function validate(
+  input: UploadInput,
+): "invalid_file" | "too_large" | "unsupported_type" | null {
   if (!input.bytes || input.bytes.length === 0) return "invalid_file";
   if (input.bytes.length > MAX_UPLOAD_BYTES) return "too_large";
   if (!ALLOWED_MIME.includes(input.mime)) return "unsupported_type";
@@ -145,7 +153,7 @@ export async function uploadFieldPhoto(
   fieldId: string,
   input: UploadInput,
 ): Promise<UploadResult> {
-  if (!isAdmin(userId)) return { ok: false, error: "forbidden" };
+  if (!(await isAdmin(userId))) return { ok: false, error: "forbidden" };
 
   const invalid = validate(input);
   if (invalid) return { ok: false, error: invalid };
@@ -196,7 +204,7 @@ export async function removeFieldPhoto(
   fieldId: string,
   photoUrl: string,
 ): Promise<RemovePhotoResult> {
-  if (!isAdmin(userId)) return { ok: false, error: "forbidden" };
+  if (!(await isAdmin(userId))) return { ok: false, error: "forbidden" };
 
   const outcome = await prisma.$transaction(async (tx) => {
     const locked = await tx.$queryRaw<

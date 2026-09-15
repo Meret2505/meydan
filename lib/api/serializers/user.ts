@@ -22,6 +22,10 @@ export type UserDto = {
   isOpenToInvite: boolean;
   locale: string;
   onboardingComplete: boolean;
+  /** Drives client-side UI gating only (e.g. showing a moderation entry
+   * point) — every admin route re-checks the database independently, so this
+   * flag being stale or spoofed grants no actual access. */
+  isAdmin: boolean;
 };
 
 /** Serializes the authenticated user's own record. */
@@ -40,6 +44,7 @@ export function toUserDto(user: User, origin: string): UserDto {
     locale: user.locale,
     // Mirrors lib/auth.ts: a profile counts as complete once it has a phone.
     onboardingComplete: !!user.phone,
+    isAdmin: user.isAdmin,
   };
 }
 

@@ -1,3 +1,4 @@
+import { isAdmin } from "@/lib/authz";
 import { forbidden, unauthorized } from "./errors";
 import { verifyAccessToken, type AccessTokenClaims } from "./tokens";
 
@@ -34,5 +35,15 @@ export async function requireAuth(request: Request): Promise<AccessTokenClaims> 
 export async function requireOnboarded(request: Request): Promise<AccessTokenClaims> {
   const claims = await requireAuth(request);
   if (!claims.onboardingComplete) throw forbidden("onboarding_required");
+  return claims;
+}
+
+/**
+ * As requireOnboarded, but also demands `User.isAdmin`. Checked against the
+ * database rather than the token — see the isAdmin() doc comment for why.
+ */
+export async function requireAdmin(request: Request): Promise<AccessTokenClaims> {
+  const claims = await requireOnboarded(request);
+  if (!(await isAdmin(claims.userId))) throw forbidden();
   return claims;
 }

@@ -165,7 +165,10 @@ describe.skipIf(!dbAvailable)("uploads + profile stats (integration)", () => {
     it("does not drop a photo uploaded during the removal", async () => {
       // The old implementation replaced the whole array from a stale read, so a
       // concurrent upload vanished. Simulate that interleaving directly.
-      const adminId = process.env.ADMIN_USER_IDS!.split(",")[0].trim();
+      const admin = await prisma.user.create({
+        data: { name: "Admin", phone: "+99361110000", district: "Berzengi", isAdmin: true },
+      });
+      const adminId = admin.id;
 
       const field = await prisma.field.create({
         data: {

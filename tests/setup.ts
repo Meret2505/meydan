@@ -17,7 +17,3 @@ process.env.NEXTAUTH_SECRET ??= process.env.AUTH_SECRET;
 process.env.STORAGE_BACKEND ??= "local";
 process.env.LOCAL_STORAGE_DIR ??= join(tmpdir(), "meydan-test-uploads");
 process.env.PUBLIC_STORAGE_BASE_URL ??= "http://storage.test/uploads";
-
-// Field photos are admin-gated by an env allowlist; give the suite an admin so
-// those paths are reachable.
-process.env.ADMIN_USER_IDS ??= "test-admin-user";
