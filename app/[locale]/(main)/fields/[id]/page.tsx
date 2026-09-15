@@ -54,7 +54,7 @@ export default async function FieldDetailPage(
     auth(),
   ]);
   if (!field) notFound();
-  const canEditPhotos = isAdmin(session?.user?.id);
+  const canEditPhotos = await isAdmin(session?.user?.id);
 
   const isTm = locale === "tm";
   const name = isTm ? field.nameTm ?? field.name : field.nameRu ?? field.name;

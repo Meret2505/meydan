@@ -16,6 +16,10 @@ export function notificationHref(
       return d.gameId ? `/${locale}/games/${d.gameId}` : `/${locale}/games`;
     case "TEAM_INVITE":
       return d.teamId ? `/${locale}/teams/${d.teamId}` : `/${locale}/teams`;
+    case "FIELD_APPROVED":
+      return d.fieldId ? `/${locale}/fields/${d.fieldId}` : `/${locale}/fields`;
+    case "FIELD_REJECTED":
+      return `/${locale}/fields`;
   }
 }
 
@@ -35,5 +39,9 @@ export function notificationIcon(type: NotificationType): string {
       return "🔔";
     case "TEAM_INVITE":
       return "👥";
+    case "FIELD_APPROVED":
+      return "⚽";
+    case "FIELD_REJECTED":
+      return "🚫";
   }
 }

@@ -30,6 +30,8 @@ const TYPE_STYLE: Record<NotificationType, { icon: string; bg: string; color: st
   RESULT_NEEDED: { icon: "✎", bg: "rgba(108,177,224,.16)", color: "#8FC4EE" },
   GAME_CANCELLED: { icon: "✕", bg: "rgba(224,85,106,.14)", color: "var(--danger)" },
   TEAM_INVITE: { icon: "★", bg: "rgba(155,143,224,.16)", color: "#B3A8EC" },
+  FIELD_APPROVED: { icon: "⚽", bg: "rgba(31,209,107,.14)", color: "var(--primary-soft)" },
+  FIELD_REJECTED: { icon: "✕", bg: "rgba(224,85,106,.14)", color: "var(--danger)" },
 };
 
 export default async function NotificationsPage(
