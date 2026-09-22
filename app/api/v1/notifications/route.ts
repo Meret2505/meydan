@@ -1,6 +1,10 @@
 import { requireOnboarded } from "@/lib/api/auth";
 import { handler, ok } from "@/lib/api/response";
-import { listNotifications, markAllRead } from "@/lib/services/notifications";
+import {
+  countUnreadNotifications,
+  listNotifications,
+  markAllRead,
+} from "@/lib/services/notifications";
 
 /**
  * The notifications list for the mobile bell screen.
@@ -16,8 +20,13 @@ import { listNotifications, markAllRead } from "@/lib/services/notifications";
 export const GET = handler(async (request: Request) => {
   const { userId } = await requireOnboarded(request);
 
-  const items = await listNotifications(userId);
-  const unreadCount = items.filter((n) => !n.isRead).length;
+  // Counted in SQL, not over the 80-row window: a user with 90 unread
+  // notifications was told they had 80, and the count disagreed with the
+  // /notifications/unread-count endpoint that drives the bell badge.
+  const [items, unreadCount] = await Promise.all([
+    listNotifications(userId),
+    countUnreadNotifications(userId),
+  ]);
 
   return ok({
     notifications: items.map((n) => ({

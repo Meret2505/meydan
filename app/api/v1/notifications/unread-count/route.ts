@@ -1,6 +1,6 @@
 import { requireOnboarded } from "@/lib/api/auth";
 import { handler, ok } from "@/lib/api/response";
-import { prisma } from "@/lib/prisma";
+import { countUnreadNotifications } from "@/lib/services/notifications";
 
 /**
  * Unread notification count for the bell badge on the feed.
@@ -12,9 +12,7 @@ import { prisma } from "@/lib/prisma";
 export const GET = handler(async (request: Request) => {
   const { userId } = await requireOnboarded(request);
 
-  const count = await prisma.notification.count({
-    where: { userId, isRead: false },
-  });
+  const count = await countUnreadNotifications(userId);
 
   return ok({ count });
 });

@@ -20,6 +20,16 @@ export async function listNotifications(userId: string) {
 }
 
 /**
+ * Unread total for the bell badge.
+ *
+ * Shared with the list endpoint, which used to count unread rows inside its own
+ * 80-row window and so reported at most 80 — disagreeing with the badge.
+ */
+export async function countUnreadNotifications(userId: string): Promise<number> {
+  return prisma.notification.count({ where: { userId, isRead: false } });
+}
+
+/**
  * Marks every unread notification for the user as read. Idempotent — a user
  * with nothing unread simply updates zero rows.
  */
