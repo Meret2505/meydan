@@ -194,6 +194,16 @@ export async function approveFieldSubmission(
 ): Promise<ApproveResult> {
   return prisma.$transaction(
     async (tx) => {
+      // Lock the row before reading its status, or two admins tapping
+      // "approve" at the same moment both read PENDING and both create a
+      // Field — the second update just overwrites `fieldId` and the first
+      // pitch becomes an orphaned, publicly visible duplicate. Same reasoning
+      // (and the same shape) as joinGame's capacity lock.
+      const locked = await tx.$queryRaw<
+        { id: string }[]
+      >`SELECT id FROM field_submissions WHERE id = ${submissionId} FOR UPDATE`;
+      if (locked.length === 0) return { ok: false as const, error: "not_found" as const };
+
       const submission = await tx.fieldSubmission.findUnique({ where: { id: submissionId } });
       if (!submission) return { ok: false as const, error: "not_found" as const };
       if (submission.status !== "PENDING") {
@@ -261,6 +271,16 @@ export async function rejectFieldSubmission(
 ): Promise<RejectResult> {
   return prisma.$transaction(
     async (tx) => {
+      // Lock the row before reading its status, or two admins tapping
+      // "approve" at the same moment both read PENDING and both create a
+      // Field — the second update just overwrites `fieldId` and the first
+      // pitch becomes an orphaned, publicly visible duplicate. Same reasoning
+      // (and the same shape) as joinGame's capacity lock.
+      const locked = await tx.$queryRaw<
+        { id: string }[]
+      >`SELECT id FROM field_submissions WHERE id = ${submissionId} FOR UPDATE`;
+      if (locked.length === 0) return { ok: false as const, error: "not_found" as const };
+
       const submission = await tx.fieldSubmission.findUnique({ where: { id: submissionId } });
       if (!submission) return { ok: false as const, error: "not_found" as const };
       if (submission.status !== "PENDING") {
