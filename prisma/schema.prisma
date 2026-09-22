@@ -169,7 +169,6 @@ model FieldFavorite {
   field Field @relation(fields: [fieldId], references: [id], onDelete: Cascade)
 
   @@id([userId, fieldId])
-  @@index([userId])
   @@map("field_favorites")
 }
 
@@ -236,7 +235,13 @@ model Game {
   invites      GameInvite[]
 
   @@index([scheduledAt])
-  @@index([status])
+  // The feed's `where status` + `orderBy scheduledAt` in one index; it also
+  // serves a status-only lookup, so the old single-column @@index([status])
+  // was redundant and is gone.
+  @@index([status, scheduledAt])
+  @@index([organizerId])
+  @@index([fieldId])
+  @@index([teamId])
   @@map("games")
 }
 
@@ -251,6 +256,7 @@ model GameParticipant {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([gameId, userId])
+  @@index([userId, attended])
   @@map("game_participants")
 }
 
@@ -282,6 +288,7 @@ model TeamMember {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([teamId, userId])
+  @@index([userId])
   @@map("team_members")
 }
 
@@ -328,6 +335,9 @@ model TournamentMatch {
   homeTeam   Team       @relation("HomeTeam", fields: [homeTeamId], references: [id])
   awayTeam   Team       @relation("AwayTeam", fields: [awayTeamId], references: [id])
 
+  @@index([tournamentId])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
   @@map("tournament_matches")
 }
 
@@ -344,6 +354,7 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead])
+  @@index([userId, createdAt(sort: Desc)])
   @@map("notifications")
 }
 
