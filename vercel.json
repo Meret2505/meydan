@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/close-past-games",
-      "schedule": "7 * * * *"
+      "schedule": "40 3 * * *"
     }
   ]
 }

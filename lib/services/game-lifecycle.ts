@@ -45,9 +45,9 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
       scheduledAt: { lte: cutoff },
     },
     select: { id: true, organizerId: true },
-    // A bounded batch: if a backlog ever builds up (this shipped long after
-    // the first games were played), it drains over successive runs instead of
-    // timing out the function.
+    // A bounded batch: a day's worth of games is far under this, and if a
+    // backlog ever builds up (this shipped long after the first games were
+    // played) it drains over successive nights instead of timing out.
     take: 500,
   });
   if (played.length === 0) return { closed: 0, gameIds: [] };
@@ -65,7 +65,7 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
   // gets, and nothing chases them afterwards.
   //
   // Not exactly-once under two runs overlapping (updateMany cannot report
-  // which rows it touched), but an hourly job that finishes in milliseconds
+  // which rows it touched), but a nightly job that finishes in milliseconds
   // does not overlap, and the worst case is a duplicate nudge rather than a
   // wrong one.
   if (count > 0) {

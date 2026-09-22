@@ -110,7 +110,7 @@ class GameDetailViewModel(
 
     /**
      * Opens the write-up sheet, pre-ticking the roster. The organizer arrives
-     * here from the RESULT_NEEDED notification the hourly job sends once the
+     * here from the RESULT_NEEDED notification the nightly job sends once the
      * game is closed — before that there was no way to record anything from
      * the app at all, so every reliability rating sat at zero.
      */

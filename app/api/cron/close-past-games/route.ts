@@ -1,4 +1,12 @@
-// Hourly job that closes out games that have been played.
+// Nightly job that closes out games that have been played.
+//
+// Daily rather than hourly because Hobby plans reject anything more frequent
+// at deploy time. It suits this job: a game finishing at 21:00 is closed
+// overnight and the organizer finds the nudge in the morning, rather than
+// being notified at midnight. The cost is that a game played in the morning
+// stays technically open until the small hours — invisible either way, since
+// the feeds drop a game at kickoff, and joining is refused by the clock rather
+// than by the status.
 //
 // Without it a game sits in OPEN forever once kickoff passes: invisible in
 // every feed (they ask for `scheduledAt >= now`), absent from anyone's
