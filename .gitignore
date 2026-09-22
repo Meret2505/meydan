@@ -61,3 +61,10 @@ keys/
 
 # Database + storage backups (contain user data — never commit)
 backups/
+
+# Generated knowledge-graph output (graphify) — rebuilt on demand, never shared.
+graphify-out/
+
+# Locally built APKs. MEYDAN.apk above is the legacy Capacitor artifact; this
+# covers the release builds produced from android-native/.
+MEYDAN-*.apk
