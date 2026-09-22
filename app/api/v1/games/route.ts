@@ -57,7 +57,9 @@ export const POST = handler(async (request: Request) => {
     notes: body.notes ?? null,
     neededPositions: body.neededPositions,
   });
-  if (!result.ok) throw badRequest();
+  // Pass the service's own code through: "game_in_past" is actionable ("pick a
+  // future time"), while a bare invalid_input is not.
+  if (!result.ok) throw badRequest(result.error);
 
   const detail = await getGameDetail(result.gameId, userId);
   if (!detail) throw notFound("game_not_found");

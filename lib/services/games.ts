@@ -27,7 +27,14 @@ export type CreateGameInput = {
 
 export type CreateGameResult =
   | { ok: true; gameId: string }
-  | { ok: false; error: "invalid_input" };
+  | { ok: false; error: "invalid_input" | "game_in_past" };
+
+/**
+ * How far in the past a kickoff may sit and still be accepted. The phone's
+ * clock is the one that picked the time, so a couple of minutes of skew (or a
+ * slow request on a bad connection) must not be rejected as a mistake.
+ */
+const CLOCK_SKEW_TOLERANCE_MS = 5 * 60 * 1000;
 
 /**
  * Creates a game with the organizer auto-joined, shared by the web create
@@ -55,6 +62,13 @@ export async function createGame(
   }
   const scheduledAt = new Date(input.scheduledAt);
   if (Number.isNaN(scheduledAt.getTime())) return { ok: false, error: "invalid_input" };
+
+  // Nothing stopped a game being created in the past, and the result was
+  // silent: every feed asks for `scheduledAt >= now`, so the game was created
+  // successfully and then visible to nobody, anywhere, ever.
+  if (scheduledAt.getTime() < Date.now() - CLOCK_SKEW_TOLERANCE_MS) {
+    return { ok: false, error: "game_in_past" };
+  }
 
   const game = await prisma.game.create({
     data: {
@@ -117,6 +131,13 @@ export async function joinGame(gameId: string, userId: string): Promise<JoinResu
     });
     if (!game) return { ok: false as const, error: "not_found" as const };
     if (game.status !== "OPEN" && game.status !== "FULL") {
+      return { ok: false as const, error: "not_joinable" as const };
+    }
+
+    // Status alone was not enough: a game whose kickoff has passed stays OPEN
+    // until the hourly job closes it (see game-lifecycle.ts), so for up to an
+    // hour the only thing refusing a join on a finished game was the UI.
+    if (game.scheduledAt.getTime() <= Date.now()) {
       return { ok: false as const, error: "not_joinable" as const };
     }
 

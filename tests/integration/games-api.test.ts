@@ -5,7 +5,10 @@ import { DELETE as cancelRoute, GET as getGame } from "@/app/api/v1/games/[id]/r
 import { DELETE as leaveRoute, POST as joinRoute } from "@/app/api/v1/games/[id]/join/route";
 import { GET as getMe, PATCH as patchMe } from "@/app/api/v1/me/route";
 import { signAccessToken } from "@/lib/api/tokens";
+import { POST as createRoute } from "@/app/api/v1/games/route";
+import { closePastGames } from "@/lib/services/game-lifecycle";
 import { joinGame } from "@/lib/services/games";
+import { getProfileStats } from "@/lib/services/profile-stats";
 
 const prisma = new PrismaClient();
 
@@ -612,6 +615,117 @@ describe.skipIf(!dbAvailable)("games API (integration)", () => {
 
       expect(response.status).toBe(409);
       expect((await body(response)).error).toBe("phone_taken");
+    });
+  });
+
+  describe("the game lifecycle", () => {
+    // A 21:00 game looked at the next morning used to stay OPEN forever:
+    // invisible in every feed (they ask for scheduledAt >= now), absent from
+    // anyone's history, and still joinable as far as the API was concerned.
+    const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000);
+
+    async function playedGame(organizerId: string, hoursSinceKickoff: number) {
+      return prisma.game.create({
+        data: {
+          organizerId,
+          totalSpots: 10,
+          scheduledAt: hoursAgo(hoursSinceKickoff),
+          fieldName: "Test pitch",
+          participants: { create: { userId: organizerId } },
+        },
+      });
+    }
+
+    it("refuses to create a game in the past", async () => {
+      const user = await makeUser("Organizer", "+99361111111");
+      const response = await createRoute(
+        await authed(`${BASE}/games`, user.id, {
+          method: "POST",
+          body: JSON.stringify({
+            scheduledAt: hoursAgo(2).toISOString(),
+            fieldName: "Yesterday pitch",
+            totalSpots: 10,
+            neededPositions: [],
+          }),
+        }),
+      );
+
+      expect(response.status).toBe(400);
+      expect((await body(response)).error).toBe("game_in_past");
+      expect(await prisma.game.count()).toBe(0);
+    });
+
+    it("still accepts a game later today", async () => {
+      const user = await makeUser("Organizer", "+99361111112");
+      const response = await createRoute(
+        await authed(`${BASE}/games`, user.id, {
+          method: "POST",
+          body: JSON.stringify({
+            scheduledAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+            fieldName: "Tonight pitch",
+            totalSpots: 10,
+            neededPositions: [],
+          }),
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      expect(await prisma.game.count()).toBe(1);
+    });
+
+    it("refuses a join once kickoff has passed, even while the game is still OPEN", async () => {
+      const organizer = await makeUser("Organizer", "+99361111113");
+      const player = await makeUser("Player", "+99361111114");
+      const game = await playedGame(organizer.id, 1);
+
+      const result = await joinGame(game.id, player.id);
+
+      expect(result).toEqual({ ok: false, error: "not_joinable" });
+      expect(await prisma.gameParticipant.count({ where: { gameId: game.id } })).toBe(1);
+    });
+
+    it("closes a played game and leaves the score empty", async () => {
+      const organizer = await makeUser("Organizer", "+99361111115");
+      const game = await playedGame(organizer.id, 4);
+
+      expect(await closePastGames()).toMatchObject({ closed: 1 });
+
+      const closed = await prisma.game.findUniqueOrThrow({ where: { id: game.id } });
+      expect(closed.status).toBe("COMPLETED");
+      expect(closed.scoreHome).toBeNull();
+      expect(closed.scoreAway).toBeNull();
+    });
+
+    it("leaves a game inside the grace window alone", async () => {
+      const organizer = await makeUser("Organizer", "+99361111116");
+      const game = await playedGame(organizer.id, 1);
+
+      expect(await closePastGames()).toMatchObject({ closed: 0 });
+      expect((await prisma.game.findUniqueOrThrow({ where: { id: game.id } })).status).toBe("OPEN");
+    });
+
+    it("does not touch a cancelled game, and is idempotent on a second run", async () => {
+      const organizer = await makeUser("Organizer", "+99361111117");
+      const cancelled = await playedGame(organizer.id, 5);
+      await prisma.game.update({ where: { id: cancelled.id }, data: { status: "CANCELLED" } });
+      await playedGame(organizer.id, 5);
+
+      expect(await closePastGames()).toMatchObject({ closed: 1 });
+      // A retried or overlapping cron run must close nothing the second time.
+      expect(await closePastGames()).toMatchObject({ closed: 0 });
+      expect((await prisma.game.findUniqueOrThrow({ where: { id: cancelled.id } })).status)
+        .toBe("CANCELLED");
+    });
+
+    it("puts a closed game into the player's history", async () => {
+      // The point of closing them: profile stats only ever look at COMPLETED
+      // games, so before this a played game counted for nobody.
+      const organizer = await makeUser("Organizer", "+99361111118");
+      await playedGame(organizer.id, 4);
+      await closePastGames();
+
+      const stats = await getProfileStats(organizer.id);
+      expect(stats.recent).toHaveLength(1);
     });
   });
 });
