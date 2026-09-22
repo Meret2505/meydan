@@ -22,7 +22,10 @@ const VALID_POSITIONS: Position[] = [
 
 const VALID_SKILLS: SkillLevel[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
 
-const VALID_LOCALES = ["ru", "tm"];
+// Must match `locales` in i18n.ts and LocaleMapper on Android. English was
+// added to both of those and missed here, so an English-speaking user's
+// profile save came back "invalid_input" — the Android mapper sends "en".
+const VALID_LOCALES = ["ru", "tm", "en"];
 
 export type OnboardingPatch = {
   name?: string;
