@@ -7,6 +7,7 @@ import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.GamesFeedDto
+import com.meydan.app.core.network.dto.RecordResultRequest
 
 /**
  * Games feed with an offline-first read path: the UI renders whatever
@@ -43,6 +44,10 @@ class GamesRepository(
         apiCall { api.leaveGame(id) }
 
     /** Cancel returns the updated (CANCELLED) detail. Organizer only (403). */
+    /** Records attendance and any score; returns the game as the server now has it. */
+    suspend fun recordResult(id: String, req: RecordResultRequest): ApiResult<GameDetailDto> =
+        apiCall { api.recordResult(id, req) }
+
     suspend fun cancelGame(id: String): ApiResult<GameDetailDto> =
         apiCall { api.cancelGame(id) }
 

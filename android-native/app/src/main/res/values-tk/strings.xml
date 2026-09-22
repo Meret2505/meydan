@@ -354,4 +354,10 @@
     <string name="profile_logout_confirm_title">Hasapdan çykmaly?</string>
     <string name="profile_logout_confirm_body">Yzyna gaýtmak üçin täzeden girmeli bolar.</string>
     <string name="profile_logout_confirm_cta">Çyk</string>
+    <string name="games_result_cta">Netijäni ýazmak</string>
+    <string name="games_result_title">Oýun nähili geçdi?</string>
+    <string name="games_result_attendance">Kim geldi</string>
+    <string name="games_result_score">Hasap · hökman däl</string>
+    <string name="games_result_save">Saklamak</string>
+    <string name="games_result_recorded">Netije ýazyldy</string>
 </resources>

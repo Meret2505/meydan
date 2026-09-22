@@ -354,4 +354,10 @@
     <string name="profile_logout_confirm_title">Sign out?</string>
     <string name="profile_logout_confirm_body">You will need to sign in again to come back.</string>
     <string name="profile_logout_confirm_cta">Sign out</string>
+    <string name="games_result_cta">Record the result</string>
+    <string name="games_result_title">How did it go?</string>
+    <string name="games_result_attendance">Who turned up</string>
+    <string name="games_result_score">Score · optional</string>
+    <string name="games_result_save">Save</string>
+    <string name="games_result_recorded">Result recorded</string>
 </resources>

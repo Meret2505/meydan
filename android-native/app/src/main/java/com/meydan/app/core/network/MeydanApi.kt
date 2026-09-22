@@ -3,6 +3,7 @@ package com.meydan.app.core.network
 import com.meydan.app.core.network.dto.ApiResponse
 import com.meydan.app.core.network.dto.AvatarResponse
 import com.meydan.app.core.network.dto.ProfileStatsDto
+import com.meydan.app.core.network.dto.RecordResultRequest
 import okhttp3.MultipartBody
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.CreateTeamRequest
@@ -99,6 +100,13 @@ interface MeydanApi {
     suspend fun joinGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
 
     // DELETE with no body needs the @HTTP form to keep Retrofit happy.
+    /** Attendance and (optionally) the score, once the game has been played. */
+    @POST("api/v1/games/{id}/result")
+    suspend fun recordResult(
+        @Path("id") id: String,
+        @Body body: RecordResultRequest,
+    ): Response<ApiResponse<GameDetailDto>>
+
     @HTTP(method = "DELETE", path = "api/v1/games/{id}/join")
     suspend fun leaveGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
 

@@ -88,3 +88,17 @@ data class UnreadCountDto(val count: Int)
 
 @Serializable
 data class FcmTokenRequest(val token: String)
+
+/**
+ * Writing up a played game. Both halves are optional on their own but not
+ * together: attendance alone is a valid write-up (it is what the reliability
+ * ratings are built from) and so is a score alone.
+ *
+ * [attended] is keyed by user id; a player left out keeps whatever they had.
+ */
+@Serializable
+data class RecordResultRequest(
+    val scoreHome: Int? = null,
+    val scoreAway: Int? = null,
+    val attended: Map<String, Boolean> = emptyMap(),
+)

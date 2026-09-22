@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,9 +28,13 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -53,13 +59,14 @@ import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
-import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.core.common.GameTime
-import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.common.errorTextRes
+import com.meydan.app.core.designsystem.MeydanTheme
+import com.meydan.app.core.designsystem.PrimaryButton
+import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.ParticipantDto
-import com.meydan.app.core.designsystem.MeydanTheme
+import com.meydan.app.feature.detail.DetailBackButton
 import java.util.Locale
 
 /**
@@ -110,6 +117,19 @@ fun GameDetailScreen(
                 onBack = onBack,
                 onToggleJoin = viewModel::toggleJoin,
                 onCancelGame = viewModel::askCancel,
+                onRecordResult = viewModel::openResult,
+            )
+        }
+
+        state.resultDraft?.let { draft ->
+            ResultSheet(
+                draft = draft,
+                participants = state.game?.participants ?: emptyList(),
+                saving = state.acting,
+                onToggle = viewModel::toggleAttendance,
+                onScores = viewModel::setScores,
+                onSave = viewModel::submitResult,
+                onDismiss = viewModel::dismissResult,
             )
         }
 
@@ -134,6 +154,7 @@ private fun GameDetailContent(
     onBack: () -> Unit,
     onToggleJoin: () -> Unit,
     onCancelGame: () -> Unit,
+    onRecordResult: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
@@ -211,6 +232,7 @@ private fun GameDetailContent(
                 isOver = isOver,
                 onToggleJoin = onToggleJoin,
                 onCancelGame = onCancelGame,
+                onRecordResult = onRecordResult,
             )
         }
     }
@@ -500,6 +522,7 @@ private fun CtaButton(
     isOver: Boolean,
     onToggleJoin: () -> Unit,
     onCancelGame: () -> Unit,
+    onRecordResult: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -530,6 +553,27 @@ private fun CtaButton(
                     fontWeight = FontWeight.Bold,
                 )
             }
+        }
+        return
+    }
+
+    // The organizer of a game that has been played gets the write-up action.
+    // This is the only route to it in the app — the feeds drop a game at
+    // kickoff, so the RESULT_NEEDED notification is what brings them here.
+    // Recording is optional: a game left unwritten keeps its "completed" label,
+    // and the action stays available afterwards so a wrong tick can be fixed.
+    if (game.isOrganizer && game.isPast && game.status != "CANCELLED") {
+        Button(
+            onClick = onRecordResult,
+            enabled = !acting,
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth().height(58.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.games_result_cta),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+            )
         }
         return
     }
@@ -607,4 +651,113 @@ private fun posShort(p: String): String = when (p) {
     "MIDFIELDER" -> stringResource(R.string.pos_short_midfielder)
     "FORWARD" -> stringResource(R.string.pos_short_forward)
     else -> p
+}
+
+/**
+ * The write-up sheet: a tick per player, and a score nobody has to fill in.
+ *
+ * Attendance is what the reliability ratings are built from, so it comes first
+ * and starts filled in; the score is labelled optional because for pick-up
+ * football it usually is.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ResultSheet(
+    draft: ResultDraft,
+    participants: List<ParticipantDto>,
+    saving: Boolean,
+    onToggle: (String) -> Unit,
+    onScores: (String, String) -> Unit,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 28.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.games_result_title),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp),
+            )
+
+            Text(
+                text = stringResource(R.string.games_result_attendance),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+            participants.forEach { player ->
+                val present = draft.attended[player.id] ?: true
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // The whole row toggles, not just the box: a 20dp
+                        // checkbox is a poor target on a phone.
+                        .clip(RoundedCornerShape(12.dp))
+                        .androidxClickable { onToggle(player.id) }
+                        .padding(vertical = 6.dp),
+                ) {
+                    Checkbox(
+                        checked = present,
+                        // The row owns the gesture; the box must not swallow it.
+                        onCheckedChange = null,
+                    )
+                    Text(
+                        text = player.name,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (present) colors.onSurface else colors.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 12.dp),
+                    )
+                }
+            }
+
+            Text(
+                text = stringResource(R.string.games_result_score),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.onSurfaceVariant,
+                modifier = Modifier.padding(top = 18.dp, bottom = 8.dp),
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedTextField(
+                    value = draft.home,
+                    onValueChange = { onScores(it, draft.away) },
+                    enabled = !saving,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.weight(1f),
+                )
+                Text("—", fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant)
+                OutlinedTextField(
+                    value = draft.away,
+                    onValueChange = { onScores(draft.home, it) },
+                    enabled = !saving,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.weight(1f),
+                )
+            }
+
+            PrimaryButton(
+                text = stringResource(R.string.games_result_save),
+                loading = saving,
+                enabled = draft.canSubmit,
+                onClick = onSave,
+                modifier = Modifier.padding(top = 20.dp),
+            )
+        }
+    }
 }
