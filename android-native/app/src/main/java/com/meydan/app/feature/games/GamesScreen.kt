@@ -56,6 +56,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
+import com.meydan.app.core.designsystem.OfflineBanner
+import com.meydan.app.core.designsystem.TabLoading
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.GameCardDto
@@ -82,8 +84,12 @@ fun GamesScreen(
 
     // The feed VM survives the trip to the create-game screen, so re-fetch when
     // this screen resumes (returning from create/detail, or app foreground) —
-    // that's what surfaces a just-created game under "Mine". ON_RESUME does not
-    // fire on the initial composition (already resumed), so no double load.
+    // that's what surfaces a just-created game under "Mine".
+    //
+    // This effect DOES fire on the initial composition, contrary to what this
+    // comment used to claim: LifecycleRegistry brings a newly added observer up
+    // to the current state, so an already-resumed host dispatches ON_RESUME
+    // immediately. refreshOnResume() therefore skips a load that just happened.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshOnResume() }
 
     // Logout lives in the Profile tab now; a forced logout (session expiry) is
@@ -103,20 +109,7 @@ fun GamesScreen(
         ChipRow(chip = state.chip, onToggle = viewModel::toggleChip)
 
         if (state.offline) {
-            Text(
-                text = stringResource(R.string.offline_banner),
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 6.dp)
-                    .background(
-                        MaterialTheme.colorScheme.errorContainer,
-                        RoundedCornerShape(10.dp),
-                    )
-                    .padding(vertical = 8.dp, horizontal = 12.dp),
-            )
+            OfflineBanner(onRetry = viewModel::pullRefresh)
         }
 
         PullToRefreshBox(
@@ -124,7 +117,11 @@ fun GamesScreen(
             onRefresh = viewModel::pullRefresh,
             modifier = Modifier.weight(1f),
         ) {
-            if (!state.loading && state.visible.isEmpty()) {
+            if (state.loading && state.visible.isEmpty()) {
+                // Was a zero-item list: several seconds of blank app on a slow
+                // connection, indistinguishable from an empty feed.
+                TabLoading()
+            } else if (state.visible.isEmpty()) {
                 EmptyFeed(tab = state.tab)
             } else {
                 LazyColumn(

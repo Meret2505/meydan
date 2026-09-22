@@ -16,10 +16,12 @@ import kotlinx.coroutines.launch
  * A photo picked for the submission. The screen resolves the Uri to bytes at
  * pick time (via ContentResolver) and hands the ViewModel raw bytes only —
  * same split of responsibility as ProfileScreen's avatar picker. [previewUri]
- * is kept only so the screen can render a thumbnail without re-reading bytes.
+ * is kept as a plain string (Coil takes one as happily as a Uri) only so the
+ * screen can render a thumbnail without re-reading the bytes; keeping the
+ * Android type out of here is what lets the pick logic be unit-tested.
  */
 class PickedPhoto(
-    val previewUri: android.net.Uri,
+    val previewUri: String,
     val bytes: ByteArray,
     val mime: String,
     val filename: String,
@@ -50,7 +52,28 @@ class SubmitFieldViewModel(
 
         /** Must stay in step with SURFACES in lib/data.ts. */
         val SURFACES = FieldsViewModel.SURFACES
+
+        /**
+         * The gallery after a multi-select pick, trimmed to the three photos a
+         * submission may carry (the server caps it at three as well). A new
+         * list, never a mutation of [existing].
+         */
+        fun photosAfterPick(
+            existing: List<PickedPhoto>,
+            picked: List<PickedPhoto>,
+        ): List<PickedPhoto> {
+            val room = MAX_PHOTOS - existing.size
+            return if (room <= 0) existing else existing + picked.take(room)
+        }
     }
+
+    /**
+     * A required input the form is still not happy with. The screen turns these
+     * into a line under the button naming what is left, because a button that
+     * stays grey while every visible input looks filled is unusable — the
+     * capacity placeholder alone ("12", in grey) reads as a value already set.
+     */
+    enum class RequiredField { NAME, ADDRESS, DISTRICT, SURFACE, CAPACITY, DESCRIPTION }
 
     data class UiState(
         val name: String = "",
@@ -66,17 +89,49 @@ class SubmitFieldViewModel(
         val errorCode: String? = null,
         val createdId: String? = null,
     ) {
-        val canSubmit: Boolean
-            get() {
+        /**
+         * Required inputs still not accepted, in the order they appear on the
+         * form. The one source of truth for both the button's enabled state and
+         * the hint that explains it, so the two can never disagree.
+         */
+        val missing: List<RequiredField>
+            get() = buildList {
+                if (name.trim().length !in MIN_NAME_LENGTH..MAX_NAME_LENGTH) {
+                    add(RequiredField.NAME)
+                }
+                if (address.trim().length !in MIN_ADDRESS_LENGTH..MAX_ADDRESS_LENGTH) {
+                    add(RequiredField.ADDRESS)
+                }
+                if (district == null) add(RequiredField.DISTRICT)
+                if (surface == null) add(RequiredField.SURFACE)
                 val cap = capacity.toIntOrNull()
-                return !submitting &&
-                    name.trim().length in MIN_NAME_LENGTH..MAX_NAME_LENGTH &&
-                    address.trim().length in MIN_ADDRESS_LENGTH..MAX_ADDRESS_LENGTH &&
-                    district != null &&
-                    surface != null &&
-                    cap != null && cap in MIN_CAPACITY..MAX_CAPACITY &&
-                    description.trim().length <= MAX_DESCRIPTION_LENGTH
+                if (cap == null || cap !in MIN_CAPACITY..MAX_CAPACITY) {
+                    add(RequiredField.CAPACITY)
+                }
+                // setDescription already clamps the length, so this can only
+                // fire if that cap is ever loosened — it mirrors the server.
+                if (description.trim().length > MAX_DESCRIPTION_LENGTH) {
+                    add(RequiredField.DESCRIPTION)
+                }
             }
+
+        val canSubmit: Boolean get() = !submitting && missing.isEmpty()
+
+        /**
+         * Whether an input holds something that is already wrong, as opposed to
+         * being untouched — only then is it worth marking red. An empty field
+         * shows its requirement in plain grey instead of shouting at someone
+         * who has not typed yet.
+         */
+        val nameTooShort: Boolean
+            get() = name.trim().isNotEmpty() && name.trim().length < MIN_NAME_LENGTH
+
+        val addressTooShort: Boolean
+            get() = address.trim().isNotEmpty() && address.trim().length < MIN_ADDRESS_LENGTH
+
+        val capacityOutOfRange: Boolean
+            get() = capacity.isNotEmpty() &&
+                capacity.toIntOrNull().let { it == null || it !in MIN_CAPACITY..MAX_CAPACITY }
     }
 
     private val _state = MutableStateFlow(UiState())
@@ -93,11 +148,13 @@ class SubmitFieldViewModel(
     fun setDescription(v: String) =
         _state.update { it.copy(description = v.take(MAX_DESCRIPTION_LENGTH), errorCode = null) }
 
-    fun addPhoto(bytes: ByteArray, mime: String, filename: String, previewUri: android.net.Uri) {
-        _state.update {
-            if (it.photos.size >= MAX_PHOTOS) return@update it
-            it.copy(photos = it.photos + PickedPhoto(previewUri, bytes, mime, filename))
-        }
+    /**
+     * Adds a whole pick at once — the picker is multi-select, so three photos
+     * arrive together rather than one trip through the gallery per photo.
+     */
+    fun addPhotos(picked: List<PickedPhoto>) {
+        if (picked.isEmpty()) return
+        _state.update { it.copy(photos = photosAfterPick(it.photos, picked)) }
     }
 
     fun removePhoto(index: Int) =

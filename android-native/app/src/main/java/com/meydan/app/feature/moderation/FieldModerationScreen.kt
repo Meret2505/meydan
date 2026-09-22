@@ -53,10 +53,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.meydan.app.R
+import com.meydan.app.core.common.ImageWidth
+import com.meydan.app.core.common.optimizedImageUrl
 import com.meydan.app.core.designsystem.FullscreenImageViewer
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.FieldSubmissionDto
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.feature.fields.surfaceLabel
 
 /**
@@ -172,7 +174,7 @@ private fun SubmissionCard(
             ) {
                 submission.photos.forEachIndexed { index, url ->
                     AsyncImage(
-                        model = url,
+                        model = optimizedImageUrl(url, ImageWidth.AVATAR),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

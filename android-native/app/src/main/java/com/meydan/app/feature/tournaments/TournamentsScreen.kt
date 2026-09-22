@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,6 +41,8 @@ import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
+import com.meydan.app.core.designsystem.OfflineBanner
+import com.meydan.app.core.designsystem.TabLoading
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.TournamentCardDto
@@ -108,6 +111,9 @@ fun TournamentsScreen(
             TabButton(stringResource(R.string.tournaments_tab_ended), state.tab == TournamentsViewModel.Tab.ENDED, { viewModel.selectTab(TournamentsViewModel.Tab.ENDED) }, Modifier.weight(1f))
         }
 
+        if (state.offline) {
+            OfflineBanner(onRetry = viewModel::pullRefresh)
+        }
         PullToRefreshBox(
             isRefreshing = state.refreshing,
             onRefresh = viewModel::pullRefresh,
@@ -115,7 +121,9 @@ fun TournamentsScreen(
                 .weight(1f)
                 .padding(top = 12.dp),
         ) {
-            if (!state.loading && state.visible.isEmpty()) {
+            if (state.loading && state.visible.isEmpty()) {
+                TabLoading()
+            } else if (state.visible.isEmpty()) {
                 EmptyTournaments(state.tab)
             } else {
                 LazyColumn(
@@ -257,7 +265,9 @@ private fun dateAndCounts(t: TournamentCardDto, locale: Locale): String {
     val start = GameTime.parse(t.startDate)?.format(fmt) ?: ""
     val end = t.endDate?.let { GameTime.parse(it)?.format(fmt) }
     val dates = if (end != null) "$start — $end" else start
-    val teams = "${t.teamsCount} ${stringResource(R.string.tournaments_teams_count)}"
-    val matches = "${t.matchesCount} ${stringResource(R.string.tournaments_matches_count)}"
+    // Plurals, not a number glued to a bare noun: that produced "1 команд".
+    val teams = pluralStringResource(R.plurals.tournaments_teams, t.teamsCount, t.teamsCount)
+    val matches =
+        pluralStringResource(R.plurals.tournaments_matches, t.matchesCount, t.matchesCount)
     return "$dates · $teams · $matches"
 }

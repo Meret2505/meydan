@@ -45,7 +45,7 @@ import com.meydan.app.core.common.DISTRICTS
 import com.meydan.app.core.common.TeamColors
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 
 /**
  * Create-team form: name, optional district, and one of five preset colours,

@@ -38,7 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

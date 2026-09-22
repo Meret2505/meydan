@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
+import com.meydan.app.core.designsystem.OfflineBanner
+import com.meydan.app.core.designsystem.TabLoading
 import com.meydan.app.core.common.TeamColors
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.TeamCardDto
@@ -94,41 +96,50 @@ fun TeamsScreen(
                 )
             }
         }
+        if (state.offline) {
+            OfflineBanner(onRetry = viewModel::pullRefresh)
+        }
         PullToRefreshBox(
             isRefreshing = state.refreshing,
             onRefresh = viewModel::pullRefresh,
             modifier = Modifier.fillMaxSize(),
         ) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = 24.dp),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                item {
-                    SectionLabel(stringResource(R.string.teams_my_teams))
-                }
-                if (state.mine.isEmpty()) {
-                    item { NotInTeamCard() }
-                } else {
-                    itemsIndexed(state.mine, key = { _, t -> t.id }) { index, team ->
-                        MyTeamCard(team = team, rank = index + 1, onClick = { onTeamClick(team.id) })
+            // `loading` was declared and never read, so the first load showed
+            // the "you're not in a team" card — which is a claim, not a state.
+            if (state.loading && state.mine.isEmpty() && state.others.isEmpty()) {
+                TabLoading()
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 12.dp, bottom = 24.dp),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    item {
+                        SectionLabel(stringResource(R.string.teams_my_teams))
                     }
-                }
+                    if (state.mine.isEmpty()) {
+                        item { NotInTeamCard() }
+                    } else {
+                        itemsIndexed(state.mine, key = { _, t -> t.id }) { index, team ->
+                            MyTeamCard(team = team, rank = index + 1, onClick = { onTeamClick(team.id) })
+                        }
+                    }
 
-                if (state.others.isNotEmpty()) {
-                    item {
-                        Spacer(Modifier.size(8.dp))
-                        SectionLabel(stringResource(R.string.teams_city_teams))
-                    }
-                    item { CityTeamsList(state.others, onTeamClick) }
-                    item {
-                        Text(
-                            text = stringResource(R.string.teams_matches_hint),
-                            fontSize = 11.5.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        )
+                    if (state.others.isNotEmpty()) {
+                        item {
+                            Spacer(Modifier.size(8.dp))
+                            SectionLabel(stringResource(R.string.teams_city_teams))
+                        }
+                        item { CityTeamsList(state.others, onTeamClick) }
+                        item {
+                            Text(
+                                text = stringResource(R.string.teams_matches_hint),
+                                fontSize = 11.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            )
+                        }
                     }
                 }
             }

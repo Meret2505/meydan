@@ -36,11 +36,14 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,8 +58,11 @@ import com.meydan.app.core.common.DISTRICTS
 import com.meydan.app.core.designsystem.PhoneTextField
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.feature.fields.surfaceLabel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Field-submission form: name, address, district, surface, capacity, plus
@@ -83,16 +89,34 @@ fun SubmitFieldScreen(
     }
 
     val context = LocalContext.current
-    val pickPhoto = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        val resolver = context.contentResolver
-        val bytes = runCatching {
-            resolver.openInputStream(uri)?.use { it.readBytes() }
-        }.getOrNull() ?: return@rememberLauncherForActivityResult
-        val mime = resolver.getType(uri) ?: "image/jpeg"
-        viewModel.addPhoto(bytes, mime, "field.${mime.substringAfterLast('/')}", uri)
+    val scope = rememberCoroutineScope()
+    // Multi-select, capped at the three a submission may carry: one trip to the
+    // gallery for all of them instead of one trip each. maxItems is fixed at
+    // MAX_PHOTOS rather than the remaining slots because the contract is
+    // registered once; addPhotos trims whatever does not fit.
+    val pickPhotos = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(SubmitFieldViewModel.MAX_PHOTOS),
+    ) { uris ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
+        // Three full-size images is far too much to read on the main thread.
+        scope.launch {
+            val picked = withContext(Dispatchers.IO) {
+                val resolver = context.contentResolver
+                uris.mapNotNull { uri ->
+                    val bytes = runCatching {
+                        resolver.openInputStream(uri)?.use { it.readBytes() }
+                    }.getOrNull() ?: return@mapNotNull null
+                    val mime = resolver.getType(uri) ?: "image/jpeg"
+                    PickedPhoto(
+                        previewUri = uri.toString(),
+                        bytes = bytes,
+                        mime = mime,
+                        filename = "field.${mime.substringAfterLast('/')}",
+                    )
+                }
+            }
+            viewModel.addPhotos(picked)
+        }
     }
 
     Column(
@@ -130,8 +154,21 @@ fun SubmitFieldScreen(
             OutlinedTextField(
                 value = state.name,
                 onValueChange = viewModel::setName,
+                enabled = !state.submitting,
                 singleLine = true,
                 placeholder = { Text(stringResource(R.string.fields_submit_name_placeholder)) },
+                // The requirement is stated up front, not discovered by the
+                // button staying grey.
+                supportingText = {
+                    Text(
+                        pluralStringResource(
+                            R.plurals.fields_submit_min_chars,
+                            SubmitFieldViewModel.MIN_NAME_LENGTH,
+                            SubmitFieldViewModel.MIN_NAME_LENGTH,
+                        ),
+                    )
+                },
+                isError = state.nameTooShort,
                 shape = MaterialTheme.shapes.large,
                 colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth(),
@@ -141,8 +178,19 @@ fun SubmitFieldScreen(
             OutlinedTextField(
                 value = state.address,
                 onValueChange = viewModel::setAddress,
+                enabled = !state.submitting,
                 singleLine = true,
                 placeholder = { Text(stringResource(R.string.fields_submit_address_placeholder)) },
+                supportingText = {
+                    Text(
+                        pluralStringResource(
+                            R.plurals.fields_submit_min_chars,
+                            SubmitFieldViewModel.MIN_ADDRESS_LENGTH,
+                            SubmitFieldViewModel.MIN_ADDRESS_LENGTH,
+                        ),
+                    )
+                },
+                isError = state.addressTooShort,
                 shape = MaterialTheme.shapes.large,
                 colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth(),
@@ -156,6 +204,7 @@ fun SubmitFieldScreen(
                             ChoiceCell(
                                 label = district,
                                 active = state.district == district,
+                                enabled = !state.submitting,
                                 onClick = { viewModel.setDistrict(district) },
                                 modifier = Modifier.weight(1f),
                             )
@@ -170,6 +219,7 @@ fun SubmitFieldScreen(
                     ChoiceCell(
                         label = surfaceLabel(surface),
                         active = state.surface == surface,
+                        enabled = !state.submitting,
                         onClick = { viewModel.setSurface(surface) },
                         modifier = Modifier.weight(1f),
                     )
@@ -180,36 +230,63 @@ fun SubmitFieldScreen(
             OutlinedTextField(
                 value = state.capacity,
                 onValueChange = viewModel::setCapacity,
+                enabled = !state.submitting,
                 singleLine = true,
                 placeholder = { Text(stringResource(R.string.fields_submit_capacity_placeholder)) },
+                supportingText = {
+                    Text(
+                        stringResource(
+                            R.string.fields_submit_capacity_hint,
+                            SubmitFieldViewModel.MIN_CAPACITY,
+                            SubmitFieldViewModel.MAX_CAPACITY,
+                        ),
+                    )
+                },
+                isError = state.capacityOutOfRange,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 shape = MaterialTheme.shapes.large,
                 colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            SectionLabel(stringResource(R.string.fields_submit_phone))
+            SectionLabel(stringResource(R.string.fields_submit_phone), optional = true)
             PhoneTextField(
                 digits = state.phoneDigits,
                 onDigitsChange = viewModel::setPhoneDigits,
                 placeholder = stringResource(R.string.auth_phone_placeholder),
+                enabled = !state.submitting,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            SectionLabel(stringResource(R.string.fields_submit_description))
+            SectionLabel(stringResource(R.string.fields_submit_description), optional = true)
             OutlinedTextField(
                 value = state.description,
                 onValueChange = viewModel::setDescription,
+                enabled = !state.submitting,
                 placeholder = { Text(stringResource(R.string.fields_submit_description_placeholder)) },
+                supportingText = {
+                    Text(
+                        stringResource(
+                            R.string.fields_submit_description_hint,
+                            SubmitFieldViewModel.MAX_DESCRIPTION_LENGTH,
+                        ),
+                    )
+                },
                 minLines = 3,
                 shape = MaterialTheme.shapes.large,
                 colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            SectionLabel(stringResource(R.string.fields_submit_photos))
+            SectionLabel(stringResource(R.string.fields_submit_photos), optional = true)
+            val slotsLeft = SubmitFieldViewModel.MAX_PHOTOS - state.photos.size
             Text(
-                text = stringResource(R.string.fields_submit_photos_hint),
+                text = if (slotsLeft > 0) {
+                    stringResource(R.string.fields_submit_photos_hint) + " " +
+                        stringResource(R.string.fields_submit_photos_left, slotsLeft)
+                } else {
+                    stringResource(R.string.fields_submit_photos_hint)
+                },
                 fontSize = 12.sp,
                 color = colors.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 10.dp),
@@ -233,7 +310,9 @@ fun SubmitFieldScreen(
                                 .size(22.dp)
                                 .clip(CircleShape)
                                 .background(colors.background.copy(alpha = 0.85f))
-                                .clickable { viewModel.removePhoto(index) },
+                                .clickable(enabled = !state.submitting) {
+                                    viewModel.removePhoto(index)
+                                },
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
@@ -251,8 +330,8 @@ fun SubmitFieldScreen(
                             .size(72.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .border(1.dp, colors.outline, RoundedCornerShape(12.dp))
-                            .clickable {
-                                pickPhoto.launch(
+                            .clickable(enabled = !state.submitting) {
+                                pickPhotos.launch(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                                 )
                             },
@@ -279,6 +358,21 @@ fun SubmitFieldScreen(
         }
 
         Column(modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 20.dp)) {
+            // Says why the button is grey. Without this the form was a guessing
+            // game: every visible input could look filled while one required
+            // one was empty or out of range.
+            if (!state.submitting && state.missing.isNotEmpty()) {
+                val names = state.missing.map { stringResource(requiredFieldLabel(it)) }
+                Text(
+                    text = stringResource(
+                        R.string.fields_submit_missing,
+                        names.joinToString(", "),
+                    ),
+                    fontSize = 13.sp,
+                    color = colors.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 10.dp),
+                )
+            }
             PrimaryButton(
                 text = stringResource(R.string.fields_submit_cta),
                 loading = state.submitting,
@@ -342,14 +436,30 @@ private fun SubmittedConfirmation(onDone: () -> Unit) {
 }
 
 @Composable
-private fun SectionLabel(text: String) {
+private fun SectionLabel(text: String, optional: Boolean = false) {
     Text(
-        text = text,
+        // Marking what is optional is what makes "everything required is
+        // filled" a statement the user can actually check.
+        text = if (optional) {
+            "$text · ${stringResource(R.string.common_optional)}"
+        } else {
+            text
+        },
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 20.dp, bottom = 10.dp),
     )
+}
+
+/** The short, lower-case field names the "still missing" line is built from. */
+private fun requiredFieldLabel(field: SubmitFieldViewModel.RequiredField): Int = when (field) {
+    SubmitFieldViewModel.RequiredField.NAME -> R.string.fields_submit_req_name
+    SubmitFieldViewModel.RequiredField.ADDRESS -> R.string.fields_submit_req_address
+    SubmitFieldViewModel.RequiredField.DISTRICT -> R.string.fields_submit_req_district
+    SubmitFieldViewModel.RequiredField.SURFACE -> R.string.fields_submit_req_surface
+    SubmitFieldViewModel.RequiredField.CAPACITY -> R.string.fields_submit_req_capacity
+    SubmitFieldViewModel.RequiredField.DESCRIPTION -> R.string.fields_submit_req_description
 }
 
 /** A single-select bordered cell, matching CreateTeamScreen's district grid. */
@@ -359,10 +469,14 @@ private fun ChoiceCell(
     active: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     Box(
         modifier = modifier
+            // Dimmed as well as inert while submitting: a cell that still looks
+            // live but swallows taps is the worse of the two failures.
+            .alpha(if (enabled) 1f else 0.4f)
             .height(52.dp)
             .border(
                 width = if (active) 1.5.dp else 1.dp,
@@ -373,7 +487,7 @@ private fun ChoiceCell(
                 color = if (active) colors.primary.copy(alpha = 0.16f) else colors.surface,
                 shape = RoundedCornerShape(14.dp),
             )
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(

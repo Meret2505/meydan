@@ -46,7 +46,7 @@ import com.meydan.app.core.common.POSITIONS
 import com.meydan.app.core.common.Position
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 
 /**
  * Profile-edit form. Mirrors the web ProfileEditForm — name, position,

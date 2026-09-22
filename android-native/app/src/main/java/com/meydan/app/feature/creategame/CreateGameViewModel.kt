@@ -21,6 +21,14 @@ import kotlinx.coroutines.launch
  * needed positions are multi-select, price and notes optional. The chosen local
  * time is sent as a UTC instant so the server stores it unambiguously.
  */
+/**
+ * Whether a picked kickoff has already passed. The date picker only constrains
+ * the day, so an earlier time on the current day gets through it and has to be
+ * caught here. Pure, so it is unit-tested.
+ */
+fun isScheduledInPast(scheduledAt: LocalDateTime, now: LocalDateTime): Boolean =
+    scheduledAt.isBefore(now)
+
 class CreateGameViewModel(
     private val gamesRepository: GamesRepository,
     private val fieldsRepository: FieldsRepository,
@@ -47,9 +55,12 @@ class CreateGameViewModel(
         val submitting: Boolean = false,
         val errorCode: String? = null,
         val createdGameId: String? = null,
+        /** Recomputed on every pick; see [isScheduledInPast]. */
+        val scheduledInPast: Boolean = false,
     ) {
         val canSubmit: Boolean
             get() = !submitting &&
+                !scheduledInPast &&
                 (if (useCustomField) customFieldName.trim().isNotEmpty() else selectedFieldId != null)
     }
 
@@ -87,7 +98,16 @@ class CreateGameViewModel(
     fun setCustomField(name: String) = _state.update { it.copy(customFieldName = name, errorCode = null) }
     fun useCatalogue() = _state.update { it.copy(useCustomField = false, customFieldName = "") }
     fun useFreeText() = _state.update { it.copy(useCustomField = true, selectedFieldId = null) }
-    fun setDateTime(dt: LocalDateTime) = _state.update { it.copy(scheduledAt = dt) }
+    fun setDateTime(dt: LocalDateTime) = _state.update {
+        it.copy(
+            scheduledAt = dt,
+            // Checked against the clock now, not against the time the screen
+            // opened: a form left open for an hour must not accept a time that
+            // has since passed.
+            scheduledInPast = isScheduledInPast(dt, LocalDateTime.now()),
+            errorCode = null,
+        )
+    }
     fun setTotalSpots(n: Int) = _state.update { it.copy(totalSpots = n) }
     fun setPrice(v: String) = _state.update { it.copy(price = v.filter { c -> c.isDigit() }.take(3)) }
     fun setNotes(v: String) = _state.update { it.copy(notes = v) }

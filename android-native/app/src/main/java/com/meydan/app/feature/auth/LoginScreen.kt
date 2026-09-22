@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meydan.app.R
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.designsystem.SecondaryButton
 import kotlinx.coroutines.launch
@@ -154,16 +155,3 @@ private fun LogoMark() {
     }
 }
 
-/** Maps server error codes to localized messages, like the web form's switch. */
-internal fun errorTextRes(code: String): Int = when (code) {
-    "wrong_password" -> R.string.error_wrong_password
-    "invalid_input" -> R.string.error_invalid_input
-    "rate_limited" -> R.string.error_rate_limited
-    "team_in_use" -> R.string.error_team_in_use
-    "phone_taken" -> R.string.error_phone_taken
-    "network" -> R.string.error_offline_title
-    "too_many_pending" -> R.string.error_too_many_pending
-    "too_many_photos" -> R.string.error_too_many_photos
-    "forbidden" -> R.string.error_forbidden
-    else -> R.string.error_auth_failed
-}

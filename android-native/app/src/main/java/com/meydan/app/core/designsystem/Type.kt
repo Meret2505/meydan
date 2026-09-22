@@ -37,6 +37,16 @@ internal val MeydanTypography = Typography(
         lineHeight = 30.sp,
         letterSpacing = (-0.3).sp,
     ),
+    // Every secondary screen title ("Create team", "Submit a pitch", the user's
+    // own name) asks for headlineSmall, and 16 call sites were silently getting
+    // Material's Roboto Normal baseline next to ExtraBold tab titles.
+    headlineSmall = TextStyle(
+        fontFamily = DisplayFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 21.sp,
+        lineHeight = 26.sp,
+        letterSpacing = (-0.2).sp,
+    ),
     titleLarge = TextStyle(
         fontFamily = DisplayFamily,
         fontWeight = FontWeight.Bold,
@@ -48,6 +58,12 @@ internal val MeydanTypography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 16.sp,
         lineHeight = 20.sp,
+    ),
+    titleSmall = TextStyle(
+        fontFamily = DisplayFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 14.sp,
+        lineHeight = 18.sp,
     ),
     // Body: Manrope.
     bodyLarge = TextStyle(

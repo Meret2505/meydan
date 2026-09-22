@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meydan.app.R
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.core.designsystem.PhoneTextField
 import com.meydan.app.core.designsystem.PrimaryButton
 

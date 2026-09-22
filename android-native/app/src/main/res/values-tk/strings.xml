@@ -87,13 +87,28 @@
     <string name="fields_submit">Meýdança teklip et</string>
     <string name="fields_submit_title">Täze meýdança</string>
     <string name="fields_submit_cta">Barlaga ugrat</string>
+    <string name="fields_submit_missing">Doldurmaly: %1$s</string>
+    <string name="fields_submit_req_name">ady</string>
+    <string name="fields_submit_req_address">salgysy</string>
+    <string name="fields_submit_req_district">etrap</string>
+    <string name="fields_submit_req_surface">örtügi</string>
+    <string name="fields_submit_req_capacity">kuwwaty (4-den 40-a)</string>
+    <string name="fields_submit_req_description">düşündiriş (500 belgiden köp däl)</string>
+    <string name="common_optional">hökman däl</string>
+    <plurals name="fields_submit_min_chars">
+        <item quantity="one">Iň az %d nyşan</item>
+        <item quantity="other">Iň az %d nyşan</item>
+    </plurals>
+    <string name="fields_submit_capacity_hint">%1$d-den %2$d oýunça çenli</string>
+    <string name="fields_submit_description_hint">%1$d nyşana çenli</string>
+    <string name="fields_submit_photos_left">Birbada saýlap bolýar, ýene %1$d</string>
     <string name="fields_submit_name">Ady</string>
     <string name="fields_submit_name_placeholder">Mysal üçin: «Olimp» stadiony</string>
     <string name="fields_submit_address">Salgy</string>
     <string name="fields_submit_address_placeholder">Mysal üçin: Görogly köçesi, 12</string>
     <string name="fields_submit_surface">Örtük</string>
     <string name="fields_submit_capacity">Sygym (oýunçy)</string>
-    <string name="fields_submit_capacity_placeholder">12</string>
+    <string name="fields_submit_capacity_placeholder">meselem, 12</string>
     <string name="fields_submit_phone">Telefon (hökman däl)</string>
     <string name="fields_submit_description">Düşündiriş (hökman däl)</string>
     <string name="fields_submit_description_placeholder">Baha, iş wagty, aýratynlyklary…</string>
@@ -293,6 +308,20 @@
     <string name="error_invalid_input">Iki meýdany hem dolduryň (azyndan 6 belgi)</string>
     <string name="error_team_in_use">Toparyň oýunlary bar — ony dargadyp bolmaýar.</string>
     <string name="error_phone_taken">Bu belgi başga hasaba baglanan</string>
+    <string name="error_generic">Bir zat ýalňyş boldy. Ýene bir gezek synanyşyň.</string>
+    <string name="error_session_expired">Sessiýa gutardy — ýene giriň.</string>
+    <string name="error_not_found">Tapylmady — belki eýýäm pozuldy.</string>
+    <string name="error_game_full">Oýunda ýer galmady.</string>
+    <string name="error_not_joinable">Bu oýna indi goşulyp bolmaýar.</string>
+    <string name="error_game_over">Oýun eýýäm tamamlandy.</string>
+    <string name="error_game_in_past">Bu wagt eýýäm geçdi — geljekdäki wagty saýlaň.</string>
+    <string name="error_organizer_cannot_leave">Guramaçy öz oýnundan çykyp bilmeýär — ony ýatyryp bolýar.</string>
+    <string name="error_captain_cannot_leave">Kapitan toparzdan çykyp bilmeýär.</string>
+    <string name="error_cannot_remove_self">Özüňi toparzdan aýryp bolmaýar.</string>
+    <string name="error_tournament_cancelled">Ýaryş ýatyryldy.</string>
+    <string name="error_not_registered">Topar ýaryşa hasaba alynmady.</string>
+    <string name="error_already_reviewed">Bu arza eýýäm gözden geçirildi.</string>
+    <string name="error_storage_failed">Suraty saklap bolmady. Ýene synanyşyň.</string>
     <string name="error_auth_failed">Girip bolmady</string>
     <string name="error_rate_limited">Örän köp synanyşyk. Soňrak synanyşyň.</string>
     <string name="error_offline_title">Birikme ýok</string>
@@ -308,4 +337,21 @@
     <string name="common_next">Indiki</string>
     <string name="common_skip">Geç</string>
     <string name="common_loading">Ýüklenýär…</string>
+    <plurals name="tournaments_teams">
+        <item quantity="one">%d komanda</item>
+        <item quantity="other">%d komanda</item>
+    </plurals>
+    <plurals name="tournaments_matches">
+        <item quantity="one">%d oýun</item>
+        <item quantity="other">%d oýun</item>
+    </plurals>
+    <plurals name="games_played">
+        <item quantity="one">%d oýun</item>
+        <item quantity="other">%d oýun</item>
+    </plurals>
+    <string name="offline_banner_generic">Birikme ýok — saklanan görkezilýär.</string>
+    <string name="common_retry">Gaýtadan</string>
+    <string name="profile_logout_confirm_title">Hasapdan çykmaly?</string>
+    <string name="profile_logout_confirm_body">Yzyna gaýtmak üçin täzeden girmeli bolar.</string>
+    <string name="profile_logout_confirm_cta">Çyk</string>
 </resources>

@@ -49,7 +49,7 @@ import com.meydan.app.core.common.Position
 import com.meydan.app.core.designsystem.PhoneTextField
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 
 /**
  * The five-step onboarding wizard: name, phone, position, district, age.

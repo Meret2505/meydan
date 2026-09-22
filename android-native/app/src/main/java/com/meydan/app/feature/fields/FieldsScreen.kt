@@ -7,15 +7,18 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,18 +37,28 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.ConfigurationCompat
@@ -53,9 +66,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.meydan.app.R
+import com.meydan.app.core.designsystem.OfflineBanner
+import com.meydan.app.core.designsystem.TabLoading
+import com.meydan.app.core.common.ImageWidth
+import com.meydan.app.core.common.optimizedImageUrl
+import com.meydan.app.core.designsystem.MeydanTheme
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.FieldCardDto
-import com.meydan.app.core.designsystem.MeydanTheme
+import kotlin.math.roundToInt
 
 /**
  * Fields tab — port of the web FieldsView list mode: search, favorites-first
@@ -85,6 +103,34 @@ fun FieldsScreen(
             state.fields, state.query, isTurkmen, state.district, state.surface,
         )
     }
+
+    // Hide-on-scroll for the search + filters block: it slides out of the way
+    // when the list scrolls down and comes straight back on the first upward
+    // drag, so the list gets the whole screen without the controls ever being
+    // more than one flick away. The title row above stays put — the submit
+    // button has to remain reachable.
+    val density = LocalDensity.current
+    val listState = rememberLazyListState()
+    var blockHeight by remember { mutableFloatStateOf(0f) }
+    var blockOffset by remember { mutableFloatStateOf(0f) }
+    val collapseConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val next = collapseOffset(
+                    blockOffset, available.y, blockHeight, listState.canScrollForward,
+                )
+                val used = next - blockOffset
+                blockOffset = next
+                // Consume what the block took, so the list holds still while it
+                // slides — otherwise content moves at double speed (Material's
+                // enterAlways top-bar behaviour).
+                return Offset(0f, used)
+            }
+        }
+    }
+    // With no results there is nothing left to scroll, so the filters that
+    // caused the empty list would be stuck off-screen. Put them back.
+    LaunchedEffect(visible.isEmpty()) { if (visible.isEmpty()) blockOffset = 0f }
 
     Column(
         modifier = Modifier
@@ -117,76 +163,105 @@ fun FieldsScreen(
                 )
             }
         }
-        OutlinedTextField(
-            value = state.query,
-            onValueChange = viewModel::onQueryChange,
-            leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
-            placeholder = { Text(stringResource(R.string.fields_search_placeholder)) },
-            singleLine = true,
-            shape = RoundedCornerShape(999.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // District chips: one per distinct district in the loaded fields, plus a
-        // surface chip row — both single-select, tapping the active one clears it.
-        if (districts.isNotEmpty()) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(top = 12.dp),
-            ) {
-                districts.forEach { d ->
-                    FilterChip(
-                        label = d,
-                        active = state.district == d,
-                        onClick = { viewModel.onDistrictToggle(d) },
-                    )
-                }
-            }
+        // A failed refresh used to be invisible here: the flag was set and never
+        // read, so a dead network looked like "nothing matches your search".
+        if (state.offline) {
+            OfflineBanner(onRetry = viewModel::pullRefresh, modifier = Modifier.padding(bottom = 4.dp))
         }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(top = 8.dp),
-        ) {
-            FieldsViewModel.SURFACES.forEach { s ->
-                FilterChip(
-                    label = surfaceLabel(s),
-                    active = state.surface == s,
-                    onClick = { viewModel.onSurfaceToggle(s) },
-                )
-            }
-        }
-
-        PullToRefreshBox(
-            isRefreshing = state.refreshing,
-            onRefresh = viewModel::pullRefresh,
+        // The collapsible block is drawn over the list area and the list is
+        // inset by however much of it is still on screen, so the two move as
+        // one and nothing is ever hidden behind the controls.
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .padding(top = 12.dp),
+                .clipToBounds()
+                .nestedScroll(collapseConnection),
         ) {
-            if (!state.loading && visible.isEmpty()) {
-                NoResults()
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 16.dp),
-                    modifier = Modifier.fillMaxSize(),
+            PullToRefreshBox(
+                isRefreshing = state.refreshing,
+                onRefresh = viewModel::pullRefresh,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = with(density) { (blockHeight + blockOffset).toDp() } + 12.dp),
+            ) {
+                if (state.loading && visible.isEmpty()) {
+                    TabLoading()
+                } else if (visible.isEmpty()) {
+                    NoResults()
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp),
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        items(visible, key = { it.id }) { field ->
+                            FieldCard(
+                                field = field,
+                                isTurkmen = isTurkmen,
+                                onToggleFavorite = { viewModel.toggleFavorite(field.id) },
+                                onClick = { onFieldClick(field.id) },
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Search + filters. Laid out at the top of the box and slid up by
+            // `blockOffset`; `onSizeChanged` feeds back the height the scroll
+            // maths needs, so the block can grow (a new district chip row)
+            // without anything here being hard-coded.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset { IntOffset(x = 0, y = blockOffset.roundToInt()) }
+                    .onSizeChanged { blockHeight = it.height.toFloat() },
+            ) {
+                OutlinedTextField(
+                    value = state.query,
+                    onValueChange = viewModel::onQueryChange,
+                    leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+                    placeholder = { Text(stringResource(R.string.fields_search_placeholder)) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(999.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                // District chips: one per distinct district in the loaded fields, plus a
+                // surface chip row — both single-select, tapping the active one clears it.
+                if (districts.isNotEmpty()) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(top = 12.dp),
+                    ) {
+                        districts.forEach { d ->
+                            FilterChip(
+                                label = d,
+                                active = state.district == d,
+                                onClick = { viewModel.onDistrictToggle(d) },
+                            )
+                        }
+                    }
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(top = 8.dp),
                 ) {
-                    items(visible, key = { it.id }) { field ->
-                        FieldCard(
-                            field = field,
-                            isTurkmen = isTurkmen,
-                            onToggleFavorite = { viewModel.toggleFavorite(field.id) },
-                            onClick = { onFieldClick(field.id) },
+                    FieldsViewModel.SURFACES.forEach { s ->
+                        FilterChip(
+                            label = surfaceLabel(s),
+                            active = state.surface == s,
+                            onClick = { viewModel.onSurfaceToggle(s) },
                         )
                     }
                 }
@@ -194,6 +269,24 @@ fun FieldsScreen(
         }
     }
 }
+
+/**
+ * Hide-on-scroll offset for the Fields search + filters block, in pixels:
+ * 0 is fully shown, -[height] fully tucked above the list. [delta] is the
+ * nested-scroll delta — negative when the finger drags the list up.
+ *
+ * [listCanScroll] is false once the list has nothing left below the fold (a
+ * filter down to one or two pitches). Hiding the block there would buy no
+ * room, only a gap, so the block stays — but it can always come back.
+ */
+internal fun collapseOffset(
+    current: Float,
+    delta: Float,
+    height: Float,
+    listCanScroll: Boolean = true,
+): Float =
+    if (delta < 0f && !listCanScroll) current
+    else (current + delta).coerceIn(-height, 0f)
 
 @Composable
 private fun FieldCard(
@@ -221,7 +314,7 @@ private fun FieldCard(
         ) {
             if (field.photo != null) {
                 AsyncImage(
-                    model = field.photo,
+                    model = optimizedImageUrl(field.photo, ImageWidth.CARD),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),

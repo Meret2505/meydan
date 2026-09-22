@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,9 +53,10 @@ import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
+import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.ParticipantDto
 import com.meydan.app.core.designsystem.MeydanTheme
@@ -119,7 +121,7 @@ fun GameDetailScreen(
         }
         // Always reachable back button on error/loading.
         if (state.game == null) {
-            BackButton(onBack, Modifier.align(Alignment.TopStart).systemBarsPadding().padding(12.dp))
+            DetailBackButton(onBack, Modifier.align(Alignment.TopStart).systemBarsPadding().padding(12.dp))
         }
     }
 }
@@ -234,7 +236,11 @@ private fun PitchHeader(game: GameDetailDto, isOver: Boolean, onBack: () -> Unit
                     ),
                 ),
         )
-        BackButton(onBack, Modifier.systemBarsPadding().padding(start = 16.dp, top = 8.dp))
+        DetailBackButton(
+            onBack,
+            Modifier.systemBarsPadding().padding(start = 16.dp, top = 8.dp),
+            onDark = true,
+        )
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -268,25 +274,6 @@ private fun PitchHeader(game: GameDetailDto, isOver: Boolean, onBack: () -> Unit
                 modifier = Modifier.padding(top = 10.dp),
             )
         }
-    }
-}
-
-@Composable
-private fun BackButton(onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.45f))
-            .androidxClickable(onBack),
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(22.dp),
-        )
     }
 }
 
@@ -430,7 +417,11 @@ private fun OrganizerRow(game: GameDetailDto) {
                 text = buildString {
                     append(stringResource(R.string.games_organizer))
                     game.organizer.attendanceRate?.let { append(" · ").append(stringResource(R.string.games_attendance_pct, it)) }
-                    if (game.organizer.gamesPlayed > 0) append(" · ").append(stringResource(R.string.games_games_count, game.organizer.gamesPlayed))
+                    if (game.organizer.gamesPlayed > 0) append(" · ").append(pluralStringResource(
+                        R.plurals.games_played,
+                        game.organizer.gamesPlayed,
+                        game.organizer.gamesPlayed,
+                    ))
                 },
                 fontSize = 12.5.sp,
                 color = colors.onSurfaceVariant,
@@ -454,7 +445,11 @@ private fun ContactRow(name: String, phone: String) {
             .clip(RoundedCornerShape(14.dp))
             .background(colors.surface)
             .androidxClickable {
-                context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+                // A tablet or a stripped ROM may have no dialer at all, and an
+                // unhandled ACTION_DIAL takes the whole app down.
+                runCatching {
+                    context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+                }
             }
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {

@@ -48,7 +48,7 @@ import com.meydan.app.core.network.dto.StandingsRowDto
 import com.meydan.app.core.network.dto.TournamentDetailDto
 import com.meydan.app.core.network.dto.TournamentMatchDto
 import com.meydan.app.core.network.dto.ViewerTeamDto
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
 import java.time.format.DateTimeFormatter

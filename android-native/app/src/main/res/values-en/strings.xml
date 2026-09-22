@@ -86,13 +86,28 @@
     <string name="fields_submit">Suggest a field</string>
     <string name="fields_submit_title">New field</string>
     <string name="fields_submit_cta">Send for review</string>
+    <string name="fields_submit_missing">Still needed: %1$s</string>
+    <string name="fields_submit_req_name">name</string>
+    <string name="fields_submit_req_address">address</string>
+    <string name="fields_submit_req_district">district</string>
+    <string name="fields_submit_req_surface">surface</string>
+    <string name="fields_submit_req_capacity">capacity (4 to 40)</string>
+    <string name="fields_submit_req_description">description (500 characters max)</string>
+    <string name="common_optional">optional</string>
+    <plurals name="fields_submit_min_chars">
+        <item quantity="one">At least %d character</item>
+        <item quantity="other">At least %d characters</item>
+    </plurals>
+    <string name="fields_submit_capacity_hint">From %1$d to %2$d players</string>
+    <string name="fields_submit_description_hint">Up to %1$d characters</string>
+    <string name="fields_submit_photos_left">Pick them all at once, %1$d left</string>
     <string name="fields_submit_name">Name</string>
     <string name="fields_submit_name_placeholder">For example: "Olimp" stadium</string>
     <string name="fields_submit_address">Address</string>
     <string name="fields_submit_address_placeholder">For example: Görogly street, 12</string>
     <string name="fields_submit_surface">Surface</string>
     <string name="fields_submit_capacity">Capacity (players)</string>
-    <string name="fields_submit_capacity_placeholder">12</string>
+    <string name="fields_submit_capacity_placeholder">e.g. 12</string>
     <string name="fields_submit_phone">Phone (optional)</string>
     <string name="fields_submit_description">Description (optional)</string>
     <string name="fields_submit_description_placeholder">Price, hours, features…</string>
@@ -293,6 +308,20 @@
     <string name="error_invalid_input">Fill in both fields (at least 6 characters)</string>
     <string name="error_team_in_use">The team has games — it can\'t be disbanded.</string>
     <string name="error_phone_taken">This number is already linked to another account</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_session_expired">Your session expired — sign in again.</string>
+    <string name="error_not_found">Not found — it may have been deleted.</string>
+    <string name="error_game_full">This game is full.</string>
+    <string name="error_not_joinable">This game can no longer be joined.</string>
+    <string name="error_game_over">This game is already over.</string>
+    <string name="error_game_in_past">That time has passed — pick a future one.</string>
+    <string name="error_organizer_cannot_leave">An organizer cannot leave their own game — cancel it instead.</string>
+    <string name="error_captain_cannot_leave">A captain cannot leave the team.</string>
+    <string name="error_cannot_remove_self">You cannot remove yourself from the team.</string>
+    <string name="error_tournament_cancelled">This tournament was cancelled.</string>
+    <string name="error_not_registered">The team is not registered for this tournament.</string>
+    <string name="error_already_reviewed">This submission has already been reviewed.</string>
+    <string name="error_storage_failed">Could not save the photo. Please try again.</string>
     <string name="error_auth_failed">Couldn\'t sign in</string>
     <string name="error_rate_limited">Too many attempts. Try again later.</string>
     <string name="error_offline_title">No connection</string>
@@ -308,4 +337,21 @@
     <string name="common_next">Next</string>
     <string name="common_skip">Skip</string>
     <string name="common_loading">Loading…</string>
+    <plurals name="tournaments_teams">
+        <item quantity="one">%d team</item>
+        <item quantity="other">%d teams</item>
+    </plurals>
+    <plurals name="tournaments_matches">
+        <item quantity="one">%d match</item>
+        <item quantity="other">%d matches</item>
+    </plurals>
+    <plurals name="games_played">
+        <item quantity="one">%d game</item>
+        <item quantity="other">%d games</item>
+    </plurals>
+    <string name="offline_banner_generic">No connection — showing what was saved.</string>
+    <string name="common_retry">Retry</string>
+    <string name="profile_logout_confirm_title">Sign out?</string>
+    <string name="profile_logout_confirm_body">You will need to sign in again to come back.</string>
+    <string name="profile_logout_confirm_cta">Sign out</string>
 </resources>

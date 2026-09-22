@@ -36,6 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -115,15 +117,20 @@ fun NotificationsScreen(
                 modifier = Modifier.fillMaxSize(),
             ) {
                 items(state.items, key = { it.id }) { notification ->
+                    // A game notification opens the game; a team one (e.g.
+                    // TEAM_INVITE, which carries teamId not gameId) opens the
+                    // team — mirroring the web's notificationHref routing. A
+                    // notification carrying neither id has nowhere to go, and
+                    // used to absorb the tap in silence, so it is now inert
+                    // rather than a dead end.
+                    val gameId = gameIdOf(notification)
+                    val teamId = if (gameId == null) teamIdOf(notification) else null
                     NotificationRow(
                         notification = notification,
-                        // A game notification opens the game; a team one (e.g.
-                        // TEAM_INVITE, which carries teamId not gameId) opens the
-                        // team — mirroring the web's notificationHref routing.
-                        onClick = {
-                            val gameId = gameIdOf(notification)
-                            if (gameId != null) onGameClick(gameId)
-                            else teamIdOf(notification)?.let(onTeamClick)
+                        onClick = when {
+                            gameId != null -> ({ onGameClick(gameId) })
+                            teamId != null -> ({ onTeamClick(teamId) })
+                            else -> null
                         },
                     )
                 }
@@ -133,7 +140,7 @@ fun NotificationsScreen(
 }
 
 @Composable
-private fun NotificationRow(notification: NotificationDto, onClick: () -> Unit) {
+private fun NotificationRow(notification: NotificationDto, onClick: (() -> Unit)?) {
     val colors = MaterialTheme.colorScheme
     val unread = !notification.isRead
     val badge = badgeFor(notification.type)
@@ -149,7 +156,7 @@ private fun NotificationRow(notification: NotificationDto, onClick: () -> Unit) 
             .clip(RoundedCornerShape(22.dp))
             // Unread rows carry a faint primary wash; read rows sit on surface.
             .background(if (unread) colors.primary.copy(alpha = 0.06f) else colors.surface)
-            .clickable(onClick = onClick)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(16.dp),
     ) {
         Box(
@@ -264,16 +271,24 @@ private fun gameIdOf(notification: NotificationDto): String? =
 private fun teamIdOf(notification: NotificationDto): String? =
     notification.data?.get("teamId")?.jsonPrimitive?.contentOrNull
 
-/** System-localized "5 min ago" style label from the ISO createdAt instant. */
+/**
+ * A "5 min ago" style label from the ISO createdAt instant, in the language the
+ * user picked in the app.
+ *
+ * DateUtils formats in the *system* locale, so a phone set to English showed
+ * English timestamps inside an app running in Russian or Turkmen. Going through
+ * a context configured with the app's locale keeps the two in step.
+ */
+@Composable
 private fun relativeTime(createdAt: String): String {
     val millis = try {
         Instant.parse(createdAt).toEpochMilli()
     } catch (e: Exception) {
         return ""
     }
-    return DateUtils.getRelativeTimeSpanString(
-        millis,
-        System.currentTimeMillis(),
-        DateUtils.MINUTE_IN_MILLIS,
-    ).toString()
+    val configuration = LocalConfiguration.current
+    val localized = LocalContext.current.createConfigurationContext(configuration)
+    // The Context overload reads its strings from that context's resources,
+    // which is what makes the app's locale win over the system's.
+    return DateUtils.getRelativeTimeSpanString(localized, millis).toString()
 }

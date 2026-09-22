@@ -32,10 +32,12 @@ fun PhoneTextField(
     onDigitsChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     OutlinedTextField(
         value = digits,
         onValueChange = { raw -> onDigitsChange(raw.filter { it.isDigit() }.take(8)) },
+        enabled = enabled,
         leadingIcon = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Spacer(Modifier.width(14.dp))

@@ -32,7 +32,9 @@ fun DetailBackButton(onBack: () -> Unit, modifier: Modifier = Modifier, onDark: 
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(40.dp)
+            // 48 dp is Material's minimum touch target; this was 40, on the
+            // only way back out of a full-screen photo header.
+            .size(48.dp)
             .clip(CircleShape)
             .background(
                 if (onDark) Color.Black.copy(alpha = 0.45f)

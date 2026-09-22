@@ -51,6 +51,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.meydan.app.R
+import com.meydan.app.core.common.ImageWidth
+import com.meydan.app.core.common.optimizedImageUrl
 import com.meydan.app.core.common.DetailViewModel
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.FieldDetailDto
@@ -114,7 +116,7 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
         ) {
             if (field.photos.isNotEmpty()) {
                 AsyncImage(
-                    model = field.photos.first(),
+                    model = optimizedImageUrl(field.photos.first(), ImageWidth.FULL),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),

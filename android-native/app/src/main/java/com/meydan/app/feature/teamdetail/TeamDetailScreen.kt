@@ -50,7 +50,7 @@ import com.meydan.app.core.common.TeamColors
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.network.dto.TeamDetailDto
 import com.meydan.app.core.network.dto.TeamMemberDto
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
 import com.meydan.app.core.designsystem.MeydanTheme

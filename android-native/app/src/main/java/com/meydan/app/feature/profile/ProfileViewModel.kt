@@ -31,6 +31,14 @@ class ProfileViewModel(
         val user: UserDto? = null,
         val stats: ProfileStatsDto? = null,
         val statsLoading: Boolean = true,
+        /**
+         * Set when /me came back empty-handed and there is no cached user to
+         * fall back on. Without it the screen drew an empty avatar circle, a
+         * blank name and a bare " · —" and looked broken rather than offline.
+         */
+        val loadFailed: Boolean = false,
+        /** Set when the attendance block failed; it used to just not exist. */
+        val statsFailed: Boolean = false,
         val uploadingAvatar: Boolean = false,
         /** Set when an avatar write fails — too large, rate limited, offline. */
         val avatarErrorCode: String? = null,
@@ -42,6 +50,12 @@ class ProfileViewModel(
         /** True while the language-picker sheet is open. */
         val languageMenuOpen: Boolean = false,
         val loggedOut: Boolean = false,
+        /**
+         * Logout was the one destructive action in the app that fired on the
+         * first tap, one row below "Language" — and getting back in costs an
+         * SMS round trip on a bad connection.
+         */
+        val confirmingLogout: Boolean = false,
         /** Admin-only: PENDING field submissions, shown as a badge on the
          *  moderation row so a new one doesn't sit unnoticed until the admin
          *  happens to open that screen. */
@@ -66,8 +80,14 @@ class ProfileViewModel(
             settingsStore.themeMode.collect { mode -> _state.update { it.copy(themeMode = mode) } }
         }
         // Refresh from the server; getMe writes the cache, so the collector above
-        // picks up the result.
-        viewModelScope.launch { authRepository.getMe() }
+        // picks up the result. A failure only matters when there is nothing
+        // cached to show.
+        viewModelScope.launch {
+            val result = authRepository.getMe()
+            if (result !is ApiResult.Success) {
+                _state.update { it.copy(loadFailed = it.user == null) }
+            }
+        }
         loadStats()
     }
 
@@ -102,15 +122,30 @@ class ProfileViewModel(
     fun onLanguagePicked() = _state.update { it.copy(languageMenuOpen = false) }
 
     private fun loadStats() {
+        _state.update { it.copy(statsLoading = true, statsFailed = false) }
         viewModelScope.launch {
             val result = authRepository.myStats()
             _state.update {
                 it.copy(
                     stats = (result as? ApiResult.Success)?.data ?: it.stats,
                     statsLoading = false,
+                    // Only a failure with nothing to show is worth reporting.
+                    statsFailed = result !is ApiResult.Success && it.stats == null,
                 )
             }
         }
+    }
+
+    /** Retry for both halves of the screen, from the error state's button. */
+    fun retry() {
+        _state.update { it.copy(loadFailed = false) }
+        viewModelScope.launch {
+            val result = authRepository.getMe()
+            if (result !is ApiResult.Success) {
+                _state.update { it.copy(loadFailed = it.user == null) }
+            }
+        }
+        loadStats()
     }
 
     /**
@@ -153,7 +188,12 @@ class ProfileViewModel(
         }
     }
 
+    fun askLogout() = _state.update { it.copy(confirmingLogout = true) }
+
+    fun dismissLogout() = _state.update { it.copy(confirmingLogout = false) }
+
     fun logout() {
+        _state.update { it.copy(confirmingLogout = false) }
         viewModelScope.launch {
             authRepository.logout()
             _state.update { it.copy(loggedOut = true) }

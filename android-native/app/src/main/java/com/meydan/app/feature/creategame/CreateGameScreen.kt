@@ -57,7 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
-import com.meydan.app.feature.auth.errorTextRes
+import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.feature.fields.FieldsViewModel
 import com.meydan.app.core.designsystem.MeydanTheme
 import java.time.LocalDateTime
@@ -196,6 +196,18 @@ fun CreateGameScreen(
                 )
             }
 
+            // A picked time that has already passed: said here rather than
+            // leaving the button grey with no explanation (the server rejects
+            // it too, but there is no reason to spend a request on it).
+            if (state.scheduledInPast) {
+                Text(
+                    text = stringResource(R.string.error_game_in_past),
+                    color = colors.error,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
             state.errorCode?.let {
                 Text(stringResource(errorTextRes(it)), color = colors.error, fontSize = 13.sp)
             }
@@ -262,7 +274,11 @@ private fun WhenPicker(value: LocalDateTime, locale: Locale, onPick: (LocalDateT
                         ).show()
                     },
                     value.year, value.monthValue - 1, value.dayOfMonth,
-                ).show()
+                ).apply {
+                    // Yesterday was selectable, and a game created in the past
+                    // is invisible everywhere the moment it is saved.
+                    datePicker.minDate = System.currentTimeMillis()
+                }.show()
             }
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.CenterStart,
