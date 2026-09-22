@@ -55,6 +55,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.meydan.app.R
 import com.meydan.app.core.common.DISTRICTS
+import com.meydan.app.core.common.compressForUpload
 import com.meydan.app.core.designsystem.PhoneTextField
 import com.meydan.app.core.designsystem.PrimaryButton
 import com.meydan.app.core.di.AppContainer
@@ -106,12 +107,15 @@ fun SubmitFieldScreen(
                     val bytes = runCatching {
                         resolver.openInputStream(uri)?.use { it.readBytes() }
                     }.getOrNull() ?: return@mapNotNull null
-                    val mime = resolver.getType(uri) ?: "image/jpeg"
+                    // Compressed here rather than at submit time: three camera
+                    // frames held in form state is ~12 MB of heap, and the
+                    // upload of each one would be minutes on a mobile uplink.
+                    val image = compressForUpload(bytes, resolver.getType(uri) ?: "image/jpeg")
                     PickedPhoto(
                         previewUri = uri.toString(),
-                        bytes = bytes,
-                        mime = mime,
-                        filename = "field.${mime.substringAfterLast('/')}",
+                        bytes = image.bytes,
+                        mime = image.mime,
+                        filename = "field.${image.mime.substringAfterLast('/')}",
                     )
                 }
             }

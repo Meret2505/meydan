@@ -73,6 +73,7 @@ import com.meydan.app.R
 import com.meydan.app.core.designsystem.OfflineBanner
 import com.meydan.app.core.designsystem.TabLoading
 import com.meydan.app.core.common.ImageWidth
+import com.meydan.app.core.common.compressForUpload
 import com.meydan.app.core.common.optimizedImageUrl
 import com.meydan.app.core.common.LocaleMapper
 import com.meydan.app.core.di.AppContainer
@@ -131,14 +132,16 @@ fun ProfileScreen(
             val picked = withContext(Dispatchers.IO) {
                 val bytes = runCatching {
                     resolver.openInputStream(uri)?.use { it.readBytes() }
-                }.getOrNull()
-                val mime = resolver.getType(uri) ?: "image/jpeg"
-                bytes?.let { it to mime }
+                }.getOrNull() ?: return@withContext null
+                // Shrunk before it goes out: the original is a multi-megabyte
+                // camera frame for a 74 dp circle, and anything over ~4.5 MB
+                // is rejected by the platform outright.
+                compressForUpload(bytes, resolver.getType(uri) ?: "image/jpeg")
             } ?: return@launch
             viewModel.uploadAvatar(
-                picked.first,
-                picked.second,
-                "avatar.${picked.second.substringAfterLast('/')}",
+                picked.bytes,
+                picked.mime,
+                "avatar.${picked.mime.substringAfterLast('/')}",
             )
         }
     }
