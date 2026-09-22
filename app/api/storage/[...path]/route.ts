@@ -7,10 +7,12 @@
 // Example: /api/storage/avatars/user-abc.png → fetched from
 //   ${NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/user-abc.png
 //
-// Response is streamed back with the upstream Cache-Control so Vercel's edge
-// cache serves repeat requests without hitting Supabase again.
+// The response is streamed back under our own Cache-Control (not the
+// upstream's), so Vercel's edge serves repeats without touching Supabase and
+// the phone keeps immutable objects instead of re-fetching them hourly.
 
 import { NextRequest } from "next/server";
+import { cacheControlFor } from "@/lib/api/storage-cache";
 
 // Only allow the buckets we actually use — refuse anything else so this route
 // can't be turned into an open proxy for arbitrary paths.
@@ -82,8 +84,10 @@ export async function GET(_req: NextRequest, props: { params: Promise<{ path: st
     const v = upstream.headers.get(h);
     if (v) headers.set(h, v);
   }
-  // 1h edge cache + 30d SWR — small pool of public assets that rarely change.
-  headers.set("Cache-Control", "public, max-age=3600, s-maxage=3600, stale-while-revalidate=2592000");
+  // Per-object, because an uploaded URL is immutable while a seeded path can be
+  // overwritten by a re-import — and because the phone, not just the edge, is
+  // what benefits here. See lib/api/storage-cache.ts.
+  headers.set("Cache-Control", cacheControlFor(bucket, rest.join("/")));
 
   return new Response(upstream.body, { status: 200, headers });
 }
