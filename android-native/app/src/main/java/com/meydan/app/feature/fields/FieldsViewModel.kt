@@ -3,6 +3,7 @@ package com.meydan.app.feature.fields
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.isStale
 import com.meydan.app.core.network.dto.FieldCardDto
 import com.meydan.app.data.FieldsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,9 @@ class FieldsViewModel(
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
+    /** When the list last came back from the network. See [isStale]. */
+    private var lastLoadedAt: Long? = null
+
     init {
         viewModelScope.launch {
             fieldsRepository.cached()?.let { cached ->
@@ -68,6 +72,10 @@ class FieldsViewModel(
      * manual pull — the one list tab that was missing this (see Teams/Games).
      */
     fun refreshOnEnter() {
+        // Skipped right after the init load — the screen's enter effect and the
+        // ViewModel's own init were both fetching, so every tab entry cost two
+        // identical requests.
+        if (!isStale(System.currentTimeMillis(), lastLoadedAt)) return
         viewModelScope.launch { load() }
     }
 
@@ -91,6 +99,7 @@ class FieldsViewModel(
     }
 
     private suspend fun load() {
+        lastLoadedAt = System.currentTimeMillis()
         when (val result = fieldsRepository.refresh()) {
             is ApiResult.Success -> _state.update {
                 it.copy(fields = result.data, loading = false, refreshing = false, offline = false)

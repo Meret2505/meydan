@@ -50,7 +50,11 @@ class AppContainer(context: Context) {
     private val networkModule = NetworkModule(
         tokenStore = tokenStore,
         onRefreshFailed = { _sessionExpired.tryEmit(Unit) },
+        cacheDir = appContext.cacheDir,
     )
+
+    /** Tuned OkHttp client for Coil — see NetworkModule.imageClient. */
+    val imageClient get() = networkModule.imageClient
 
     val authRepository = AuthRepository(
         api = networkModule.meydanApi,

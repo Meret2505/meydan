@@ -3,6 +3,7 @@ package com.meydan.app.feature.games
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.isStale
 import com.meydan.app.core.common.GameTime
 import com.meydan.app.core.network.dto.GameCardDto
 import com.meydan.app.data.GamesRepository
@@ -43,6 +44,9 @@ class GamesViewModel(
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
+    /** When the feed last came back from the network. See [isStale]. */
+    private var lastLoadedAt: Long? = null
+
     init {
         viewModelScope.launch {
             // Cache first: the feed appears instantly (or the skeleton stays
@@ -79,6 +83,10 @@ class GamesViewModel(
      * leaves the pull spinner alone.
      */
     fun refreshOnResume() {
+        // Skipped right after the init load: the screen's ON_RESUME effect fires
+        // on first composition too (LifecycleRegistry syncs a new observer up to
+        // the current state), which made every tab entry fetch twice.
+        if (!isStale(System.currentTimeMillis(), lastLoadedAt)) return
         viewModelScope.launch { refresh(initial = false) }
         // The bell badge was only ever fetched once, at VM init — a notification
         // that arrived later (e.g. a field submission getting approved) never
@@ -94,6 +102,7 @@ class GamesViewModel(
     }
 
     private suspend fun refresh(initial: Boolean) {
+        lastLoadedAt = System.currentTimeMillis()
         when (val result = gamesRepository.refresh()) {
             is ApiResult.Success -> _state.update {
                 it.copy(

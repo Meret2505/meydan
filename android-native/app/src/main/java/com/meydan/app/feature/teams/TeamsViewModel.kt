@@ -3,6 +3,7 @@ package com.meydan.app.feature.teams
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.isStale
 import com.meydan.app.core.network.dto.TeamCardDto
 import com.meydan.app.data.TeamsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,9 @@ class TeamsViewModel(
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
+    /** When the list last came back from the network. See [isStale]. */
+    private var lastLoadedAt: Long? = null
+
     init {
         viewModelScope.launch {
             teamsRepository.cached()?.let { c ->
@@ -48,10 +52,15 @@ class TeamsViewModel(
      * team that was just disbanded, or miss one just created.
      */
     fun refreshOnEnter() {
+        // Skipped right after the init load — the screen's enter effect and the
+        // ViewModel's own init were both fetching, so every tab entry cost two
+        // identical requests.
+        if (!isStale(System.currentTimeMillis(), lastLoadedAt)) return
         viewModelScope.launch { load() }
     }
 
     private suspend fun load() {
+        lastLoadedAt = System.currentTimeMillis()
         when (val result = teamsRepository.refresh()) {
             is ApiResult.Success -> _state.update {
                 it.copy(
