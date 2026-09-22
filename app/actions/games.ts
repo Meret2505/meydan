@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { recordGameResult } from "@/lib/services/game-result";
 import { parseScore } from "@/lib/validate";
 import {
   cancelGame as cancelGameService,
@@ -76,33 +77,29 @@ export async function saveResult(formData: FormData): Promise<void> {
   const userId = await requireUserId();
   const gameId = String(formData.get("gameId") ?? "");
   const locale = String(formData.get("locale") ?? "ru");
-  const scoreHome = parseScore(String(formData.get("scoreHome") ?? ""));
-  const scoreAway = parseScore(String(formData.get("scoreAway") ?? ""));
-  if (scoreHome === null || scoreAway === null) return;
 
-  const game = await prisma.game.findUnique({
-    where: { id: gameId },
-    include: { participants: true },
+  // Checkbox semantics: an unchecked box is simply absent from the submission,
+  // so the roster is read here to turn "absent" into an explicit false —
+  // exactly what this action did inline before it moved to the shared service.
+  const participants = await prisma.gameParticipant.findMany({
+    where: { gameId },
+    select: { userId: true },
   });
-  if (!game || game.organizerId !== userId) return;
+  const attended = Object.fromEntries(
+    participants.map((p) => [p.userId, formData.get(`attended_${p.userId}`) === "on"]),
+  );
 
-  const updates = game.participants.map((p) => {
-    const attended = formData.get(`attended_${p.userId}`) === "on";
-    return prisma.gameParticipant.update({
-      where: { id: p.id },
-      data: { attended },
-    });
+  const result = await recordGameResult(gameId, userId, {
+    scoreHome: parseScore(String(formData.get("scoreHome") ?? "")),
+    scoreAway: parseScore(String(formData.get("scoreAway") ?? "")),
+    attended,
   });
-
-  await prisma.$transaction([
-    ...updates,
-    prisma.game.update({
-      where: { id: gameId },
-      data: { scoreHome, scoreAway, status: "COMPLETED" },
-    }),
-  ]);
+  // A failed attempt (not the organizer, not played yet, cancelled) resolves
+  // silently and re-renders, as the other actions in this file do.
+  if (!result.ok) return;
 
   revalidatePath(`/${locale}/games`);
   revalidatePath(`/${locale}/games/${gameId}`);
   redirect(`/${locale}/games?tab=mine`);
 }
+

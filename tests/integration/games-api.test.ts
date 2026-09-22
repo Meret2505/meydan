@@ -6,9 +6,11 @@ import { DELETE as leaveRoute, POST as joinRoute } from "@/app/api/v1/games/[id]
 import { GET as getMe, PATCH as patchMe } from "@/app/api/v1/me/route";
 import { signAccessToken } from "@/lib/api/tokens";
 import { POST as createRoute } from "@/app/api/v1/games/route";
+import { POST as resultRoute } from "@/app/api/v1/games/[id]/result/route";
 import { closePastGames } from "@/lib/services/game-lifecycle";
 import { joinGame } from "@/lib/services/games";
 import { getProfileStats } from "@/lib/services/profile-stats";
+import { getPlayerStats } from "@/lib/stats";
 
 const prisma = new PrismaClient();
 
@@ -726,6 +728,160 @@ describe.skipIf(!dbAvailable)("games API (integration)", () => {
 
       const stats = await getProfileStats(organizer.id);
       expect(stats.recent).toHaveLength(1);
+    });
+  });
+
+  describe("writing up a played game", () => {
+    const hoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000);
+
+    async function playedWithRoster(organizerId: string, playerIds: string[]) {
+      return prisma.game.create({
+        data: {
+          organizerId,
+          totalSpots: 10,
+          scheduledAt: hoursAgo(4),
+          fieldName: "Test pitch",
+          participants: { create: [organizerId, ...playerIds].map((userId) => ({ userId })) },
+        },
+      });
+    }
+
+    it("records attendance with no score at all", async () => {
+      // The case the whole feature exists for: attendance is what the
+      // reliability ratings are built from, and a score is optional.
+      const organizer = await makeUser("Organizer", "+99362111111");
+      const player = await makeUser("Player", "+99362111112");
+      const game = await playedWithRoster(organizer.id, [player.id]);
+
+      const response = await resultRoute(
+        await authed(`${BASE}/games/${game.id}/result`, organizer.id, {
+          method: "POST",
+          body: JSON.stringify({ attended: { [organizer.id]: true, [player.id]: false } }),
+        }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(200);
+      const updated = await prisma.game.findUniqueOrThrow({ where: { id: game.id } });
+      expect(updated.status).toBe("COMPLETED");
+      expect(updated.scoreHome).toBeNull();
+      const marks = await prisma.gameParticipant.findMany({ where: { gameId: game.id } });
+      expect(marks.find((m) => m.userId === player.id)?.attended).toBe(false);
+      expect(marks.find((m) => m.userId === organizer.id)?.attended).toBe(true);
+    });
+
+    it("feeds the attendance rating", async () => {
+      const organizer = await makeUser("Organizer", "+99362111113");
+      const player = await makeUser("Player", "+99362111114");
+      const game = await playedWithRoster(organizer.id, [player.id]);
+
+      await resultRoute(
+        await authed(`${BASE}/games/${game.id}/result`, organizer.id, {
+          method: "POST",
+          body: JSON.stringify({ attended: { [player.id]: true } }),
+        }),
+        ctx(game.id),
+      );
+
+      expect(await getPlayerStats(player.id)).toEqual({
+        gamesPlayed: 1,
+        attendanceRate: 100,
+        totalJoined: 1,
+      });
+    });
+
+    it("records a score", async () => {
+      const organizer = await makeUser("Organizer", "+99362111115");
+      const game = await playedWithRoster(organizer.id, []);
+
+      const response = await resultRoute(
+        await authed(`${BASE}/games/${game.id}/result`, organizer.id, {
+          method: "POST",
+          body: JSON.stringify({ scoreHome: 3, scoreAway: 2 }),
+        }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(200);
+      const updated = await prisma.game.findUniqueOrThrow({ where: { id: game.id } });
+      expect([updated.scoreHome, updated.scoreAway]).toEqual([3, 2]);
+    });
+
+    it("lets the organizer correct a mistake without losing the score", async () => {
+      const organizer = await makeUser("Organizer", "+99362111116");
+      const player = await makeUser("Player", "+99362111117");
+      const game = await playedWithRoster(organizer.id, [player.id]);
+
+      const send = async (payload: object) =>
+        resultRoute(
+          await authed(`${BASE}/games/${game.id}/result`, organizer.id, {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
+          ctx(game.id),
+        );
+
+      await send({ scoreHome: 1, scoreAway: 1, attended: { [player.id]: false } });
+      await send({ attended: { [player.id]: true } });
+
+      const updated = await prisma.game.findUniqueOrThrow({ where: { id: game.id } });
+      expect([updated.scoreHome, updated.scoreAway]).toEqual([1, 1]);
+      const mark = await prisma.gameParticipant.findFirstOrThrow({
+        where: { gameId: game.id, userId: player.id },
+      });
+      expect(mark.attended).toBe(true);
+    });
+
+    it("refuses anyone who is not the organizer", async () => {
+      const organizer = await makeUser("Organizer", "+99362111118");
+      const player = await makeUser("Player", "+99362111119");
+      const game = await playedWithRoster(organizer.id, [player.id]);
+
+      const response = await resultRoute(
+        await authed(`${BASE}/games/${game.id}/result`, player.id, {
+          method: "POST",
+          body: JSON.stringify({ attended: { [player.id]: true } }),
+        }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(403);
+      expect((await prisma.game.findUniqueOrThrow({ where: { id: game.id } })).status)
+        .toBe("OPEN");
+    });
+
+    it("refuses a game that has not been played yet", async () => {
+      const organizer = await makeUser("Organizer", "+99362111120");
+      const game = await makeGame(organizer.id, 10); // scheduled for tomorrow
+
+      const response = await resultRoute(
+        await authed(`${BASE}/games/${game.id}/result`, organizer.id, {
+          method: "POST",
+          body: JSON.stringify({ scoreHome: 1, scoreAway: 0 }),
+        }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(400);
+      expect((await body(response)).error).toBe("game_not_played");
+    });
+
+    it("refuses half a score rather than closing the game on it", async () => {
+      const organizer = await makeUser("Organizer", "+99362111121");
+      const game = await playedWithRoster(organizer.id, []);
+
+      const response = await resultRoute(
+        await authed(`${BASE}/games/${game.id}/result`, organizer.id, {
+          method: "POST",
+          body: JSON.stringify({ scoreHome: 3 }),
+        }),
+        ctx(game.id),
+      );
+
+      expect(response.status).toBe(400);
+      expect((await body(response)).error).toBe("invalid_input");
+      expect((await prisma.game.findUniqueOrThrow({ where: { id: game.id } })).status)
+        .toBe("OPEN");
     });
   });
 });

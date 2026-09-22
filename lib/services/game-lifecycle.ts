@@ -30,7 +30,8 @@ export type ClosePastGamesResult = { closed: number; gameIds: string[] };
  * Scores stay null: a completed game without a recorded result is exactly what
  * this is — played, with nobody having filled in what happened. Attendance is
  * likewise untouched, so nobody is credited or blamed for a game the organizer
- * never marked.
+ * never marked. The organizer gets one RESULT_NEEDED notification, which opens
+ * the write-up screen; recording is optional and nothing chases them.
  *
  * Idempotent: the `status` filter means a second run in the same hour closes
  * nothing, so a retried or overlapping cron is harmless.
@@ -43,7 +44,7 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
       status: { in: ["OPEN", "FULL"] },
       scheduledAt: { lte: cutoff },
     },
-    select: { id: true },
+    select: { id: true, organizerId: true },
     // A bounded batch: if a backlog ever builds up (this shipped long after
     // the first games were played), it drains over successive runs instead of
     // timing out the function.
@@ -58,6 +59,26 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
     where: { id: { in: gameIds }, status: { in: ["OPEN", "FULL"] } },
     data: { status: "COMPLETED" },
   });
+
+  // One nudge per closed game, now that the app has a screen to act on it.
+  // Writing the result is optional — this is the only reminder the organizer
+  // gets, and nothing chases them afterwards.
+  //
+  // Not exactly-once under two runs overlapping (updateMany cannot report
+  // which rows it touched), but an hourly job that finishes in milliseconds
+  // does not overlap, and the worst case is a duplicate nudge rather than a
+  // wrong one.
+  if (count > 0) {
+    await prisma.notification.createMany({
+      data: played.map((game) => ({
+        userId: game.organizerId,
+        type: "RESULT_NEEDED" as const,
+        title: "Игра прошла",
+        body: "Отметь, кто пришёл — это влияет на рейтинг игроков.",
+        data: { gameId: game.id },
+      })),
+    });
+  }
 
   return { closed: count, gameIds };
 }
