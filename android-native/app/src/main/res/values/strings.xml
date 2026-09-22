@@ -389,4 +389,5 @@
     <string name="games_result_score">Счёт · необязательно</string>
     <string name="games_result_save">Сохранить</string>
     <string name="games_result_recorded">Результат записан</string>
+    <string name="games_create_field_loading">Загружаем список полей…</string>
 </resources>

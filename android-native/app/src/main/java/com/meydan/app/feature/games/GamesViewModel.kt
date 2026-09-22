@@ -58,7 +58,6 @@ class GamesViewModel(
             }
             refresh(initial = true)
         }
-        viewModelScope.launch { refreshUnread() }
     }
 
     fun selectTab(tab: Tab) {
@@ -86,13 +85,16 @@ class GamesViewModel(
         // Skipped right after the init load: the screen's ON_RESUME effect fires
         // on first composition too (LifecycleRegistry syncs a new observer up to
         // the current state), which made every tab entry fetch twice.
-        if (!isStale(System.currentTimeMillis(), lastLoadedAt)) return
+        if (!isStale(System.currentTimeMillis(), lastLoadedAt)) {
+            // The feed is fresh enough to leave alone, but the badge may not be
+            // — coming back from the notifications screen is the common case —
+            // and asking for one integer is the cheapest request in the app.
+            viewModelScope.launch { refreshUnread() }
+            return
+        }
+        // The feed response carries the badge with it, so this is one request,
+        // not two.
         viewModelScope.launch { refresh(initial = false) }
-        // The bell badge was only ever fetched once, at VM init — a notification
-        // that arrived later (e.g. a field submission getting approved) never
-        // showed up on the badge until the process restarted. Re-fetch it every
-        // time the feed resumes, same as the game list.
-        viewModelScope.launch { refreshUnread() }
     }
 
     private suspend fun refreshUnread() {
@@ -108,6 +110,8 @@ class GamesViewModel(
                 it.copy(
                     open = result.data.open,
                     mine = result.data.mine,
+                    // Carried by the feed response itself.
+                    unread = result.data.unread,
                     loading = false,
                     refreshing = false,
                     offline = false,

@@ -44,6 +44,15 @@ class CreateGameViewModel(
 
     data class UiState(
         val fields: List<FieldCardDto> = emptyList(),
+        /**
+         * True until the catalogue has been fetched (or failed).
+         *
+         * Without it an empty list read as "there are no pitches", and the form
+         * silently dropped the user into typing a pitch name by hand — the
+         * normal case on a slow connection, with no spinner, no explanation and
+         * no way back to the picker once the data landed.
+         */
+        val fieldsLoading: Boolean = true,
         val useCustomField: Boolean = false,
         val selectedFieldId: String? = null,
         val customFieldName: String = "",
@@ -77,6 +86,14 @@ class CreateGameViewModel(
             val cached = fieldsRepository.cached()
             if (cached != null) applyFields(cached)
             (fieldsRepository.refresh() as? ApiResult.Success)?.let { applyFields(it.data) }
+            // Only now is an empty catalogue really empty, so only now may the
+            // form fall back to free text.
+            _state.update {
+                it.copy(
+                    fieldsLoading = false,
+                    useCustomField = it.useCustomField || it.fields.isEmpty(),
+                )
+            }
         }
     }
 
@@ -89,7 +106,10 @@ class CreateGameViewModel(
             it.copy(
                 fields = fields,
                 selectedFieldId = preselect ?: it.selectedFieldId,
-                useCustomField = if (preselect != null) false else it.useCustomField || fields.isEmpty(),
+                // The empty-list fallback is deferred until loading finishes
+                // (see init) so a slow fetch is not mistaken for an empty
+                // catalogue.
+                useCustomField = if (preselect != null) false else it.useCustomField,
             )
         }
     }

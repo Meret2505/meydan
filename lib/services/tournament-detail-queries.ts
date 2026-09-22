@@ -26,6 +26,11 @@ export async function fetchTournamentDetail(
           awayTeam: { select: { id: true, name: true } },
         },
         orderBy: { scheduledAt: "desc" },
+        // The one nested list with no ceiling: a season's matches grew without
+        // limit, and every register/withdraw/record-result response re-sent
+        // the whole thing. Standings are computed from this list, so the cap is
+        // set well above any realistic tournament rather than tight.
+        take: 200,
       },
     },
   });

@@ -23,6 +23,12 @@ data class GameCardDto(
 data class GamesFeedDto(
     val open: List<GameCardDto>,
     val mine: List<GameCardDto>,
+    /**
+     * Unread notifications, shipped with the feed so the badge costs no
+     * separate round trip. Defaulted, so a cached payload written by an older
+     * build still parses.
+     */
+    val unread: Int = 0,
 )
 
 @Serializable

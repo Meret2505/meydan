@@ -3,6 +3,7 @@ package com.meydan.app.feature.tournaments
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.isStale
 import com.meydan.app.core.network.dto.TournamentCardDto
 import com.meydan.app.data.TournamentsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,9 @@ class TournamentsViewModel(
             get() = tournaments.filter { inTab(it.status, tab) }
     }
 
+    /** When the list last came back from the network. See [isStale]. */
+    private var lastLoadedAt: Long? = null
+
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
@@ -51,7 +55,20 @@ class TournamentsViewModel(
         viewModelScope.launch { load() }
     }
 
+    /**
+     * Re-fetch on entering the tab. This was the only list tab without it, and
+     * because creating a tournament lands on the new tournament's detail
+     * screen, pressing Back returned to a list that did not contain the thing
+     * the user had just made — until they pulled to refresh. Gated on
+     * freshness like the others, so entering the tab twice is one request.
+     */
+    fun refreshOnEnter() {
+        if (!isStale(System.currentTimeMillis(), lastLoadedAt)) return
+        viewModelScope.launch { load() }
+    }
+
     private suspend fun load() {
+        lastLoadedAt = System.currentTimeMillis()
         when (val result = tournamentsRepository.refresh()) {
             is ApiResult.Success -> _state.update {
                 it.copy(tournaments = result.data, loading = false, refreshing = false, offline = false)

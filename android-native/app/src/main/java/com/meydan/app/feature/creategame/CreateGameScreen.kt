@@ -41,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -118,7 +119,26 @@ fun CreateGameScreen(
 
             // Field: catalogue picker or free text
             FieldBlock(stringResource(R.string.games_create_field_label)) {
-                if (!state.useCustomField && state.fields.isNotEmpty()) {
+                if (state.fieldsLoading && state.fields.isEmpty()) {
+                    // Says the catalogue is on its way instead of quietly
+                    // becoming a free-text form the user cannot get out of.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    ) {
+                        CircularProgressIndicator(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(16.dp),
+                            color = colors.primary,
+                        )
+                        Text(
+                            text = stringResource(R.string.games_create_field_loading),
+                            fontSize = 13.sp,
+                            color = colors.onSurfaceVariant,
+                        )
+                    }
+                } else if (!state.useCustomField && state.fields.isNotEmpty()) {
                     FieldDropdown(
                         fields = state.fields,
                         selectedId = state.selectedFieldId,

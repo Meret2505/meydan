@@ -7,6 +7,7 @@ import { handler, ok } from "@/lib/api/response";
 import { toGameCardDto, toGameDetailDto } from "@/lib/api/serializers/game";
 import { parseJson } from "@/lib/api/validate";
 import { fetchGamesFeed, getGameDetail } from "@/lib/services/game-queries";
+import { countUnreadNotifications } from "@/lib/services/notifications";
 import { createGame } from "@/lib/services/games";
 
 /**
@@ -21,11 +22,19 @@ export const GET = handler(async (request: Request) => {
   const { userId } = await requireOnboarded(request);
   const origin = originOf(request);
 
-  const { open, mine } = await fetchGamesFeed(userId);
+  // The bell badge ships with the feed: the client used to spend a second
+  // full HTTPS round trip on one integer, on a link where the handshake
+  // costs more than the payload. The standalone endpoint stays for the
+  // targeted refresh after the notifications screen marks everything read.
+  const [{ open, mine }, unread] = await Promise.all([
+    fetchGamesFeed(userId),
+    countUnreadNotifications(userId),
+  ]);
 
   return ok({
     open: open.map((game) => toGameCardDto(game, origin, userId)),
     mine: mine.map((game) => toGameCardDto(game, origin, userId)),
+    unread,
   });
 });
 
