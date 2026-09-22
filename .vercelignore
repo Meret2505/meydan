@@ -1,0 +1,47 @@
+# What NOT to upload when deploying the Next.js app.
+#
+# The CLI does not read .gitignore, so `vercel --prod` was packing the whole
+# working tree — 205 MB, most of it the Android project's Gradle output — and
+# the upload failed outright on a slow connection. Only what `next build`
+# (and `prisma generate`, via postinstall) actually reads belongs here.
+#
+# Kept: app/, components/, lib/, utils/, i18n*, messages/, public/, prisma/,
+# middleware.ts, next.config.js, package*.json, tsconfig.json, the postcss and
+# tailwind configs, and vercel.json.
+
+# The mobile apps. 312 MB and 62 MB respectively, almost all build output.
+android-native/
+android/
+capacitor.config.ts
+
+# Built mobile artefacts.
+*.apk
+*.aab
+
+# Generated knowledge-graph output.
+graphify-out/
+
+# Store listing material, database dumps, signing keys, design sources.
+play/
+backups/
+keys/
+prototype/
+
+# Self-hosting setup — Vercel builds none of this.
+Dockerfile
+docker-compose*.yml
+nginx/
+DEPLOY-VPS.md
+
+# Tests and their fixtures never run on the deployment.
+tests/
+**/*.test.ts
+**/*.test.tsx
+vitest.config.ts
+
+# Seed input, used only by `prisma db seed` from a developer machine.
+*.csv
+
+# Local build cache.
+tsconfig.tsbuildinfo
+.next/
