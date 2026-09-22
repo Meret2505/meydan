@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { getPlayerStats } from "@/lib/stats";
+import { getPlayerStatsFor } from "@/lib/stats";
 import type { TeamDetailDto } from "@/lib/api/serializers/team-detail";
 
 /**
@@ -39,18 +39,19 @@ export async function fetchTeamDetail(
     else draws++;
   }
 
-  const members = await Promise.all(
-    team.members.map(async (m) => {
-      const stats = await getPlayerStats(m.userId);
-      return {
-        id: m.user.id,
-        name: m.user.name,
-        position: m.user.position,
-        isCaptain: m.isCaptain,
-        attendanceRate: stats.attendanceRate,
-      };
-    }),
-  );
+  // One grouped query for the whole roster. This was a getPlayerStats call per
+  // member — concurrent, but still one query each on a single pooled
+  // connection, and it ran on every team open, create and member change.
+  const statsByUser = await getPlayerStatsFor(team.members.map((m) => m.userId));
+  const members = team.members.map((m) => ({
+    id: m.user.id,
+    name: m.user.name,
+    position: m.user.position,
+    isCaptain: m.isCaptain,
+    // Absent from the map means no attendance recorded at all, which is a null
+    // rate ("new"), not a zero one.
+    attendanceRate: statsByUser.get(m.userId)?.attendanceRate ?? null,
+  }));
 
   const viewerMembership = viewerId
     ? team.members.find((m) => m.userId === viewerId)
