@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { requireOnboarded } from "@/lib/api/auth";
 import { conflict, forbidden, notFound } from "@/lib/api/errors";
 import { handler, ok } from "@/lib/api/response";
@@ -21,6 +22,7 @@ async function respondWithTeam(teamId: string, userId: string) {
 /** Join a team. Idempotent — joining twice succeeds. */
 export const POST = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("team-members", userId, 30, PER_HOUR);
   const { id } = await context.params;
 
   const result = await joinTeam(id, userId);

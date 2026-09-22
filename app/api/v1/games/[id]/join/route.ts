@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { requireOnboarded } from "@/lib/api/auth";
 import { conflict, forbidden, notFound } from "@/lib/api/errors";
 import { originOf } from "@/lib/api/images";
@@ -23,6 +24,7 @@ async function respondWithGame(request: Request, gameId: string, userId: string)
 /** Join a game. Idempotent — joining twice succeeds. */
 export const POST = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("join-game", userId, 60, PER_HOUR);
   const { id } = await context.params;
 
   const result = await joinGame(id, userId);
@@ -38,6 +40,7 @@ export const POST = handler(async (request: Request, context: Context) => {
 /** Leave a game. The organizer cannot leave their own. */
 export const DELETE = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("join-game", userId, 60, PER_HOUR);
   const { id } = await context.params;
 
   const result = await leaveGame(id, userId);

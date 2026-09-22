@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireAuth } from "@/lib/api/auth";
 import { handler, ok } from "@/lib/api/response";
@@ -21,6 +22,7 @@ const schema = z.object({ token: z.string().min(1).max(4096) });
  */
 export const POST = handler(async (request: Request) => {
   const { userId } = await requireAuth(request);
+  await enforceRateLimit("fcm-token", userId, 60, PER_HOUR);
   const { token } = await parseJson(request, schema);
 
   await prisma.user.update({ where: { id: userId }, data: { fcmToken: token } });

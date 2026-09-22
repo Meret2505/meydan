@@ -1,3 +1,4 @@
+import { sendPush } from "@/lib/fcm";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -78,7 +79,42 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
         data: { gameId: game.id },
       })),
     });
+    await pushResultReminders(played);
   }
 
   return { closed: count, gameIds };
+}
+
+/**
+ * Pushes the nudge as well as writing it in-app.
+ *
+ * Without this the reminder only existed inside the app, which is no reminder
+ * at all: the whole point is to reach an organizer who has no reason to open
+ * the app again — the game has already vanished from every feed. Committed
+ * notifications come first and the push is best-effort, the same order
+ * joinGame uses.
+ */
+async function pushResultReminders(games: { id: string; organizerId: string }[]): Promise<void> {
+  const organizers = await prisma.user.findMany({
+    where: { id: { in: [...new Set(games.map((g) => g.organizerId))] }, fcmToken: { not: null } },
+    select: { id: true, fcmToken: true, locale: true },
+  });
+  if (organizers.length === 0) return;
+
+  const byId = new Map(organizers.map((o) => [o.id, o]));
+  await Promise.all(
+    games.map(async (game) => {
+      const organizer = byId.get(game.organizerId);
+      if (!organizer) return;
+      const ru = organizer.locale !== "tm";
+      await sendPush(
+        organizer.fcmToken,
+        ru ? "Игра прошла" : "Oýun geçdi",
+        ru
+          ? "Отметь, кто пришёл — это влияет на рейтинг игроков."
+          : "Kim geldi belläň — bu oýunçylaryň reýtingine täsir edýär.",
+        { gameId: game.id, url: `/${organizer.locale}/games/${game.id}` },
+      );
+    }),
+  );
 }

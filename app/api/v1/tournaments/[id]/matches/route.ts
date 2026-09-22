@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, conflict, forbidden, notFound } from "@/lib/api/errors";
@@ -27,6 +28,7 @@ const matchSchema = z
  */
 export const POST = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("tournament-match", userId, 60, PER_DAY);
   const { id } = await context.params;
   const input = await parseJson(request, matchSchema);
 

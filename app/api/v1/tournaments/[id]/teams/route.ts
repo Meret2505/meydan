@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { conflict, forbidden, notFound } from "@/lib/api/errors";
@@ -17,6 +18,7 @@ const registerSchema = z.object({ teamId: z.string() }).strict();
  */
 export const POST = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("tournament-teams", userId, 30, PER_HOUR);
   const { id } = await context.params;
   const { teamId } = await parseJson(request, registerSchema);
 

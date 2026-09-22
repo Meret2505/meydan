@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { requireOnboarded } from "@/lib/api/auth";
 import { conflict, forbidden, notFound } from "@/lib/api/errors";
 import { originOf } from "@/lib/api/images";
@@ -25,6 +26,7 @@ export const GET = handler(async (request: Request, context: Context) => {
  */
 export const DELETE = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("cancel-game", userId, 20, PER_HOUR);
   const { id } = await context.params;
 
   const result = await cancelGame(id, userId);

@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { requireOnboarded } from "@/lib/api/auth";
 import { notFound } from "@/lib/api/errors";
 import { handler, ok } from "@/lib/api/response";
@@ -8,6 +9,7 @@ type Context = { params: Promise<{ id: string }> };
 /** Favorite a field. Idempotent. */
 export const POST = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("favorite", userId, 120, PER_HOUR);
   const { id } = await context.params;
 
   const result = await setFieldFavorite(userId, id, true);
@@ -19,6 +21,7 @@ export const POST = handler(async (request: Request, context: Context) => {
 /** Unfavorite a field. Idempotent. */
 export const DELETE = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("favorite", userId, 120, PER_HOUR);
   const { id } = await context.params;
 
   const result = await setFieldFavorite(userId, id, false);

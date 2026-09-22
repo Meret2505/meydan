@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, forbidden, notFound } from "@/lib/api/errors";
@@ -31,6 +32,7 @@ type Context = { params: Promise<{ id: string }> };
 
 export const POST = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("game-result", userId, 30, PER_HOUR);
   const { id } = await context.params;
   const body = await parseJson(request, schema);
 

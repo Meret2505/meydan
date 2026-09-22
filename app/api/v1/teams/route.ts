@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, notFound } from "@/lib/api/errors";
@@ -34,6 +35,7 @@ const createSchema = z
 /** Creates a team with the caller as captain; returns the new team's detail. */
 export const POST = handler(async (request: Request) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("create-team", userId, 10, PER_DAY);
   const input = await parseJson(request, createSchema);
 
   const result = await createTeam(userId, input);

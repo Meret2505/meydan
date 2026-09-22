@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, notFound } from "@/lib/api/errors";
@@ -46,6 +47,7 @@ const createSchema = z
  */
 export const POST = handler(async (request: Request) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("create-game", userId, 20, PER_DAY);
   const body = await parseJson(request, createSchema);
 
   const result = await createGame(userId, {

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { requireAuth } from "@/lib/api/auth";
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { badRequest, conflict, notFound } from "@/lib/api/errors";
 import { originOf } from "@/lib/api/images";
 import { handler, ok } from "@/lib/api/response";
@@ -43,6 +44,7 @@ export const GET = handler(async (request: Request) => {
  */
 export const PATCH = handler(async (request: Request) => {
   const claims = await requireAuth(request);
+  await enforceRateLimit("patch-me", claims.userId, 30, PER_HOUR);
   const patch = await parseJson(request, patchSchema);
 
   const result = await updateOnboardingProfile(claims.userId, patch);

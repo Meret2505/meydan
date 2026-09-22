@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_HOUR } from "@/lib/api/rate-limit";
 import { requireOnboarded } from "@/lib/api/auth";
 import { conflict, forbidden, notFound } from "@/lib/api/errors";
 import { handler, ok } from "@/lib/api/response";
@@ -15,6 +16,7 @@ type Context = { params: Promise<{ id: string; userId: string }> };
  */
 export const DELETE = handler(async (request: Request, context: Context) => {
   const { userId: callerId } = await requireOnboarded(request);
+  await enforceRateLimit("team-members", callerId, 30, PER_HOUR);
   const { id, userId: targetId } = await context.params;
 
   const result = await removeMember(id, callerId, targetId);

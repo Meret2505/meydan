@@ -1,3 +1,4 @@
+import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, conflict, forbidden, notFound } from "@/lib/api/errors";
 import { absoluteImageUrl, originOf } from "@/lib/api/images";
@@ -13,6 +14,7 @@ type Context = { params: Promise<{ id: string }> };
  */
 export const POST = handler(async (request: Request, context: Context) => {
   const { userId } = await requireOnboarded(request);
+  await enforceRateLimit("submission-photo", userId, 30, PER_DAY);
   const { id } = await context.params;
 
   const form = await request.formData().catch(() => null);
