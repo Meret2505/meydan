@@ -672,7 +672,15 @@ private fun ResultSheet(
     onDismiss: () -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = colors.surface,
+        // Explicit, like the profile sheets: M3 takes the sheet's corner from
+        // shapes.extraLarge, which this theme defines as a 999dp pill for
+        // buttons. Left to the default, the corner arc swallowed the sheet's
+        // own title and the "who turned up" label.
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -1,6 +1,5 @@
 package com.meydan.app.feature.notifications
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +37,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import com.meydan.app.core.common.RelativeSpan
+import com.meydan.app.core.common.relativeSpanOf
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -272,12 +274,9 @@ private fun teamIdOf(notification: NotificationDto): String? =
     notification.data?.get("teamId")?.jsonPrimitive?.contentOrNull
 
 /**
- * A "5 min ago" style label from the ISO createdAt instant, in the language the
- * user picked in the app.
- *
- * DateUtils formats in the *system* locale, so a phone set to English showed
- * English timestamps inside an app running in Russian or Turkmen. Going through
- * a context configured with the app's locale keeps the two in step.
+ * A "5 minutes ago" label from the ISO createdAt instant, worded by the app's
+ * own plurals — so it follows the language the user picked in the app, and
+ * Russian gets its cases. See RelativeSpan for why DateUtils was not usable.
  */
 @Composable
 private fun relativeTime(createdAt: String): String {
@@ -286,9 +285,14 @@ private fun relativeTime(createdAt: String): String {
     } catch (e: Exception) {
         return ""
     }
-    val configuration = LocalConfiguration.current
-    val localized = LocalContext.current.createConfigurationContext(configuration)
-    // The Context overload reads its strings from that context's resources,
-    // which is what makes the app's locale win over the system's.
-    return DateUtils.getRelativeTimeSpanString(localized, millis).toString()
+    return when (val span = relativeSpanOf(millis, System.currentTimeMillis())) {
+        RelativeSpan.JustNow -> stringResource(R.string.time_just_now)
+        is RelativeSpan.Minutes ->
+            pluralStringResource(R.plurals.time_minutes_ago, span.count, span.count)
+        is RelativeSpan.Hours ->
+            pluralStringResource(R.plurals.time_hours_ago, span.count, span.count)
+        is RelativeSpan.Days ->
+            pluralStringResource(R.plurals.time_days_ago, span.count, span.count)
+    }
 }
+

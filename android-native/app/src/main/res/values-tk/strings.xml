@@ -361,4 +361,17 @@
     <string name="games_result_save">Saklamak</string>
     <string name="games_result_recorded">Netije ýazyldy</string>
     <string name="games_create_field_loading">Meýdanlaryň sanawy ýüklenýär…</string>
+    <string name="time_just_now">şu wagt</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="one">%d minut öň</item>
+        <item quantity="other">%d minut öň</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="one">%d sagat öň</item>
+        <item quantity="other">%d sagat öň</item>
+    </plurals>
+    <plurals name="time_days_ago">
+        <item quantity="one">%d gün öň</item>
+        <item quantity="other">%d gün öň</item>
+    </plurals>
 </resources>

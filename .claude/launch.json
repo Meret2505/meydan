@@ -4,9 +4,25 @@
     {
       "name": "meydan-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "meydan-dev-testdb",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "DATABASE_URL=postgresql://meydan_test:meydan_test@localhost:5433/meydan_test",
+        "DIRECT_URL=postgresql://meydan_test:meydan_test@localhost:5433/meydan_test",
+        "STORAGE_BACKEND=local",
+        "npm",
+        "run",
+        "dev"
+      ],
+      "port": 3000
     }
   ]
 }
