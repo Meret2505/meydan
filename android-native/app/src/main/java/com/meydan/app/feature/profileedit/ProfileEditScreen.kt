@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,6 +46,7 @@ import com.meydan.app.core.common.DISTRICTS
 import com.meydan.app.core.common.POSITIONS
 import com.meydan.app.core.common.Position
 import com.meydan.app.core.designsystem.PrimaryButton
+import com.meydan.app.core.designsystem.rememberExitGuard
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.common.errorTextRes
 
@@ -69,6 +71,7 @@ fun ProfileEditScreen(
     }
 
     val colors = MaterialTheme.colorScheme
+    val exit = rememberExitGuard(state.hasUnsavedInput, onBack)
 
     Column(
         modifier = Modifier
@@ -83,7 +86,7 @@ fun ProfileEditScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 8.dp),
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = exit.requestExit) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.common_back),
@@ -272,7 +275,7 @@ private fun ChoiceChip(
     val colors = MaterialTheme.colorScheme
     Box(
         modifier = modifier
-            .height(52.dp)
+            .heightIn(min = 52.dp)
             .border(
                 width = if (active) 1.5.dp else 1.dp,
                 color = if (active) colors.primary else colors.outline,

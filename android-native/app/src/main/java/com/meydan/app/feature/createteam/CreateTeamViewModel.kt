@@ -34,17 +34,31 @@ class CreateTeamViewModel(
         val submitting: Boolean = false,
         val errorCode: String? = null,
         val createdTeamId: String? = null,
+        /**
+         * Whether the user has touched a control. Only the setters below set
+         * it, never a seeding path, so a form that filled *itself* in is never
+         * mistaken for typed input. Re-picking a value that was already
+         * selected counts as a touch — that costs one extra confirmation tap
+         * and buys a rule with no exceptions to get wrong.
+         */
+        val edited: Boolean = false,
     ) {
         val canSubmit: Boolean
             get() = !submitting && name.trim().length >= MIN_NAME_LENGTH
+
+        /** See rememberExitGuard: Back must ask before discarding this. */
+        val hasUnsavedInput: Boolean get() = edited && createdTeamId == null
     }
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
-    fun setName(v: String) = _state.update { it.copy(name = v.take(40), errorCode = null) }
-    fun setDistrict(v: String) = _state.update { it.copy(district = v) }
-    fun setColor(v: String) = _state.update { it.copy(color = v) }
+    fun setName(v: String) =
+        _state.update { it.copy(name = v.take(40), errorCode = null, edited = true) }
+
+    fun setDistrict(v: String) = _state.update { it.copy(district = v, edited = true) }
+
+    fun setColor(v: String) = _state.update { it.copy(color = v, edited = true) }
 
     fun submit() {
         val s = _state.value

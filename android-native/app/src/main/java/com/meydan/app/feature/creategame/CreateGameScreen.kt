@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -57,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
 import com.meydan.app.core.designsystem.PrimaryButton
+import com.meydan.app.core.designsystem.rememberExitGuard
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.feature.fields.FieldsViewModel
@@ -92,6 +94,8 @@ fun CreateGameScreen(
         return
     }
 
+    val exit = rememberExitGuard(state.hasUnsavedInput, onBack)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,7 +103,7 @@ fun CreateGameScreen(
             .imePadding(),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 16.dp)) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = exit.requestExit) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back), tint = colors.onBackground)
             }
             Text(stringResource(R.string.games_create_title), style = MaterialTheme.typography.headlineSmall)
@@ -279,7 +283,7 @@ private fun WhenPicker(value: LocalDateTime, locale: Locale, onPick: (LocalDateT
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, colors.outline, RoundedCornerShape(12.dp))
             .clickable {
@@ -348,7 +352,7 @@ private fun SpotChip(n: Int, active: Boolean, onClick: () -> Unit, modifier: Mod
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .height(48.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(if (active) colors.primary.copy(alpha = 0.16f) else colors.surface)
             .border(if (active) 1.5.dp else 1.dp, if (active) colors.primary else colors.outline, RoundedCornerShape(12.dp))
@@ -365,7 +369,7 @@ private fun PositionChip(label: String, active: Boolean, onClick: () -> Unit, mo
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .height(48.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(if (active) warning.copy(alpha = 0.16f) else colors.surface)
             .border(if (active) 1.5.dp else 1.dp, if (active) warning else colors.outline, RoundedCornerShape(12.dp))

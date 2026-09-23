@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -251,7 +252,7 @@ private fun SubmissionCard(
                 onClick = onReject,
                 enabled = !disabled && !acting,
                 shape = MaterialTheme.shapes.large,
-                modifier = Modifier.weight(1f).height(46.dp),
+                modifier = Modifier.weight(1f).heightIn(min = 46.dp),
             ) {
                 Text(stringResource(R.string.fields_moderation_reject), fontWeight = FontWeight.SemiBold)
             }
@@ -263,7 +264,7 @@ private fun SubmissionCard(
                     containerColor = colors.primary,
                     contentColor = colors.onPrimary,
                 ),
-                modifier = Modifier.weight(1f).height(46.dp),
+                modifier = Modifier.weight(1f).heightIn(min = 46.dp),
             ) {
                 if (acting) {
                     CircularProgressIndicator(

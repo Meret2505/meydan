@@ -35,6 +35,8 @@ class CreateTournamentViewModel(
         val submitting: Boolean = false,
         val errorCode: String? = null,
         val createdId: String? = null,
+        /** The user touched a control; see CreateTeamViewModel.UiState.edited. */
+        val edited: Boolean = false,
     ) {
         val canSubmit: Boolean
             get() = !submitting &&
@@ -42,16 +44,25 @@ class CreateTournamentViewModel(
                 // The server rejects this too; blocking it here avoids a
                 // pointless round-trip and a confusing error.
                 (endDate == null || !endDate.isBefore(startDate))
+
+        /** See rememberExitGuard: Back must ask before discarding this. */
+        val hasUnsavedInput: Boolean get() = edited && createdId == null
     }
 
     // Default to a week out, like a real fixture list rather than "today".
     private val _state = MutableStateFlow(UiState(startDate = today.plusWeeks(1)))
     val state: StateFlow<UiState> = _state.asStateFlow()
 
-    fun setName(v: String) = _state.update { it.copy(name = v.take(60), errorCode = null) }
-    fun setStart(d: LocalDate) = _state.update { it.copy(startDate = d, errorCode = null) }
-    fun setEnd(d: LocalDate?) = _state.update { it.copy(endDate = d, errorCode = null) }
-    fun setDescription(v: String) = _state.update { it.copy(description = v) }
+    fun setName(v: String) =
+        _state.update { it.copy(name = v.take(60), errorCode = null, edited = true) }
+
+    fun setStart(d: LocalDate) =
+        _state.update { it.copy(startDate = d, errorCode = null, edited = true) }
+
+    fun setEnd(d: LocalDate?) =
+        _state.update { it.copy(endDate = d, errorCode = null, edited = true) }
+
+    fun setDescription(v: String) = _state.update { it.copy(description = v, edited = true) }
 
     fun submit() {
         val s = _state.value

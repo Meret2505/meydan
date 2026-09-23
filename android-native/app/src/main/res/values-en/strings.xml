@@ -334,6 +334,11 @@
     <!-- common -->
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
+    <!-- Leaving a form that has unsaved input. -->
+    <string name="form_discard_title">Discard changes?</string>
+    <string name="form_discard_body">What you have entered will not be saved.</string>
+    <string name="form_discard_confirm">Discard</string>
+    <string name="form_discard_dismiss">Keep editing</string>
     <string name="common_next">Next</string>
     <string name="common_skip">Skip</string>
     <string name="common_loading">Loading…</string>

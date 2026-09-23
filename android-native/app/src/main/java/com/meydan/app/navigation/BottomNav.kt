@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.meydan.app.R
@@ -108,7 +110,16 @@ private fun NavItem(
             color = color,
             fontSize = 11.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.SemiBold,
-            modifier = Modifier.padding(top = 5.dp),
+            // One line, always. At a 200% font scale "Tournaments" wrapped
+            // mid-word, which made the whole bar a line taller and put "ments"
+            // down in the gesture-bar inset. A tab label is a hint next to an
+            // icon that already identifies the tab, so clipping it is the right
+            // loss — the icon and its contentDescription still say which tab
+            // this is.
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 5.dp, start = 2.dp, end = 2.dp),
         )
     }
 }

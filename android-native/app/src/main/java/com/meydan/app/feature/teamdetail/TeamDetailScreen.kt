@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -273,9 +274,10 @@ private fun MembershipCta(
             contentAlignment = Alignment.Center,
             modifier = modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .heightIn(min = 52.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(colors.surfaceVariant.copy(alpha = 0.5f)),
+                .background(colors.surfaceVariant.copy(alpha = 0.5f))
+                .padding(horizontal = 16.dp, vertical = 10.dp),
         ) {
             Text(
                 text = stringResource(R.string.teams_you_are_captain),
@@ -296,7 +298,7 @@ private fun MembershipCta(
             containerColor = if (member) colors.surfaceVariant else colors.primary,
             contentColor = if (member) colors.onSurface else colors.onPrimary,
         ),
-        modifier = modifier.fillMaxWidth().height(52.dp),
+        modifier = modifier.fillMaxWidth().heightIn(min = 52.dp),
     ) {
         if (acting) {
             CircularProgressIndicator(

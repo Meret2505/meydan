@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,6 +63,7 @@ import com.meydan.app.core.common.DISTRICTS
 import com.meydan.app.core.common.compressForUpload
 import com.meydan.app.core.designsystem.PhoneTextField
 import com.meydan.app.core.designsystem.PrimaryButton
+import com.meydan.app.core.designsystem.rememberExitGuard
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.common.errorTextRes
 import com.meydan.app.feature.fields.surfaceLabel
@@ -93,6 +95,7 @@ fun SubmitFieldScreen(
         return
     }
 
+    val exit = rememberExitGuard(state.hasUnsavedInput, onBack)
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -139,7 +142,7 @@ fun SubmitFieldScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = exit.requestExit) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.common_back),
@@ -501,7 +504,7 @@ private fun ChoiceCell(
             // Dimmed as well as inert while submitting: a cell that still looks
             // live but swallows taps is the worse of the two failures.
             .alpha(if (enabled) 1f else 0.4f)
-            .height(52.dp)
+            .heightIn(min = 52.dp)
             .border(
                 width = if (active) 1.5.dp else 1.dp,
                 color = if (active) colors.primary else colors.outline,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,6 +45,7 @@ import com.meydan.app.R
 import com.meydan.app.core.common.DISTRICTS
 import com.meydan.app.core.common.TeamColors
 import com.meydan.app.core.designsystem.PrimaryButton
+import com.meydan.app.core.designsystem.rememberExitGuard
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.common.errorTextRes
 
@@ -69,6 +71,7 @@ fun CreateTeamScreen(
     }
 
     val colors = MaterialTheme.colorScheme
+    val exit = rememberExitGuard(state.hasUnsavedInput, onBack)
 
     Column(
         modifier = Modifier
@@ -80,7 +83,7 @@ fun CreateTeamScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = exit.requestExit) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.common_back),
@@ -162,7 +165,7 @@ fun CreateTeamScreen(
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .height(52.dp)
+                                    .heightIn(min = 52.dp)
                                     .border(
                                         width = 1.dp,
                                         color = if (active) colors.primary else colors.outline,

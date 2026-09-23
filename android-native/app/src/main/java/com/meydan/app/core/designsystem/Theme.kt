@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
  * The app's semantic colour roles.
  *
  * Material 3's own scheme does not have a place for several tokens the brand
- * relies on — three tiers of muted text, two border weights, a second surface
+ * relies on — two tiers of muted text, two border weights, a second surface
  * layer — so those live here and are provided alongside the MaterialTheme.
  * Components read `MeydanTheme.colors`; MaterialTheme is still populated so
  * stock Material components look right.
@@ -36,7 +36,6 @@ data class MeydanColors(
     val text: Color,
     val textSoft: Color,
     val textMuted: Color,
-    val textFaint: Color,
     val border: Color,
     val borderStrong: Color,
     /**
@@ -61,7 +60,6 @@ private val DarkColors = MeydanColors(
     text = DarkText,
     textSoft = DarkTextSoft,
     textMuted = DarkTextMuted,
-    textFaint = DarkTextFaint,
     border = DarkBorder,
     borderStrong = DarkBorderStrong,
     pitchTop = PitchTop,
@@ -81,7 +79,6 @@ private val LightColors = MeydanColors(
     text = LightText,
     textSoft = LightTextSoft,
     textMuted = LightTextMuted,
-    textFaint = LightTextFaint,
     border = LightBorder,
     borderStrong = LightBorderStrong,
     pitchTop = PitchTop,

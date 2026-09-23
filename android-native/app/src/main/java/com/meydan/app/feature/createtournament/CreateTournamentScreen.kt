@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -37,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.meydan.app.R
 import com.meydan.app.core.designsystem.PrimaryButton
+import com.meydan.app.core.designsystem.rememberExitGuard
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.core.common.errorTextRes
 import java.time.LocalDate
@@ -66,6 +68,7 @@ fun CreateTournamentScreen(
     }
 
     val colors = MaterialTheme.colorScheme
+    val exit = rememberExitGuard(state.hasUnsavedInput, onBack)
 
     Column(
         modifier = Modifier
@@ -77,7 +80,7 @@ fun CreateTournamentScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = exit.requestExit) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.common_back),
@@ -181,7 +184,7 @@ private fun DateField(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .heightIn(min = 56.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(colors.surface)
             .clickable {

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -334,7 +335,7 @@ private fun DistrictStep(selected: String?, onSelect: (String) -> Unit) {
             val active = selected == district
             Box(
                 modifier = Modifier
-                    .height(64.dp)
+                    .heightIn(min = 64.dp)
                     .border(
                         width = 1.dp,
                         color = if (active) MaterialTheme.colorScheme.primary
@@ -373,7 +374,7 @@ private fun AgeStep(selected: Int?, onSelect: (Int) -> Unit) {
             val active = selected == range.mid
             Box(
                 modifier = Modifier
-                    .height(64.dp)
+                    .heightIn(min = 64.dp)
                     .border(
                         width = 1.dp,
                         color = if (active) MaterialTheme.colorScheme.primary

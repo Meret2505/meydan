@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -538,7 +539,7 @@ private fun CtaButton(
                 containerColor = colors.error.copy(alpha = 0.12f),
                 contentColor = colors.error,
             ),
-            modifier = Modifier.fillMaxWidth().height(58.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
         ) {
             if (acting) {
                 CircularProgressIndicator(
@@ -567,7 +568,7 @@ private fun CtaButton(
             onClick = onRecordResult,
             enabled = !acting,
             shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth().height(58.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
         ) {
             Text(
                 text = stringResource(R.string.games_result_cta),
@@ -590,9 +591,10 @@ private fun CtaButton(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(58.dp)
+                .heightIn(min = 58.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(colors.surfaceVariant.copy(alpha = 0.5f)),
+                .background(colors.surfaceVariant.copy(alpha = 0.5f))
+                .padding(horizontal = 16.dp, vertical = 10.dp),
         ) {
             Text(label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant)
         }
@@ -609,7 +611,7 @@ private fun CtaButton(
             containerColor = if (joined) colors.surfaceVariant else colors.primary,
             contentColor = if (joined) colors.onSurface else colors.onPrimary,
         ),
-        modifier = Modifier.fillMaxWidth().height(58.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
     ) {
         if (acting) {
             CircularProgressIndicator(strokeWidth = 2.5.dp, modifier = Modifier.size(22.dp), color = colors.onPrimary)

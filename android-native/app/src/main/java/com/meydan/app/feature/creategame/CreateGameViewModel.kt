@@ -66,11 +66,21 @@ class CreateGameViewModel(
         val createdGameId: String? = null,
         /** Recomputed on every pick; see [isScheduledInPast]. */
         val scheduledInPast: Boolean = false,
+        /**
+         * The user touched a control; see CreateTeamViewModel.UiState.edited.
+         * This form has two seeding paths that must *not* count — the preselected
+         * pitch from a field's detail, and the free-text fallback an empty
+         * catalogue turns on by itself — so [applyFields] and `init` leave it be.
+         */
+        val edited: Boolean = false,
     ) {
         val canSubmit: Boolean
             get() = !submitting &&
                 !scheduledInPast &&
                 (if (useCustomField) customFieldName.trim().isNotEmpty() else selectedFieldId != null)
+
+        /** See rememberExitGuard: Back must ask before discarding this. */
+        val hasUnsavedInput: Boolean get() = edited && createdGameId == null
     }
 
     // Default to the next round hour + 2h, matching the web's defaultScheduled().
@@ -114,10 +124,18 @@ class CreateGameViewModel(
         }
     }
 
-    fun selectField(id: String) = _state.update { it.copy(selectedFieldId = id, errorCode = null) }
-    fun setCustomField(name: String) = _state.update { it.copy(customFieldName = name, errorCode = null) }
-    fun useCatalogue() = _state.update { it.copy(useCustomField = false, customFieldName = "") }
-    fun useFreeText() = _state.update { it.copy(useCustomField = true, selectedFieldId = null) }
+    fun selectField(id: String) =
+        _state.update { it.copy(selectedFieldId = id, errorCode = null, edited = true) }
+
+    fun setCustomField(name: String) =
+        _state.update { it.copy(customFieldName = name, errorCode = null, edited = true) }
+
+    fun useCatalogue() =
+        _state.update { it.copy(useCustomField = false, customFieldName = "", edited = true) }
+
+    fun useFreeText() =
+        _state.update { it.copy(useCustomField = true, selectedFieldId = null, edited = true) }
+
     fun setDateTime(dt: LocalDateTime) = _state.update {
         it.copy(
             scheduledAt = dt,
@@ -126,14 +144,22 @@ class CreateGameViewModel(
             // has since passed.
             scheduledInPast = isScheduledInPast(dt, LocalDateTime.now()),
             errorCode = null,
+            edited = true,
         )
     }
-    fun setTotalSpots(n: Int) = _state.update { it.copy(totalSpots = n) }
-    fun setPrice(v: String) = _state.update { it.copy(price = v.filter { c -> c.isDigit() }.take(3)) }
-    fun setNotes(v: String) = _state.update { it.copy(notes = v) }
+
+    fun setTotalSpots(n: Int) = _state.update { it.copy(totalSpots = n, edited = true) }
+
+    fun setPrice(v: String) =
+        _state.update { it.copy(price = v.filter { c -> c.isDigit() }.take(3), edited = true) }
+
+    fun setNotes(v: String) = _state.update { it.copy(notes = v, edited = true) }
 
     fun togglePosition(p: String) = _state.update {
-        it.copy(positions = if (it.positions.contains(p)) it.positions - p else it.positions + p)
+        it.copy(
+            positions = if (it.positions.contains(p)) it.positions - p else it.positions + p,
+            edited = true,
+        )
     }
 
     fun submit() {

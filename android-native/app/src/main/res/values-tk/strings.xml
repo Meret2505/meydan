@@ -334,6 +334,11 @@
     <!-- common -->
     <string name="common_back">Yza</string>
     <string name="common_cancel">Ýatyr</string>
+    <!-- Leaving a form that has unsaved input. -->
+    <string name="form_discard_title">Saklamazdan çykylsynmy?</string>
+    <string name="form_discard_body">Giren maglumatlaryňyz saklanmaz.</string>
+    <string name="form_discard_confirm">Çyk</string>
+    <string name="form_discard_dismiss">Galmak</string>
     <string name="common_next">Indiki</string>
     <string name="common_skip">Geç</string>
     <string name="common_loading">Ýüklenýär…</string>

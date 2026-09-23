@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -315,10 +316,11 @@ private fun CallButton(phone: String, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
-            .height(48.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(colors.primary)
-            .clickable { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))) },
+            .clickable { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))) }
+            .padding(horizontal = 12.dp, vertical = 10.dp),
     ) {
         Icon(imageVector = Icons.Filled.Call, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
         Text(stringResource(R.string.fields_call), color = colors.onPrimary, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
@@ -334,10 +336,11 @@ private fun WhatsappButton(phone: String, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
-            .height(48.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(colors.surface)
-            .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$digits"))) },
+            .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/$digits"))) }
+            .padding(horizontal = 12.dp, vertical = 10.dp),
     ) {
         Icon(imageVector = Icons.AutoMirrored.Filled.Chat, contentDescription = null, tint = colors.onSurface, modifier = Modifier.size(18.dp))
         Text(stringResource(R.string.field_whatsapp), color = colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp, modifier = Modifier.padding(start = 8.dp))
@@ -351,10 +354,11 @@ private fun StartGameButton(onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(colors.surface)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
     ) {
         Text(stringResource(R.string.field_start_game), color = colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp)
     }

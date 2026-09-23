@@ -352,6 +352,11 @@
     <!-- common -->
     <string name="common_back">Назад</string>
     <string name="common_cancel">Отмена</string>
+    <!-- Leaving a form that has unsaved input. -->
+    <string name="form_discard_title">Выйти без сохранения?</string>
+    <string name="form_discard_body">Введённые данные не сохранятся.</string>
+    <string name="form_discard_confirm">Выйти</string>
+    <string name="form_discard_dismiss">Остаться</string>
     <string name="common_next">Далее</string>
     <string name="common_skip">Пропустить</string>
     <string name="common_loading">Загрузка…</string>

@@ -38,9 +38,18 @@ class ProfileEditViewModel(
         val submitting: Boolean = false,
         val errorCode: String? = null,
         val saved: Boolean = false,
+        /**
+         * The user touched a control; see CreateTeamViewModel.UiState.edited.
+         * Here the distinction matters most: this form seeds itself twice, from
+         * the cached user and then from /me, and neither is the user's input.
+         */
+        val edited: Boolean = false,
     ) {
         val canSubmit: Boolean
             get() = !submitting && name.trim().isNotEmpty()
+
+        /** See rememberExitGuard: Back must ask before discarding this. */
+        val hasUnsavedInput: Boolean get() = edited && !saved
     }
 
     private val _state = MutableStateFlow(UiState())
@@ -56,7 +65,10 @@ class ProfileEditViewModel(
     /** Populates the form from a user record, but never clobbers edits in progress. */
     private fun seed(user: UserDto) {
         _state.update {
-            if (it.loaded) return@update it
+            // `edited` as well as `loaded`: someone who starts typing in the
+            // frame before the cached user arrives must not have it overwritten
+            // by the seed that lands next.
+            if (it.loaded || it.edited) return@update it
             it.copy(
                 loaded = true,
                 name = user.name,
@@ -69,12 +81,18 @@ class ProfileEditViewModel(
         }
     }
 
-    fun setName(v: String) = _state.update { it.copy(name = v, errorCode = null) }
-    fun setPosition(p: Position) = _state.update { it.copy(position = p) }
-    fun setDistrict(d: String) = _state.update { it.copy(district = d) }
-    fun setSkill(s: String) = _state.update { it.copy(skillLevel = s) }
-    fun setAge(v: String) = _state.update { it.copy(age = v.filter { c -> c.isDigit() }.take(3)) }
-    fun setOpenToInvite(v: Boolean) = _state.update { it.copy(isOpenToInvite = v) }
+    fun setName(v: String) = _state.update { it.copy(name = v, errorCode = null, edited = true) }
+
+    fun setPosition(p: Position) = _state.update { it.copy(position = p, edited = true) }
+
+    fun setDistrict(d: String) = _state.update { it.copy(district = d, edited = true) }
+
+    fun setSkill(s: String) = _state.update { it.copy(skillLevel = s, edited = true) }
+
+    fun setAge(v: String) =
+        _state.update { it.copy(age = v.filter { c -> c.isDigit() }.take(3), edited = true) }
+
+    fun setOpenToInvite(v: Boolean) = _state.update { it.copy(isOpenToInvite = v, edited = true) }
 
     fun submit() {
         val s = _state.value

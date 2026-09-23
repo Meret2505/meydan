@@ -32,11 +32,12 @@ internal val DarkPrimarySoft = Color(0xFF4ADE80)
 internal val DarkWarning = Color(0xFFFBBF24)
 internal val DarkDanger = Color(0xFFF87171)
 
-// Text: slate ramp. 4 tiers, each a real step apart so hierarchy is legible.
+// Text: slate ramp (50 / 300 / 400), each a real step apart so hierarchy is
+// legible. Every tier clears 4.5:1 on all three dark surfaces — the lightest
+// surface, DarkSurface2, is the binding one: 18.71 / 13.18 / 6.09.
 internal val DarkText = Color(0xFFF8FAFC)
 internal val DarkTextSoft = Color(0xFFCBD5E1)
 internal val DarkTextMuted = Color(0xFF94A3B8)
-internal val DarkTextFaint = Color(0xFF64748B)
 
 internal val DarkBorder = Color(0x14FFFFFF) // rgba(255,255,255,.08)
 internal val DarkBorderStrong = Color(0x24FFFFFF) // rgba(255,255,255,.14)
@@ -49,17 +50,51 @@ internal val LightSurface = Color(0xFFFFFFFF)
 internal val LightSurface2 = Color(0xFFEFF1F4)
 internal val LightNavBg = Color(0xFFFFFFFF)
 
-// green-600 on white clears 4.5:1 for text and button labels.
-internal val LightPrimary = Color(0xFF16A34A)
+// green-800, not the green-600 this used to be — and not because green-600 is
+// the wrong green, but because on a light ground it cannot carry text or a
+// white label. Measured against LightBg / LightSurface / LightSurface2:
+//
+//   green-600 #16A34A   as text  3.07 / 3.30 / 2.91   white on it  3.30
+//   green-800 #166534   as text  6.65 / 7.13 / 6.30   white on it  7.13
+//
+// The 3.30 was the app's primary call to action — white on green, the most
+// pressed button in the product — sitting a third below the 4.5:1 that body
+// text needs. `primary` is also the label colour in 19 places and the text on
+// every selected chip (over an 8% tint of itself, which is darker still: 5.62
+// at green-800, 3.02 at green-600), so one token had to answer for all of it.
+//
+// Dark mode keeps the vivid #22C55E: on #0A0C10 it already measures 8.59. The
+// brand therefore reads as vivid green on dark and deep green on light, which
+// is the same direction every accent has to move when the ground flips.
+internal val LightPrimary = Color(0xFF166534)
 internal val LightPrimaryText = Color(0xFFFFFFFF)
-internal val LightPrimarySoft = Color(0xFF15803D)
-internal val LightWarning = Color(0xFFD97706)
-internal val LightDanger = Color(0xFFDC2626)
 
+/** green-700: lighter than [LightPrimary], mirroring PrimarySoft in dark mode. */
+internal val LightPrimarySoft = Color(0xFF15803D)
+
+/**
+ * amber-600, and knowingly under AA as text (2.82–3.19 on the light surfaces).
+ *
+ * It is not darkened here because this token does two jobs: a text colour on
+ * light surfaces, and the tint of the favourite star drawn over the dark pitch
+ * hero, where an amber-800 would vanish. Splitting the role is the fix; it
+ * belongs with the wider colour cleanup, not with a one-line edit that trades
+ * one contrast failure for another.
+ */
+internal val LightWarning = Color(0xFFD97706)
+
+/** red-700: as text 5.72 on the worst light surface, 6.47 for white on it. */
+internal val LightDanger = Color(0xFFB91C1C)
+
+// Text: the same slate ramp as dark mode, inverted, shifted one step darker
+// than it was (900 / 700 / 600). slate-500 as `muted` measured 4.21 on
+// LightSurface2 and 4.44 on LightBg, and `muted` is wired to M3's
+// onSurfaceVariant — every section label, placeholder and hint in the app — so
+// that one value was most of the app's secondary text. slate-600 is 6.70 at
+// worst.
 internal val LightText = Color(0xFF0F172A)
 internal val LightTextSoft = Color(0xFF334155)
-internal val LightTextMuted = Color(0xFF64748B)
-internal val LightTextFaint = Color(0xFF94A3B8)
+internal val LightTextMuted = Color(0xFF475569)
 
 internal val LightBorder = Color(0x140F172A) // rgba(15,23,42,.08)
 internal val LightBorderStrong = Color(0x240F172A) // rgba(15,23,42,.14)

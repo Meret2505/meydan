@@ -88,6 +88,8 @@ class SubmitFieldViewModel(
         val submitting: Boolean = false,
         val errorCode: String? = null,
         val createdId: String? = null,
+        /** The user touched a control; see CreateTeamViewModel.UiState.edited. */
+        val edited: Boolean = false,
     ) {
         /**
          * Required inputs still not accepted, in the order they appear on the
@@ -132,21 +134,39 @@ class SubmitFieldViewModel(
         val capacityOutOfRange: Boolean
             get() = capacity.isNotEmpty() &&
                 capacity.toIntOrNull().let { it == null || it !in MIN_CAPACITY..MAX_CAPACITY }
+
+        /**
+         * See rememberExitGuard: Back must ask before discarding this. The
+         * longest form in the app, and the only one that can hold work that
+         * cannot be retyped at all — three photos resolved from the gallery.
+         */
+        val hasUnsavedInput: Boolean get() = edited && createdId == null
     }
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
-    fun setName(v: String) = _state.update { it.copy(name = v.take(MAX_NAME_LENGTH), errorCode = null) }
-    fun setAddress(v: String) =
-        _state.update { it.copy(address = v.take(MAX_ADDRESS_LENGTH), errorCode = null) }
-    fun setDistrict(v: String) = _state.update { it.copy(district = v) }
-    fun setSurface(v: String) = _state.update { it.copy(surface = v) }
-    fun setCapacity(v: String) =
-        _state.update { it.copy(capacity = v.filter(Char::isDigit).take(2), errorCode = null) }
-    fun setPhoneDigits(v: String) = _state.update { it.copy(phoneDigits = v, errorCode = null) }
-    fun setDescription(v: String) =
-        _state.update { it.copy(description = v.take(MAX_DESCRIPTION_LENGTH), errorCode = null) }
+    fun setName(v: String) =
+        _state.update { it.copy(name = v.take(MAX_NAME_LENGTH), errorCode = null, edited = true) }
+
+    fun setAddress(v: String) = _state.update {
+        it.copy(address = v.take(MAX_ADDRESS_LENGTH), errorCode = null, edited = true)
+    }
+
+    fun setDistrict(v: String) = _state.update { it.copy(district = v, edited = true) }
+
+    fun setSurface(v: String) = _state.update { it.copy(surface = v, edited = true) }
+
+    fun setCapacity(v: String) = _state.update {
+        it.copy(capacity = v.filter(Char::isDigit).take(2), errorCode = null, edited = true)
+    }
+
+    fun setPhoneDigits(v: String) =
+        _state.update { it.copy(phoneDigits = v, errorCode = null, edited = true) }
+
+    fun setDescription(v: String) = _state.update {
+        it.copy(description = v.take(MAX_DESCRIPTION_LENGTH), errorCode = null, edited = true)
+    }
 
     /**
      * Adds a whole pick at once — the picker is multi-select, so three photos
@@ -154,11 +174,12 @@ class SubmitFieldViewModel(
      */
     fun addPhotos(picked: List<PickedPhoto>) {
         if (picked.isEmpty()) return
-        _state.update { it.copy(photos = photosAfterPick(it.photos, picked)) }
+        _state.update { it.copy(photos = photosAfterPick(it.photos, picked), edited = true) }
     }
 
-    fun removePhoto(index: Int) =
-        _state.update { it.copy(photos = it.photos.filterIndexed { i, _ -> i != index }) }
+    fun removePhoto(index: Int) = _state.update {
+        it.copy(photos = it.photos.filterIndexed { i, _ -> i != index }, edited = true)
+    }
 
     fun submit() {
         val s = _state.value
