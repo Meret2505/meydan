@@ -81,6 +81,8 @@ fun GamesScreen(
         GamesViewModel(container.gamesRepository)
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
+        ?: Locale.forLanguageTag("ru")
 
     // The feed VM survives the trip to the create-game screen, so re-fetch when
     // this screen resumes (returning from create/detail, or app foreground) —
@@ -132,7 +134,15 @@ fun GamesScreen(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     items(state.visible, key = { it.id }) { game ->
-                        GameCard(game = game, onClick = { onGameClick(game.id) })
+                        GameCard(
+                            game = game,
+                            // Read once for the screen, not inside every card:
+                            // reading it per card widened each card's
+                            // recomposition scope to a value that only changes
+                            // on a configuration change.
+                            locale = locale,
+                            onClick = { onGameClick(game.id) },
+                        )
                     }
                 }
             }
@@ -383,10 +393,8 @@ private fun EmptyFeed(tab: GamesViewModel.Tab) {
 }
 
 @Composable
-private fun GameCard(game: GameCardDto, onClick: () -> Unit) {
+private fun GameCard(game: GameCardDto, locale: Locale, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val locale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
-        ?: Locale.forLanguageTag("ru")
     val dt = remember(game.scheduledAt) { GameTime.parse(game.scheduledAt) }
     val remaining = game.totalSpots - game.joinedCount
     val isFull = remaining <= 0
@@ -457,7 +465,7 @@ private fun GameCard(game: GameCardDto, onClick: () -> Unit) {
 
         if (game.participants.isNotEmpty()) {
             AvatarStack(
-                names = game.participants.map { it.name },
+                names = remember(game.participants) { game.participants.map { it.name } },
                 modifier = Modifier.padding(top = 14.dp),
             )
         }

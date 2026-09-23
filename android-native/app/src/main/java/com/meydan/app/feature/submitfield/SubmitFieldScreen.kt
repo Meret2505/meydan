@@ -46,6 +46,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -91,6 +95,8 @@ fun SubmitFieldScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val nextField = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) })
     // Multi-select, capped at the three a submission may carry: one trip to the
     // gallery for all of them instead of one trip each. maxItems is fixed at
     // MAX_PHOTOS rather than the remaining slots because the contract is
@@ -160,6 +166,10 @@ fun SubmitFieldScreen(
                 onValueChange = viewModel::setName,
                 enabled = !state.submitting,
                 singleLine = true,
+                // The keyboard's action key walks the form instead of just
+                // closing: no form in the app used to set one.
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = nextField,
                 placeholder = { Text(stringResource(R.string.fields_submit_name_placeholder)) },
                 // The requirement is stated up front, not discovered by the
                 // button staying grey.
@@ -184,6 +194,8 @@ fun SubmitFieldScreen(
                 onValueChange = viewModel::setAddress,
                 enabled = !state.submitting,
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = nextField,
                 placeholder = { Text(stringResource(R.string.fields_submit_address_placeholder)) },
                 supportingText = {
                     Text(
@@ -247,7 +259,11 @@ fun SubmitFieldScreen(
                     )
                 },
                 isError = state.capacityOutOfRange,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                ),
+                keyboardActions = nextField,
                 shape = MaterialTheme.shapes.large,
                 colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth(),
@@ -259,6 +275,10 @@ fun SubmitFieldScreen(
                 onDigitsChange = viewModel::setPhoneDigits,
                 placeholder = stringResource(R.string.auth_phone_placeholder),
                 enabled = !state.submitting,
+                // Last of the single-line fields; the description below is
+                // multi-line, where Enter belongs to the text.
+                imeAction = ImeAction.Done,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 modifier = Modifier.fillMaxWidth(),
             )
 

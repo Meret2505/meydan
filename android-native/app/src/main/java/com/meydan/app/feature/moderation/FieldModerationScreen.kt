@@ -126,14 +126,29 @@ fun FieldModerationScreen(container: AppContainer, onBack: () -> Unit) {
             }
         }
 
+        // A failure here used to be a red line and nothing else — no way to
+        // try again without leaving the screen and coming back.
         state.errorCode?.let { code ->
-            Text(
-                text = stringResource(errorTextRes(code)),
-                color = colors.error,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            ) {
+                Text(
+                    text = stringResource(errorTextRes(code)),
+                    color = colors.error,
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                )
+                TextButton(onClick = viewModel::pullRefresh) {
+                    Text(
+                        text = stringResource(R.string.common_retry),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.error,
+                    )
+                }
+            }
         }
     }
 

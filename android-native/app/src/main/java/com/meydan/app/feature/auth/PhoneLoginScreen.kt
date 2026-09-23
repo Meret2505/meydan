@@ -25,6 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -46,6 +53,9 @@ fun PhoneLoginScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val focusManager = LocalFocusManager.current
+    val phoneFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { phoneFocus.requestFocus() }
     val configuration = LocalConfiguration.current
     // The device/app language drives the locale sent on signup, like the web
     // form posts its current locale.
@@ -95,6 +105,10 @@ fun PhoneLoginScreen(
             digits = state.phone,
             onDigitsChange = viewModel::onPhoneChange,
             placeholder = stringResource(R.string.auth_phone_placeholder),
+            // The form opens with the cursor here and the keyboard up: this is
+            // the first screen of the app, and every tap saved counts.
+            focusRequester = phoneFocus,
+            keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
@@ -113,7 +127,18 @@ fun PhoneLoginScreen(
             onValueChange = viewModel::onPasswordChange,
             placeholder = { Text("••••••••") },
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+            // Enter submits, rather than dropping the keyboard and leaving the
+            // user to find the button.
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                    if (!state.loading) viewModel.submitPhone(languageTag)
+                },
+            ),
             singleLine = true,
             shape = MaterialTheme.shapes.large,
             colors = OutlinedTextFieldDefaults.colors(
