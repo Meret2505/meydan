@@ -13,7 +13,12 @@ export type GameCardDto = {
   joinedCount: number;
   pricePerPlayer: number | null;
   neededPositions: Position[];
-  participants: { id: string; name: string; avatar: string | null }[];
+  /**
+   * Only what a card draws: it renders initials from the names. Avatars,
+   * positions and attendance belong to the detail payload, and were being
+   * downloaded for every player of every game in the feed and discarded.
+   */
+  participants: { id: string; name: string }[];
   /** True when the viewer organizes this game (not merely joined it). */
   mine: boolean;
 };
@@ -41,7 +46,6 @@ export function toGameCardDto(
     participants: game.participants.map((p) => ({
       id: p.user.id,
       name: p.user.name,
-      avatar: absoluteImageUrl(p.user.avatar, origin),
     })),
     mine: game.organizerId === viewerId,
   };

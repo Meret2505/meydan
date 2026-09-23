@@ -1,6 +1,6 @@
 import type { FieldSubmission, FieldSubmissionStatus, User } from "@prisma/client";
 import { absoluteImageUrl } from "@/lib/api/images";
-import { toPublicUserDto, type PublicUserDto } from "@/lib/api/serializers/user";
+import { toPublicUserDto, type PublicUserDto, PublicUserRow } from "@/lib/api/serializers/user";
 
 /** A pending field submission as the admin moderation screen renders it. */
 export interface FieldSubmissionDto {
@@ -19,7 +19,7 @@ export interface FieldSubmissionDto {
 }
 
 export function toFieldSubmissionDto(
-  submission: FieldSubmission & { submittedBy: User },
+  submission: FieldSubmission & { submittedBy: PublicUserRow },
   origin: string,
 ): FieldSubmissionDto {
   return {

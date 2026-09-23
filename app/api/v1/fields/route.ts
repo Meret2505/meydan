@@ -1,6 +1,6 @@
 import { requireOnboarded } from "@/lib/api/auth";
 import { originOf } from "@/lib/api/images";
-import { handler, ok } from "@/lib/api/response";
+import { handler, okRevalidatable } from "@/lib/api/response";
 import { toFieldCardDto } from "@/lib/api/serializers/field";
 import { fetchFields } from "@/lib/services/field-queries";
 
@@ -15,7 +15,7 @@ export const GET = handler(async (request: Request) => {
 
   const { fields, favoriteIds } = await fetchFields(userId);
 
-  return ok({
+  return okRevalidatable(request, {
     fields: fields.map((field) => toFieldCardDto(field, origin, favoriteIds)),
   });
 });

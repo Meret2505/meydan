@@ -16,10 +16,14 @@ const upcomingAndJoinable = () => ({
 });
 
 const feedInclude = {
-  field: true,
+  // A card shows the venue name and its district; the rest of the row —
+  // photos, hours, contacts, attributes, translations, coordinates — was
+  // being fetched for every one of up to 100 games.
+  field: { select: { name: true, district: true } },
   organizer: { select: { id: true, name: true } },
+  // The card renders initials from names, nothing else.
   participants: {
-    include: { user: { select: { id: true, name: true, avatar: true } } },
+    include: { user: { select: { id: true, name: true } } },
   },
 } as const;
 
@@ -80,10 +84,15 @@ export async function getGameDetail(gameId: string, userId: string) {
   const game = await prisma.game.findUnique({
     where: { id: gameId },
     include: {
-      field: true,
-      organizer: true,
+      field: { select: { name: true, district: true } },
+      // Whole User rows (password hash, fcm token, email) were fetched to
+      // read four columns. The serializers never leaked them, but the pooler
+      // carried them on every game open.
+      organizer: { select: { id: true, name: true, avatar: true, phone: true } },
       participants: {
-        include: { user: true },
+        include: {
+          user: { select: { id: true, name: true, avatar: true, position: true } },
+        },
         orderBy: { joinedAt: "asc" },
       },
     },

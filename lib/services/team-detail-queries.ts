@@ -18,7 +18,7 @@ export async function fetchTeamDetail(
     where: { id },
     include: {
       members: {
-        include: { user: true },
+        include: { user: { select: { id: true, name: true, position: true } } },
         orderBy: [{ isCaptain: "desc" }, { joinedAt: "asc" }],
       },
       games: {

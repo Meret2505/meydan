@@ -64,7 +64,13 @@ export type PublicUserDto = {
   district: string | null;
 };
 
-export function toPublicUserDto(user: User, origin: string): PublicUserDto {
+/** The columns a public profile needs — so callers may select just these. */
+export type PublicUserRow = Pick<
+  User,
+  "id" | "name" | "avatar" | "position" | "skillLevel" | "district"
+>;
+
+export function toPublicUserDto(user: PublicUserRow, origin: string): PublicUserDto {
   return {
     id: user.id,
     name: user.name,

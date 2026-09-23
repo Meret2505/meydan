@@ -18,8 +18,14 @@ export interface FieldCardDto {
   favorite: boolean;
 }
 
+/** The columns a card needs — so the query may select just these. */
+export type FieldCardRow = Pick<
+  Field,
+  "id" | "name" | "nameRu" | "nameTm" | "district" | "surface" | "capacity" | "image"
+>;
+
 export function toFieldCardDto(
-  field: Field,
+  field: FieldCardRow,
   origin: string,
   favoriteIds: Set<string>,
 ): FieldCardDto {

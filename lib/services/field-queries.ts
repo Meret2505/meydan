@@ -21,6 +21,20 @@ export async function fetchFields(userId: string) {
   const [fields, favorites] = await Promise.all([
     prisma.field.findMany({
       where: { isActive: true },
+      // Exactly what toFieldCardDto reads. Without this the whole catalogue
+      // came across with every photos[] array, hours/contacts/attributes JSON
+      // blob, both address translations and the coordinates — all of it thrown
+      // away by the serializer, on every open of the Fields tab.
+      select: {
+        id: true,
+        name: true,
+        nameRu: true,
+        nameTm: true,
+        district: true,
+        surface: true,
+        capacity: true,
+        image: true,
+      },
       orderBy: { name: "asc" },
       take: MAX_FIELDS,
     }),

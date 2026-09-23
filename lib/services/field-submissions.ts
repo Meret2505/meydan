@@ -171,7 +171,20 @@ export async function listPendingSubmissions() {
   return prisma.fieldSubmission.findMany({
     where: { status: "PENDING" },
     orderBy: { createdAt: "asc" },
-    include: { submittedBy: true },
+    // toPublicUserDto reads six columns; the rest of the row is not the
+    // moderation queue's business.
+    include: {
+      submittedBy: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+          position: true,
+          skillLevel: true,
+          district: true,
+        },
+      },
+    },
   });
 }
 

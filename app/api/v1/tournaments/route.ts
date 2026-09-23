@@ -2,7 +2,7 @@ import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, notFound } from "@/lib/api/errors";
-import { handler, ok } from "@/lib/api/response";
+import { handler, ok, okRevalidatable } from "@/lib/api/response";
 import { toTournamentCardDto } from "@/lib/api/serializers/tournament";
 import { parseJson } from "@/lib/api/validate";
 import { fetchTournamentDetail } from "@/lib/services/tournament-detail-queries";
@@ -18,7 +18,7 @@ export const GET = handler(async (request: Request) => {
 
   const tournaments = await fetchTournaments();
 
-  return ok({ tournaments: tournaments.map(toTournamentCardDto) });
+  return okRevalidatable(request, { tournaments: tournaments.map(toTournamentCardDto) });
 });
 
 const createSchema = z

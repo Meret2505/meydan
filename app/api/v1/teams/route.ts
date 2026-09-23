@@ -2,7 +2,7 @@ import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, notFound } from "@/lib/api/errors";
-import { handler, ok } from "@/lib/api/response";
+import { handler, ok, okRevalidatable } from "@/lib/api/response";
 import { toTeamCardDto } from "@/lib/api/serializers/team";
 import { parseJson } from "@/lib/api/validate";
 import { fetchTeamDetail } from "@/lib/services/team-detail-queries";
@@ -18,7 +18,7 @@ export const GET = handler(async (request: Request) => {
 
   const { myTeams, others } = await fetchTeams(userId);
 
-  return ok({
+  return okRevalidatable(request, {
     mine: myTeams.map((team) => toTeamCardDto(team, true)),
     others: others.map((team) => toTeamCardDto(team, false)),
   });
