@@ -29,6 +29,11 @@ fun errorTextRes(code: String): Int = when (code) {
     "game_in_past" -> R.string.error_game_in_past
     "rate_limited" -> R.string.error_rate_limited
 
+    // The first attempt at this submit is still running on the server — the
+    // response to it was lost, not the request. Tapping again shortly gets the
+    // real answer, so say that rather than "something went wrong".
+    "request_in_progress" -> R.string.error_request_in_progress
+
     // Games.
     "game_full" -> R.string.error_game_full
     "not_joinable" -> R.string.error_not_joinable

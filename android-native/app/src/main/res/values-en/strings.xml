@@ -324,6 +324,7 @@
     <string name="error_storage_failed">Could not save the photo. Please try again.</string>
     <string name="error_auth_failed">Couldn\'t sign in</string>
     <string name="error_rate_limited">Too many attempts. Try again later.</string>
+    <string name="error_request_in_progress">Still being processed. Try again in a few seconds.</string>
     <string name="error_offline_title">No connection</string>
     <string name="error_generic_title">Something went wrong</string>
     <string name="error_too_many_pending">You already have 3 submissions pending</string>

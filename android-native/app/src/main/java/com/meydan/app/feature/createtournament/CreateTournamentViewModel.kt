@@ -3,6 +3,7 @@ package com.meydan.app.feature.createtournament
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.SubmitKey
 import com.meydan.app.core.network.dto.CreateTournamentRequest
 import com.meydan.app.data.TournamentsRepository
 import java.time.LocalDate
@@ -49,6 +50,10 @@ class CreateTournamentViewModel(
         val hasUnsavedInput: Boolean get() = edited && createdId == null
     }
 
+    // One key per submit, reused by every retry of it: a retry after a lost
+    // response has to be recognised as the same request, not a new one.
+    private val submitKey = SubmitKey()
+
     // Default to a week out, like a real fixture list rather than "today".
     private val _state = MutableStateFlow(UiState(startDate = today.plusWeeks(1)))
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -75,7 +80,7 @@ class CreateTournamentViewModel(
                 endDate = s.endDate?.toIso(),
                 description = s.description.trim().ifEmpty { null },
             )
-            when (val result = tournamentsRepository.createTournament(req)) {
+            when (val result = tournamentsRepository.createTournament(req, submitKey.forAttempt())) {
                 is ApiResult.Success ->
                     _state.update { it.copy(submitting = false, createdId = result.data.id) }
                 is ApiResult.Failure ->

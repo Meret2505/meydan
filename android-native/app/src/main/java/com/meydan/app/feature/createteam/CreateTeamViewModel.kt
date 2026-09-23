@@ -3,6 +3,7 @@ package com.meydan.app.feature.createteam
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.SubmitKey
 import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.data.TeamsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +51,10 @@ class CreateTeamViewModel(
         val hasUnsavedInput: Boolean get() = edited && createdTeamId == null
     }
 
+    // One key per submit, reused by every retry of it: a retry after a lost
+    // response has to be recognised as the same request, not a new one.
+    private val submitKey = SubmitKey()
+
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
@@ -70,7 +75,7 @@ class CreateTeamViewModel(
                 district = s.district,
                 color = s.color,
             )
-            when (val result = teamsRepository.createTeam(req)) {
+            when (val result = teamsRepository.createTeam(req, submitKey.forAttempt())) {
                 is ApiResult.Success ->
                     _state.update { it.copy(submitting = false, createdTeamId = result.data.id) }
                 is ApiResult.Failure ->

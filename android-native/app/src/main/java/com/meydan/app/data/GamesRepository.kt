@@ -31,9 +31,15 @@ class GamesRepository(
     suspend fun gameDetail(id: String): ApiResult<GameDetailDto> =
         apiCall { api.getGame(id) }
 
-    /** Creates a game (organizer auto-joined); returns the new game's detail. */
-    suspend fun createGame(req: CreateGameRequest): ApiResult<GameDetailDto> =
-        apiCall { api.createGame(req) }
+    /**
+     * Creates a game (organizer auto-joined); returns the new game's detail.
+     * [idempotencyKey] makes a retry of a lost response replay rather than
+     * create a second game — see SubmitKey.
+     */
+    suspend fun createGame(
+        req: CreateGameRequest,
+        idempotencyKey: String,
+    ): ApiResult<GameDetailDto> = apiCall { api.createGame(idempotencyKey, req) }
 
     /** Join returns the updated detail (roster, counts, joined flag). */
     suspend fun joinGame(id: String): ApiResult<GameDetailDto> =

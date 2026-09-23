@@ -324,6 +324,7 @@
     <string name="error_storage_failed">Suraty saklap bolmady. Ýene synanyşyň.</string>
     <string name="error_auth_failed">Girip bolmady</string>
     <string name="error_rate_limited">Örän köp synanyşyk. Soňrak synanyşyň.</string>
+    <string name="error_request_in_progress">Haýyş henizem işlenýär. Birnäçe sekuntdan gaýtadan synanyşyň.</string>
     <string name="error_offline_title">Birikme ýok</string>
     <string name="error_generic_title">Bir zat ýalňyş geçdi</string>
     <string name="error_too_many_pending">Barlagdaky 3 arzaň bar eýýäm</string>

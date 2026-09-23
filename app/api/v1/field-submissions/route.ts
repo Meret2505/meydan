@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, conflict, rateLimited } from "@/lib/api/errors";
+import { withIdempotency } from "@/lib/api/idempotency";
 import { handler, ok } from "@/lib/api/response";
 import { parseJson } from "@/lib/api/validate";
 import { createFieldSubmission } from "@/lib/services/field-submissions";
@@ -26,12 +27,21 @@ export const POST = handler(async (request: Request) => {
   const { userId } = await requireOnboarded(request);
   const input = await parseJson(request, createSchema);
 
-  const result = await createFieldSubmission(userId, input);
-  if (!result.ok) {
-    if (result.error === "too_many_pending") throw conflict("too_many_pending");
-    if (result.error === "rate_limited") throw rateLimited();
-    throw badRequest();
-  }
+  const created = await withIdempotency(
+    request,
+    userId,
+    "create-field-submission",
+    async () => {
+      const result = await createFieldSubmission(userId, input);
+      if (!result.ok) {
+        if (result.error === "too_many_pending") throw conflict("too_many_pending");
+        if (result.error === "rate_limited") throw rateLimited();
+        throw badRequest();
+      }
 
-  return ok({ id: result.submissionId, status: "PENDING" });
+      return { id: result.submissionId, status: "PENDING" };
+    },
+  );
+
+  return ok(created);
 });

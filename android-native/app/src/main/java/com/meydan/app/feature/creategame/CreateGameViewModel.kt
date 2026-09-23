@@ -3,6 +3,7 @@ package com.meydan.app.feature.creategame
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.SubmitKey
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.FieldCardDto
 import com.meydan.app.data.FieldsRepository
@@ -85,6 +86,10 @@ class CreateGameViewModel(
 
     // Default to the next round hour + 2h, matching the web's defaultScheduled().
     private val defaultTime = now.withMinute(0).withSecond(0).withNano(0).plusHours(2)
+
+    // One key per submit, reused by every retry of it: a retry after a lost
+    // response has to be recognised as the same request, not a new one.
+    private val submitKey = SubmitKey()
 
     private val _state = MutableStateFlow(UiState(scheduledAt = defaultTime))
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -177,7 +182,7 @@ class CreateGameViewModel(
                 notes = s.notes.trim().ifEmpty { null },
                 neededPositions = s.positions.toList(),
             )
-            when (val result = gamesRepository.createGame(req)) {
+            when (val result = gamesRepository.createGame(req, submitKey.forAttempt())) {
                 is ApiResult.Success -> _state.update { it.copy(submitting = false, createdGameId = result.data.id) }
                 is ApiResult.Failure -> _state.update { it.copy(submitting = false, errorCode = result.code) }
                 ApiResult.NetworkError -> _state.update { it.copy(submitting = false, errorCode = "network") }

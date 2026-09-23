@@ -2,6 +2,7 @@ import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, notFound } from "@/lib/api/errors";
+import { withIdempotency } from "@/lib/api/idempotency";
 import { handler, ok, okRevalidatable } from "@/lib/api/response";
 import { toTournamentCardDto } from "@/lib/api/serializers/tournament";
 import { parseJson } from "@/lib/api/validate";
@@ -36,11 +37,15 @@ export const POST = handler(async (request: Request) => {
   await enforceRateLimit("create-tournament", userId, 10, PER_DAY);
   const input = await parseJson(request, createSchema);
 
-  const result = await createTournament(userId, input);
-  if (!result.ok) throw badRequest();
+  const detail = await withIdempotency(request, userId, "create-tournament", async () => {
+    const result = await createTournament(userId, input);
+    if (!result.ok) throw badRequest();
 
-  const detail = await fetchTournamentDetail(result.tournamentId, userId);
-  if (!detail) throw notFound("tournament_not_found");
+    const tournament = await fetchTournamentDetail(result.tournamentId, userId);
+    if (!tournament) throw notFound("tournament_not_found");
+
+    return tournament;
+  });
 
   return ok(detail);
 });

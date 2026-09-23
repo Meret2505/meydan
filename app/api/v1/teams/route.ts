@@ -2,6 +2,7 @@ import { enforceRateLimit, PER_DAY } from "@/lib/api/rate-limit";
 import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, notFound } from "@/lib/api/errors";
+import { withIdempotency } from "@/lib/api/idempotency";
 import { handler, ok, okRevalidatable } from "@/lib/api/response";
 import { toTeamCardDto } from "@/lib/api/serializers/team";
 import { parseJson } from "@/lib/api/validate";
@@ -38,11 +39,15 @@ export const POST = handler(async (request: Request) => {
   await enforceRateLimit("create-team", userId, 10, PER_DAY);
   const input = await parseJson(request, createSchema);
 
-  const result = await createTeam(userId, input);
-  if (!result.ok) throw badRequest();
+  const detail = await withIdempotency(request, userId, "create-team", async () => {
+    const result = await createTeam(userId, input);
+    if (!result.ok) throw badRequest();
 
-  const detail = await fetchTeamDetail(result.teamId, userId);
-  if (!detail) throw notFound("team_not_found");
+    const team = await fetchTeamDetail(result.teamId, userId);
+    if (!team) throw notFound("team_not_found");
+
+    return team;
+  });
 
   return ok(detail);
 });

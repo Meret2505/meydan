@@ -39,6 +39,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.HTTP
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
@@ -90,8 +91,16 @@ interface MeydanApi {
     @GET("api/v1/games")
     suspend fun getGames(): Response<ApiResponse<GamesFeedDto>>
 
+    /**
+      * The key is what lets a retry of a lost response create one game instead
+      * of two; see lib/api/idempotency.ts. One value per submit, reused for
+      * every retry of it.
+      */
     @POST("api/v1/games")
-    suspend fun createGame(@Body body: CreateGameRequest): Response<ApiResponse<GameDetailDto>>
+    suspend fun createGame(
+        @Header("Idempotency-Key") idempotencyKey: String,
+        @Body body: CreateGameRequest,
+    ): Response<ApiResponse<GameDetailDto>>
 
     @GET("api/v1/games/{id}")
     suspend fun getGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
@@ -128,6 +137,7 @@ interface MeydanApi {
 
     @POST("api/v1/tournaments")
     suspend fun createTournament(
+        @Header("Idempotency-Key") idempotencyKey: String,
         @Body body: CreateTournamentRequest,
     ): Response<ApiResponse<TournamentDetailDto>>
 
@@ -167,7 +177,10 @@ interface MeydanApi {
     suspend fun getTeams(): Response<ApiResponse<TeamsResponse>>
 
     @POST("api/v1/teams")
-    suspend fun createTeam(@Body body: CreateTeamRequest): Response<ApiResponse<TeamDetailDto>>
+    suspend fun createTeam(
+        @Header("Idempotency-Key") idempotencyKey: String,
+        @Body body: CreateTeamRequest,
+    ): Response<ApiResponse<TeamDetailDto>>
 
     @POST("api/v1/teams/{id}/members")
     suspend fun joinTeam(@Path("id") id: String): Response<ApiResponse<TeamDetailDto>>
@@ -203,6 +216,7 @@ interface MeydanApi {
     /** Submits a new field for admin review. */
     @POST("api/v1/field-submissions")
     suspend fun createFieldSubmission(
+        @Header("Idempotency-Key") idempotencyKey: String,
         @Body body: CreateFieldSubmissionRequest,
     ): Response<ApiResponse<CreateSubmissionResponse>>
 

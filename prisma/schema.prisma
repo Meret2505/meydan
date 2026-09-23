@@ -371,6 +371,36 @@ model RateLimit {
   @@map("rate_limits")
 }
 
+/// One row per (caller, Idempotency-Key) on a create endpoint.
+///
+/// A phone on a Turkmen mobile link loses a response far more often than it
+/// loses a request: the game is created, the reply never arrives, and the
+/// client — or the person tapping again — asks a second time. Without a key to
+/// recognise the repeat by, that is a duplicate game, and the duplicate is
+/// indistinguishable from a real one.
+///
+/// The row is claimed *before* the work runs, so the unique constraint is what
+/// serialises two requests racing with the same key rather than an application
+/// check that both would pass. `response` stays null until the work succeeds:
+/// a repeat arriving in between gets "request_in_progress", and a failed
+/// attempt deletes its own claim so a corrected retry is not locked out by it.
+///
+/// `endpoint` is not part of the key — a client generates one UUID per submit,
+/// so the same key on a different endpoint means a client bug, and saying so is
+/// more useful than replaying a game's body at a team create.
+model IdempotencyKey {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  endpoint  String
+  response  Json?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([createdAt])
+  @@map("idempotency_keys")
+}
+
 /// Refresh tokens for the native mobile clients. The web app keeps using
 /// NextAuth's cookie session and never touches this table.
 ///

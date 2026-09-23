@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireOnboarded } from "@/lib/api/auth";
 import { badRequest, notFound } from "@/lib/api/errors";
 import { originOf } from "@/lib/api/images";
+import { withIdempotency } from "@/lib/api/idempotency";
 import { handler, ok } from "@/lib/api/response";
 import { toGameCardDto, toGameDetailDto } from "@/lib/api/serializers/game";
 import { parseJson } from "@/lib/api/validate";
@@ -59,21 +60,25 @@ export const POST = handler(async (request: Request) => {
   await enforceRateLimit("create-game", userId, 20, PER_DAY);
   const body = await parseJson(request, createSchema);
 
-  const result = await createGame(userId, {
-    scheduledAt: body.scheduledAt,
-    fieldId: body.fieldId ?? null,
-    fieldName: body.fieldName ?? null,
-    totalSpots: body.totalSpots,
-    pricePerPlayer: body.pricePerPlayer ?? null,
-    notes: body.notes ?? null,
-    neededPositions: body.neededPositions,
+  const dto = await withIdempotency(request, userId, "create-game", async () => {
+    const result = await createGame(userId, {
+      scheduledAt: body.scheduledAt,
+      fieldId: body.fieldId ?? null,
+      fieldName: body.fieldName ?? null,
+      totalSpots: body.totalSpots,
+      pricePerPlayer: body.pricePerPlayer ?? null,
+      notes: body.notes ?? null,
+      neededPositions: body.neededPositions,
+    });
+    // Pass the service's own code through: "game_in_past" is actionable ("pick a
+    // future time"), while a bare invalid_input is not.
+    if (!result.ok) throw badRequest(result.error);
+
+    const detail = await getGameDetail(result.gameId, userId);
+    if (!detail) throw notFound("game_not_found");
+
+    return toGameDetailDto(detail, originOf(request));
   });
-  // Pass the service's own code through: "game_in_past" is actionable ("pick a
-  // future time"), while a bare invalid_input is not.
-  if (!result.ok) throw badRequest(result.error);
 
-  const detail = await getGameDetail(result.gameId, userId);
-  if (!detail) throw notFound("game_not_found");
-
-  return ok(toGameDetailDto(detail, originOf(request)));
+  return ok(dto);
 });

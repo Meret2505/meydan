@@ -342,6 +342,7 @@
     <string name="error_storage_failed">Не удалось сохранить фото. Попробуйте ещё раз.</string>
     <string name="error_auth_failed">Не удалось войти</string>
     <string name="error_rate_limited">Слишком много попыток. Попробуйте позже.</string>
+    <string name="error_request_in_progress">Запрос ещё обрабатывается. Повторите через несколько секунд.</string>
     <string name="error_offline_title">Нет соединения</string>
     <string name="error_generic_title">Что-то пошло не так</string>
     <string name="error_too_many_pending">У тебя уже 3 заявки на рассмотрении</string>

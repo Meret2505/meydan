@@ -32,10 +32,16 @@ class TournamentsRepository(
     suspend fun detail(id: String): ApiResult<TournamentDetailDto> =
         apiCall { api.getTournamentDetail(id) }
 
-    /** Creates a tournament (caller becomes creator); returns its detail. */
+    /**
+     * Creates a tournament (caller becomes creator); returns its detail.
+     * [idempotencyKey] makes a retry of a lost response replay rather than
+     * create a second tournament — see SubmitKey.
+     */
     suspend fun createTournament(
         req: CreateTournamentRequest,
-    ): ApiResult<TournamentDetailDto> = apiCall { api.createTournament(req) }
+        idempotencyKey: String,
+    ): ApiResult<TournamentDetailDto> =
+        apiCall { api.createTournament(idempotencyKey, req) }
 
     /** Creator only. Soft-cancels and returns the updated detail. */
     suspend fun cancelTournament(id: String): ApiResult<TournamentDetailDto> =

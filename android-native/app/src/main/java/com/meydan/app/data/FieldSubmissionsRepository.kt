@@ -21,8 +21,15 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class FieldSubmissionsRepository(
     private val api: MeydanApi,
 ) {
-    suspend fun create(req: CreateFieldSubmissionRequest): ApiResult<CreateSubmissionResponse> =
-        apiCall { api.createFieldSubmission(req) }
+    /**
+     * [idempotencyKey] makes a retry of a lost response replay rather than
+     * queue a second submission for review — see SubmitKey.
+     */
+    suspend fun create(
+        req: CreateFieldSubmissionRequest,
+        idempotencyKey: String,
+    ): ApiResult<CreateSubmissionResponse> =
+        apiCall { api.createFieldSubmission(idempotencyKey, req) }
 
     suspend fun addPhoto(
         submissionId: String,

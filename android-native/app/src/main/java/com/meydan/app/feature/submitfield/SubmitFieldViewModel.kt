@@ -3,6 +3,7 @@ package com.meydan.app.feature.submitfield
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.meydan.app.core.common.ApiResult
+import com.meydan.app.core.common.SubmitKey
 import com.meydan.app.core.network.dto.CreateFieldSubmissionRequest
 import com.meydan.app.data.FieldSubmissionsRepository
 import com.meydan.app.feature.fields.FieldsViewModel
@@ -143,6 +144,10 @@ class SubmitFieldViewModel(
         val hasUnsavedInput: Boolean get() = edited && createdId == null
     }
 
+    // One key per submit, reused by every retry of it: a retry after a lost
+    // response has to be recognised as the same request, not a new one.
+    private val submitKey = SubmitKey()
+
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
@@ -195,7 +200,7 @@ class SubmitFieldViewModel(
                 phone = if (s.phoneDigits.length == 8) "+993${s.phoneDigits}" else null,
                 description = s.description.trim().ifBlank { null },
             )
-            when (val result = repository.create(req)) {
+            when (val result = repository.create(req, submitKey.forAttempt())) {
                 is ApiResult.Success -> {
                     val submissionId = result.data.id
                     // Best-effort: the submission itself already succeeded and

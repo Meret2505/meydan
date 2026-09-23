@@ -25,9 +25,15 @@ class TeamsRepository(
     suspend fun detail(id: String): ApiResult<TeamDetailDto> =
         apiCall { api.getTeamDetail(id) }
 
-    /** Creates a team (caller becomes captain); returns the new team's detail. */
-    suspend fun createTeam(req: CreateTeamRequest): ApiResult<TeamDetailDto> =
-        apiCall { api.createTeam(req) }
+    /**
+     * Creates a team (caller becomes captain); returns the new team's detail.
+     * [idempotencyKey] makes a retry of a lost response replay rather than
+     * create a second team — see SubmitKey.
+     */
+    suspend fun createTeam(
+        req: CreateTeamRequest,
+        idempotencyKey: String,
+    ): ApiResult<TeamDetailDto> = apiCall { api.createTeam(idempotencyKey, req) }
 
     /** Join returns the updated detail (roster, count, membership flags). */
     suspend fun joinTeam(id: String): ApiResult<TeamDetailDto> =
