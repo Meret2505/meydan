@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -15,6 +16,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.di.AppContainer
 import com.meydan.app.feature.auth.LoginScreen
@@ -69,7 +73,15 @@ object Routes {
  * onboarding incomplete -> onboarding; otherwise home.
  */
 @Composable
-fun MeydanApp(container: AppContainer) {
+fun MeydanApp(
+    container: AppContainer,
+    /**
+     * Links the activity was opened with, or handed later by onNewIntent.
+     * Defaulted so a preview or a test can build the graph without one.
+     */
+    deepLinks: StateFlow<DeepLink?> = MutableStateFlow(null),
+    onDeepLinkHandled: () -> Unit = {},
+) {
     val navController = rememberNavController()
 
     // The authenticator emits when a refresh finally fails; wherever the user
@@ -113,6 +125,8 @@ fun MeydanApp(container: AppContainer) {
         Box(Modifier.fillMaxSize())
         return
     }
+
+    DeepLinkEffect(navController, deepLinks, onDeepLinkHandled)
 
     NavHost(navController = navController, startDestination = start) {
         composable(Routes.LOGIN) {
@@ -266,6 +280,41 @@ fun MeydanApp(container: AppContainer) {
         }
     }
 }
+
+/**
+ * Opens a link once the app is somewhere it can be opened from.
+ *
+ * The wait is the point. A link tapped by someone who is signed out lands on
+ * the login screen, and navigating to a game from there would either be
+ * refused or strand them on a screen with no session behind it — so the link
+ * is held until the app leaves the signed-out routes, which is exactly when
+ * sign-in or onboarding finishes. Someone who never signs in simply never
+ * follows it; the effect is cancelled with the screen.
+ *
+ * The destination goes *on top* of wherever the app is, so Back from a game
+ * opened by a link returns to the feed rather than out of the app.
+ */
+@Composable
+private fun DeepLinkEffect(
+    navController: androidx.navigation.NavHostController,
+    deepLinks: StateFlow<DeepLink?>,
+    onHandled: () -> Unit,
+) {
+    val pending by deepLinks.collectAsStateWithLifecycle()
+
+    LaunchedEffect(pending) {
+        val link = pending ?: return@LaunchedEffect
+        navController.currentBackStackEntryFlow.first { entry ->
+            entry.destination.route !in SIGNED_OUT_ROUTES
+        }
+        navController.navigate(link.route())
+        onHandled()
+    }
+}
+
+/** Routes with no session behind them; a link has to wait these out. */
+private val SIGNED_OUT_ROUTES =
+    setOf(Routes.LOGIN, Routes.LOGIN_PHONE, Routes.ONBOARDING)
 
 /**
  * Both login routes share one ViewModel scoped to the LOGIN back-stack entry,

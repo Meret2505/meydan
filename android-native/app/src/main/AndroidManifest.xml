@@ -13,14 +13,48 @@
         android:theme="@style/Theme.Meydan"
         android:localeConfig="@xml/locales_config">
 
+        <!--
+          singleTask so a link tapped while the app is already open is
+          delivered to the running instance (onNewIntent) instead of stacking a
+          second MainActivity behind the first — the app is one activity
+          hosting a nav graph, so two of them would mean two nav states.
+        -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Meydan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!--
+              The web app's own URLs. autoVerify makes Android check
+              /.well-known/assetlinks.json on the host and, if this app's
+              signing certificate is listed there, open these links directly
+              instead of offering a chooser. Without the file the links still
+              work — the user just picks the app once. A custom domain later is
+              a change here and in that file.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="meydan-chi.vercel.app" />
+                <data android:scheme="http" android:host="meydan-chi.vercel.app" />
+            </intent-filter>
+
+            <!--
+              The app's own scheme, for links that should never open a browser
+              (a push notification's payload, a QR code at a pitch).
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="meydan" />
             </intent-filter>
         </activity>
 
