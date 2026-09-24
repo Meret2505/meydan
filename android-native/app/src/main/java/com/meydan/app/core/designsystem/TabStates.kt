@@ -33,9 +33,22 @@ import com.meydan.app.R
  * connection, indistinguishable from "there is nothing here".
  */
 
-/** Sits above a list: says the data on screen may be stale, and offers a retry. */
+/**
+ * Sits above a list: says the data on screen may be stale, and offers a retry.
+ *
+ * [savedAt] makes "stale" a number. The app draws its cache immediately and
+ * refreshes behind it, so on a dead connection what is on screen is whatever
+ * was last stored — and the banner used to say only that, which left a feed
+ * from last Tuesday looking exactly like one from a minute ago. Null when the
+ * age is unknown (a cache written before this shipped), and the banner falls
+ * back to the old wording rather than guessing.
+ */
 @Composable
-fun OfflineBanner(onRetry: () -> Unit, modifier: Modifier = Modifier) {
+fun OfflineBanner(
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    savedAt: Long? = null,
+) {
     val colors = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -47,7 +60,11 @@ fun OfflineBanner(onRetry: () -> Unit, modifier: Modifier = Modifier) {
             .padding(start = 12.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
     ) {
         Text(
-            text = stringResource(R.string.offline_banner_generic),
+            text = if (savedAt != null) {
+                stringResource(R.string.offline_banner_saved, relativeTimeText(savedAt))
+            } else {
+                stringResource(R.string.offline_banner_generic)
+            },
             fontSize = 13.sp,
             color = colors.onErrorContainer,
             modifier = Modifier.weight(1f).padding(vertical = 8.dp),

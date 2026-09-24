@@ -2,7 +2,8 @@ package com.meydan.app.data
 
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
-import com.meydan.app.core.datastore.FieldsCache
+import com.meydan.app.core.datastore.Cached
+import com.meydan.app.core.datastore.JsonCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.FieldCardDto
 import com.meydan.app.core.network.dto.FieldDetailDto
@@ -14,9 +15,10 @@ import com.meydan.app.core.network.dto.FieldDetailDto
  */
 class FieldsRepository(
     private val api: MeydanApi,
-    private val fieldsCache: FieldsCache,
+    private val fieldsCache: JsonCache<List<FieldCardDto>>,
 ) {
-    suspend fun cached(): List<FieldCardDto>? = fieldsCache.load()
+    /** The stored catalogue and when it was stored; null if never. */
+    suspend fun cached(): Cached<List<FieldCardDto>>? = fieldsCache.load()
 
     suspend fun refresh(): ApiResult<List<FieldCardDto>> {
         val result = apiCall { api.getFields() }

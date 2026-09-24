@@ -166,7 +166,11 @@ fun FieldsScreen(
         // A failed refresh used to be invisible here: the flag was set and never
         // read, so a dead network looked like "nothing matches your search".
         if (state.offline) {
-            OfflineBanner(onRetry = viewModel::pullRefresh, modifier = Modifier.padding(bottom = 4.dp))
+            OfflineBanner(
+                onRetry = viewModel::pullRefresh,
+                modifier = Modifier.padding(bottom = 4.dp),
+                savedAt = state.cachedAt,
+            )
         }
         // The collapsible block is drawn over the list area and the list is
         // inset by however much of it is still on screen, so the two move as

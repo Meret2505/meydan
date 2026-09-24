@@ -2,7 +2,8 @@ package com.meydan.app.data
 
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
-import com.meydan.app.core.datastore.FeedCache
+import com.meydan.app.core.datastore.Cached
+import com.meydan.app.core.datastore.JsonCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.CreateGameRequest
 import com.meydan.app.core.network.dto.GameDetailDto
@@ -18,9 +19,10 @@ import com.meydan.app.core.network.dto.RecordResultRequest
  */
 class GamesRepository(
     private val api: MeydanApi,
-    private val feedCache: FeedCache,
+    private val feedCache: JsonCache<GamesFeedDto>,
 ) {
-    suspend fun cachedFeed(): GamesFeedDto? = feedCache.load()
+    /** The stored feed and when it was stored; null if never. */
+    suspend fun cachedFeed(): Cached<GamesFeedDto>? = feedCache.load()
 
     suspend fun refresh(): ApiResult<GamesFeedDto> {
         val result = apiCall { api.getGames() }

@@ -37,9 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import com.meydan.app.core.common.RelativeSpan
-import com.meydan.app.core.common.relativeSpanOf
-import androidx.compose.ui.res.pluralStringResource
+import com.meydan.app.core.designsystem.relativeTimeText
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -285,14 +283,6 @@ private fun relativeTime(createdAt: String): String {
     } catch (e: Exception) {
         return ""
     }
-    return when (val span = relativeSpanOf(millis, System.currentTimeMillis())) {
-        RelativeSpan.JustNow -> stringResource(R.string.time_just_now)
-        is RelativeSpan.Minutes ->
-            pluralStringResource(R.plurals.time_minutes_ago, span.count, span.count)
-        is RelativeSpan.Hours ->
-            pluralStringResource(R.plurals.time_hours_ago, span.count, span.count)
-        is RelativeSpan.Days ->
-            pluralStringResource(R.plurals.time_days_ago, span.count, span.count)
-    }
+    return relativeTimeText(millis)
 }
 

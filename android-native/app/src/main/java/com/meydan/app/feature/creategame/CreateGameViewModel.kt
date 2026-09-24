@@ -99,7 +99,7 @@ class CreateGameViewModel(
             // Cached fields first so the picker is populated instantly; a fresh
             // list replaces it. If there are no fields, start in free-text mode.
             val cached = fieldsRepository.cached()
-            if (cached != null) applyFields(cached)
+            if (cached != null) applyFields(cached.value)
             (fieldsRepository.refresh() as? ApiResult.Success)?.let { applyFields(it.data) }
             // Only now is an empty catalogue really empty, so only now may the
             // form fall back to free text.

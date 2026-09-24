@@ -1,14 +1,15 @@
 package com.meydan.app.core.di
 
 import android.content.Context
-import com.meydan.app.core.datastore.FeedCache
-import com.meydan.app.core.datastore.FieldsCache
+import com.meydan.app.core.datastore.JsonCache
 import com.meydan.app.core.datastore.SettingsStore
-import com.meydan.app.core.datastore.TeamsCache
 import com.meydan.app.core.datastore.TokenStore
-import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.NetworkModule
+import com.meydan.app.core.network.dto.FieldCardDto
+import com.meydan.app.core.network.dto.GamesFeedDto
+import com.meydan.app.core.network.dto.TeamsResponse
+import com.meydan.app.core.network.dto.TournamentCardDto
 import com.meydan.app.data.AuthRepository
 import com.meydan.app.data.FieldSubmissionsRepository
 import com.meydan.app.data.FieldsRepository
@@ -16,6 +17,7 @@ import com.meydan.app.data.GamesRepository
 import com.meydan.app.data.NotificationsRepository
 import com.meydan.app.data.TeamsRepository
 import com.meydan.app.data.TournamentsRepository
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -33,10 +35,13 @@ class AppContainer(context: Context) {
     val tokenStore = TokenStore(appContext)
     val settingsStore = SettingsStore(appContext)
     val userCache = UserCache(appContext)
-    val feedCache = FeedCache(appContext)
-    val fieldsCache = FieldsCache(appContext)
-    val teamsCache = TeamsCache(appContext)
-    val tournamentsCache = TournamentsCache(appContext)
+    // One DataStore file behind all four; see JsonCache.
+    val feedCache = JsonCache(appContext, "feed", GamesFeedDto.serializer())
+    val fieldsCache =
+        JsonCache(appContext, "fields", ListSerializer(FieldCardDto.serializer()))
+    val teamsCache = JsonCache(appContext, "teams", TeamsResponse.serializer())
+    val tournamentsCache =
+        JsonCache(appContext, "tournaments", ListSerializer(TournamentCardDto.serializer()))
 
     /**
      * Emits when the session becomes unrecoverable (refresh failed). The root

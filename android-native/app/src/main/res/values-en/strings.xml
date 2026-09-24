@@ -356,6 +356,7 @@
         <item quantity="other">%d games</item>
     </plurals>
     <string name="offline_banner_generic">No connection — showing what was saved.</string>
+    <string name="offline_banner_saved">No connection — saved %1$s.</string>
     <string name="common_retry">Retry</string>
     <string name="profile_logout_confirm_title">Sign out?</string>
     <string name="profile_logout_confirm_body">You will need to sign in again to come back.</string>

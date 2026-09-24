@@ -28,6 +28,13 @@ class TournamentsViewModel(
         val loading: Boolean = true,
         val refreshing: Boolean = false,
         val offline: Boolean = false,
+        /**
+         * When the data on screen was last saved, if it came from the cache.
+         * Read by the offline banner so it can say how old "what was saved" is;
+         * a successful refresh clears it, because what is on screen is then
+         * live.
+         */
+        val cachedAt: Long? = null,
     ) {
         val visible: List<TournamentCardDto>
             get() = tournaments.filter { inTab(it.status, tab) }
@@ -42,7 +49,9 @@ class TournamentsViewModel(
     init {
         viewModelScope.launch {
             tournamentsRepository.cached()?.let { c ->
-                _state.update { it.copy(tournaments = c, loading = false) }
+                _state.update {
+                    it.copy(tournaments = c.value, loading = false, cachedAt = c.savedAt)
+                }
             }
             load()
         }
@@ -71,7 +80,7 @@ class TournamentsViewModel(
         lastLoadedAt = System.currentTimeMillis()
         when (val result = tournamentsRepository.refresh()) {
             is ApiResult.Success -> _state.update {
-                it.copy(tournaments = result.data, loading = false, refreshing = false, offline = false)
+                it.copy(tournaments = result.data, loading = false, refreshing = false, offline = false, cachedAt = null)
             }
             is ApiResult.Failure, ApiResult.NetworkError -> _state.update {
                 it.copy(loading = false, refreshing = false, offline = true)

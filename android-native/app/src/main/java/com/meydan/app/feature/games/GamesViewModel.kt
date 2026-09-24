@@ -35,6 +35,13 @@ class GamesViewModel(
         val loading: Boolean = true,
         val refreshing: Boolean = false,
         val offline: Boolean = false,
+        /**
+         * When the data on screen was last saved, if it came from the cache.
+         * Read by the offline banner so it can say how old "what was saved" is;
+         * a successful refresh clears it, because what is on screen is then
+         * live.
+         */
+        val cachedAt: Long? = null,
         val unread: Int = 0,
     ) {
         val visible: List<GameCardDto>
@@ -53,7 +60,12 @@ class GamesViewModel(
             // briefly on true first run), then the network result replaces it.
             gamesRepository.cachedFeed()?.let { cached ->
                 _state.update {
-                    it.copy(open = cached.open, mine = cached.mine, loading = false)
+                    it.copy(
+                        open = cached.value.open,
+                        mine = cached.value.mine,
+                        loading = false,
+                        cachedAt = cached.savedAt,
+                    )
                 }
             }
             refresh(initial = true)
@@ -114,7 +126,7 @@ class GamesViewModel(
                     unread = result.data.unread,
                     loading = false,
                     refreshing = false,
-                    offline = false,
+                    offline = false, cachedAt = null,
                 )
             }
             // Server errors and dead connections read the same to the feed:

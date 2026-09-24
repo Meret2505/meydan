@@ -356,6 +356,7 @@
         <item quantity="other">%d oýun</item>
     </plurals>
     <string name="offline_banner_generic">Birikme ýok — saklanan görkezilýär.</string>
+    <string name="offline_banner_saved">Birikme ýok — %1$s saklanan.</string>
     <string name="common_retry">Gaýtadan</string>
     <string name="profile_logout_confirm_title">Hasapdan çykmaly?</string>
     <string name="profile_logout_confirm_body">Yzyna gaýtmak üçin täzeden girmeli bolar.</string>

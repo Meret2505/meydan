@@ -111,7 +111,7 @@ fun GamesScreen(
         ChipRow(chip = state.chip, onToggle = viewModel::toggleChip)
 
         if (state.offline) {
-            OfflineBanner(onRetry = viewModel::pullRefresh)
+            OfflineBanner(onRetry = viewModel::pullRefresh, savedAt = state.cachedAt)
         }
 
         PullToRefreshBox(

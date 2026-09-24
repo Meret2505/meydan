@@ -2,11 +2,8 @@ package com.meydan.app.data
 
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
-import com.meydan.app.core.datastore.FeedCache
-import com.meydan.app.core.datastore.FieldsCache
-import com.meydan.app.core.datastore.TeamsCache
+import com.meydan.app.core.datastore.JsonCache
 import com.meydan.app.core.datastore.TokenStore
-import com.meydan.app.core.datastore.TournamentsCache
 import com.meydan.app.core.datastore.UserCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.AvatarResponse
@@ -32,10 +29,11 @@ class AuthRepository(
     private val api: MeydanApi,
     private val tokenStore: TokenStore,
     private val userCache: UserCache,
-    private val feedCache: FeedCache,
-    private val fieldsCache: FieldsCache,
-    private val teamsCache: TeamsCache,
-    private val tournamentsCache: TournamentsCache,
+    // Typed only enough to clear them on sign-out; the payload is irrelevant here.
+    private val feedCache: JsonCache<*>,
+    private val fieldsCache: JsonCache<*>,
+    private val teamsCache: JsonCache<*>,
+    private val tournamentsCache: JsonCache<*>,
 ) {
     suspend fun hasSession(): Boolean = tokenStore.hasSession()
 

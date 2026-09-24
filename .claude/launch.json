@@ -23,6 +23,22 @@
         "dev"
       ],
       "port": 3000
+    },
+    {
+      "name": "meydan-dev-testdb-3001",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "DATABASE_URL=postgresql://meydan_test:meydan_test@localhost:5433/meydan_test",
+        "DIRECT_URL=postgresql://meydan_test:meydan_test@localhost:5433/meydan_test",
+        "STORAGE_BACKEND=local",
+        "npm",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3001"
+      ],
+      "port": 3001
     }
   ]
 }

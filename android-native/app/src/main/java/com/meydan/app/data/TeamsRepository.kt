@@ -2,7 +2,8 @@ package com.meydan.app.data
 
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
-import com.meydan.app.core.datastore.TeamsCache
+import com.meydan.app.core.datastore.Cached
+import com.meydan.app.core.datastore.JsonCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.core.network.dto.DisbandedDto
@@ -12,9 +13,10 @@ import com.meydan.app.core.network.dto.TeamsResponse
 /** Teams tab data with the offline-first read path shared by games/fields. */
 class TeamsRepository(
     private val api: MeydanApi,
-    private val teamsCache: TeamsCache,
+    private val teamsCache: JsonCache<TeamsResponse>,
 ) {
-    suspend fun cached(): TeamsResponse? = teamsCache.load()
+    /** The stored response and when it was stored; null if never. */
+    suspend fun cached(): Cached<TeamsResponse>? = teamsCache.load()
 
     suspend fun refresh(): ApiResult<TeamsResponse> {
         val result = apiCall { api.getTeams() }

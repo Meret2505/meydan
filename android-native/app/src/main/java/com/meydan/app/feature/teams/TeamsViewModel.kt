@@ -23,6 +23,13 @@ class TeamsViewModel(
         val loading: Boolean = true,
         val refreshing: Boolean = false,
         val offline: Boolean = false,
+        /**
+         * When the data on screen was last saved, if it came from the cache.
+         * Read by the offline banner so it can say how old "what was saved" is;
+         * a successful refresh clears it, because what is on screen is then
+         * live.
+         */
+        val cachedAt: Long? = null,
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -34,7 +41,14 @@ class TeamsViewModel(
     init {
         viewModelScope.launch {
             teamsRepository.cached()?.let { c ->
-                _state.update { it.copy(mine = c.mine, others = c.others, loading = false) }
+                _state.update {
+                    it.copy(
+                        mine = c.value.mine,
+                        others = c.value.others,
+                        loading = false,
+                        cachedAt = c.savedAt,
+                    )
+                }
             }
             load()
         }
@@ -68,7 +82,7 @@ class TeamsViewModel(
                     others = result.data.others,
                     loading = false,
                     refreshing = false,
-                    offline = false,
+                    offline = false, cachedAt = null,
                 )
             }
             is ApiResult.Failure, ApiResult.NetworkError -> _state.update {

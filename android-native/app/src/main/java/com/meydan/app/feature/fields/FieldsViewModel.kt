@@ -34,6 +34,13 @@ class FieldsViewModel(
         val loading: Boolean = true,
         val refreshing: Boolean = false,
         val offline: Boolean = false,
+        /**
+         * When the data on screen was last saved, if it came from the cache.
+         * Read by the offline banner so it can say how old "what was saved" is;
+         * a successful refresh clears it, because what is on screen is then
+         * live.
+         */
+        val cachedAt: Long? = null,
     )
 
     private val _state = MutableStateFlow(UiState())
@@ -45,7 +52,9 @@ class FieldsViewModel(
     init {
         viewModelScope.launch {
             fieldsRepository.cached()?.let { cached ->
-                _state.update { it.copy(fields = cached, loading = false) }
+                _state.update {
+                    it.copy(fields = cached.value, loading = false, cachedAt = cached.savedAt)
+                }
             }
             load()
         }
@@ -102,7 +111,7 @@ class FieldsViewModel(
         lastLoadedAt = System.currentTimeMillis()
         when (val result = fieldsRepository.refresh()) {
             is ApiResult.Success -> _state.update {
-                it.copy(fields = result.data, loading = false, refreshing = false, offline = false)
+                it.copy(fields = result.data, loading = false, refreshing = false, offline = false, cachedAt = null)
             }
             is ApiResult.Failure, ApiResult.NetworkError -> _state.update {
                 it.copy(loading = false, refreshing = false, offline = true)

@@ -116,7 +116,7 @@ fun TournamentsScreen(
         }
 
         if (state.offline) {
-            OfflineBanner(onRetry = viewModel::pullRefresh)
+            OfflineBanner(onRetry = viewModel::pullRefresh, savedAt = state.cachedAt)
         }
         PullToRefreshBox(
             isRefreshing = state.refreshing,

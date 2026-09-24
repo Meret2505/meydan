@@ -2,7 +2,8 @@ package com.meydan.app.data
 
 import com.meydan.app.core.common.ApiResult
 import com.meydan.app.core.common.apiCall
-import com.meydan.app.core.datastore.TournamentsCache
+import com.meydan.app.core.datastore.Cached
+import com.meydan.app.core.datastore.JsonCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.CreateTournamentRequest
 import com.meydan.app.core.network.dto.MatchResultRequest
@@ -13,9 +14,10 @@ import com.meydan.app.core.network.dto.TournamentDetailDto
 /** Tournaments tab data with the offline-first read path. */
 class TournamentsRepository(
     private val api: MeydanApi,
-    private val tournamentsCache: TournamentsCache,
+    private val tournamentsCache: JsonCache<List<TournamentCardDto>>,
 ) {
-    suspend fun cached(): List<TournamentCardDto>? = tournamentsCache.load()
+    /** The stored list and when it was stored; null if never. */
+    suspend fun cached(): Cached<List<TournamentCardDto>>? = tournamentsCache.load()
 
     suspend fun refresh(): ApiResult<List<TournamentCardDto>> {
         val result = apiCall { api.getTournaments() }
