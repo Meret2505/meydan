@@ -1,5 +1,6 @@
-import type { Field } from "@prisma/client";
+import type { Field, Surface } from "@prisma/client";
 import { absoluteImageUrl } from "@/lib/api/images";
+import { LEGACY_LABEL } from "@/lib/surface";
 import {
   DAY_KEYS,
   parseAttributes,
@@ -25,7 +26,13 @@ export interface FieldDetailDto {
   addressRu: string | null;
   addressTm: string | null;
   district: string;
+  /**
+   * The Russian label the column used to hold. Installed builds filter the
+   * catalogue client-side by comparing against this exact string, so it keeps
+   * being sent until those builds are gone. New clients read [surfaceKey].
+   */
   surface: string;
+  surfaceKey: Surface;
   capacity: number;
   gamesPlayed: number;
   bodyRu: string | null;
@@ -56,7 +63,8 @@ export function toFieldDetailDto(field: FieldWithCount, origin: string): FieldDe
     addressRu: field.addressRu,
     addressTm: field.addressTm,
     district: field.district,
-    surface: field.surface,
+    surface: LEGACY_LABEL[field.surface],
+    surfaceKey: field.surface,
     capacity: field.capacity,
     gamesPlayed: field._count.games,
     bodyRu: field.bodyRu,

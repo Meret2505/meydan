@@ -45,6 +45,15 @@ enum NotificationType {
   FIELD_REJECTED
 }
 
+/// Pitch surface. Was a free String holding the Russian display label
+/// ("Искусственная трава"), which made copy-editing that label a silent
+/// break of every translation — see lib/surface.ts.
+enum Surface {
+  ARTIFICIAL
+  RUBBER
+  DIRT
+}
+
 enum FieldSubmissionStatus {
   PENDING
   APPROVED
@@ -140,7 +149,7 @@ model Field {
   bodyTm     String?
   bodyRu     String?
   district   String
-  surface    String
+  surface    Surface
   capacity   Int
   phone      String?
   image      String?
@@ -186,7 +195,7 @@ model FieldSubmission {
   name            String
   address         String
   district        String
-  surface         String
+  surface         Surface
   capacity        Int
   phone           String?
   description     String?

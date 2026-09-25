@@ -17,6 +17,7 @@ class FieldsFilterTest {
         nameTm: String = nameRu,
         district: String = "Berzengi",
         favorite: Boolean = false,
+        surfaceKey: String? = "ARTIFICIAL",
     ) = FieldCardDto(
         id = id,
         name = nameRu,
@@ -24,6 +25,7 @@ class FieldsFilterTest {
         nameTm = nameTm,
         district = district,
         surface = "Искусственная трава",
+        surfaceKey = surfaceKey,
         capacity = 12,
         photo = null,
         favorite = favorite,
@@ -79,5 +81,36 @@ class FieldsFilterTest {
         assertEquals(0, FieldsViewModel.filterAndSort(listOf(f), "олимп", isTurkmen = true).size)
         assertEquals(1, FieldsViewModel.filterAndSort(listOf(f), "olimp", isTurkmen = true).size)
         assertEquals("Olimp", FieldsViewModel.displayName(f, isTurkmen = true))
+    }
+
+    /**
+     * The surface chips filter on the key the server now sends. The Russian
+     * label is still on the wire for builds that predate the key, so a card
+     * without one has to keep resolving — otherwise the chip silently matches
+     * nothing against a server that has not been deployed yet.
+     */
+    @Test
+    fun `surface filters on the key, and falls back to the old label`() {
+        val withKey = field("a", "Алем")
+        val fromOlderServer = field("b", "Байкал", surfaceKey = null)
+
+        assertEquals("ARTIFICIAL", FieldsViewModel.surfaceKeyOf(withKey))
+        assertEquals("ARTIFICIAL", FieldsViewModel.surfaceKeyOf(fromOlderServer))
+
+        val matched = FieldsViewModel.filterAndSort(
+            listOf(withKey, fromOlderServer),
+            query = "",
+            isTurkmen = false,
+            surface = "ARTIFICIAL",
+        )
+        assertEquals(listOf("a", "b"), matched.map { it.id })
+
+        val other = FieldsViewModel.filterAndSort(
+            listOf(withKey, fromOlderServer),
+            query = "",
+            isTurkmen = false,
+            surface = "DIRT",
+        )
+        assertEquals(emptyList<String>(), other.map { it.id })
     }
 }

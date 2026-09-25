@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma, PrismaClient, Surface } from "@prisma/client";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { GET as getFieldDetail } from "@/app/api/v1/fields/[id]/route";
 import { signAccessToken } from "@/lib/api/tokens";
@@ -64,7 +64,7 @@ describe.skipIf(!dbAvailable)("field detail with hand-edited JSON (integration)"
         name: "Meydan Arena",
         address: "просп. Махтумкули 16",
         district: "Berzengi",
-        surface: "Искусственная трава",
+        surface: Surface.ARTIFICIAL,
         capacity: 12,
         isActive: true,
         ...json,

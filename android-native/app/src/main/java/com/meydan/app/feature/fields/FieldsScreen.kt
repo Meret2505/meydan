@@ -364,7 +364,7 @@ private fun FieldCard(
                 modifier = Modifier.padding(top = 10.dp),
             ) {
                 Chip(field.district)
-                Chip(surfaceLabel(field.surface))
+                Chip(surfaceLabel(FieldsViewModel.surfaceKeyOf(field)))
                 Chip(stringResource(R.string.fields_capacity_chip, field.capacity))
             }
         }
@@ -445,6 +445,11 @@ private fun NoResults() {
  */
 @Composable
 internal fun surfaceLabel(surface: String): String = when (surface) {
+    "ARTIFICIAL" -> stringResource(R.string.fields_surface_turf)
+    "RUBBER" -> stringResource(R.string.fields_surface_rubber)
+    "DIRT" -> stringResource(R.string.fields_surface_dirt)
+    // The Russian labels the column used to hold, still accepted so a card
+    // from an older server keeps its translation instead of falling through.
     "Искусственная трава" -> stringResource(R.string.fields_surface_turf)
     "Резиновое" -> stringResource(R.string.fields_surface_rubber)
     "Грунт" -> stringResource(R.string.fields_surface_dirt)

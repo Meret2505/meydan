@@ -1,4 +1,5 @@
-import type { Field } from "@prisma/client";
+import type { Field, Surface } from "@prisma/client";
+import { LEGACY_LABEL } from "@/lib/surface";
 import { absoluteImageUrl } from "@/lib/api/images";
 
 /**
@@ -12,7 +13,13 @@ export interface FieldCardDto {
   nameRu: string | null;
   nameTm: string | null;
   district: string;
+  /**
+   * The Russian label the column used to hold. Installed builds filter the
+   * catalogue client-side by comparing against this exact string, so it keeps
+   * being sent until those builds are gone. New clients read [surfaceKey].
+   */
   surface: string;
+  surfaceKey: Surface;
   capacity: number;
   photo: string | null;
   favorite: boolean;
@@ -35,7 +42,8 @@ export function toFieldCardDto(
     nameRu: field.nameRu,
     nameTm: field.nameTm,
     district: field.district,
-    surface: field.surface,
+    surface: LEGACY_LABEL[field.surface],
+    surfaceKey: field.surface,
     capacity: field.capacity,
     // Proxied + absolute so Coil can load it directly and Supabase-blocking
     // networks still get the image (see lib/api/images.ts).

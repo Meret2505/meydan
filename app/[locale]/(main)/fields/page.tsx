@@ -7,14 +7,8 @@ import { StatusBar } from "@/components/ui/StatusBar";
 import { Skeleton, FieldCardSkeleton } from "@/components/ui/Skeleton";
 import { FieldsView, type FieldItem } from "@/components/fields/FieldsView";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
-import { SURFACES } from "@/lib/data";
 import { cn } from "@/lib/utils";
-
-const SURFACE_KEY: Record<string, string> = {
-  "Искусственная трава": "fields.surface_turf",
-  "Резиновое": "fields.surface_rubber",
-  "Грунт": "fields.surface_dirt",
-};
+import { SURFACES, SURFACE_MESSAGE_KEY, toSurface } from "@/lib/surface";
 
 type FieldsSearchParams = { district?: string; surface?: string; view?: string };
 
@@ -88,9 +82,9 @@ async function FieldsContent({
   const districtFilter = districts.includes(searchParams.district ?? "")
     ? (searchParams.district as string)
     : null;
-  const surfaceFilter = (SURFACES as readonly string[]).includes(searchParams.surface ?? "")
-    ? (searchParams.surface as string)
-    : null;
+  // toSurface, not a plain includes(): a bookmarked link from before the enum
+  // still carries the Russian label, and it should keep working.
+  const surfaceFilter = toSurface(searchParams.surface);
 
   const fields = await prisma.field.findMany({
     where: {
@@ -167,7 +161,7 @@ async function FieldsContent({
             <Chip
               key={s}
               href={`/${locale}/fields${queryFor({ surface: s })}`}
-              label={t(SURFACE_KEY[s] as never)}
+              label={t(SURFACE_MESSAGE_KEY[s] as never)}
               active={surfaceFilter === s}
             />
           ))}

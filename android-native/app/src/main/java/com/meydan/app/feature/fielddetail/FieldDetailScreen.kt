@@ -62,6 +62,7 @@ import com.meydan.app.feature.detail.DetailBackButton
 import com.meydan.app.feature.detail.DetailStateBox
 import com.meydan.app.core.designsystem.FullscreenImageViewer
 import com.meydan.app.core.designsystem.MeydanTheme
+import com.meydan.app.feature.fields.surfaceLabel
 
 /**
  * Field detail — port of fields/[id]/page.tsx: photo (or pitch gradient)
@@ -138,7 +139,7 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
             Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 24.dp, vertical = 16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = field.surface,
+                        text = surfaceLabel(field.surfaceKey ?: field.surface),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -157,7 +158,13 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
             // Info card.
             Card {
                 InfoRow(stringResource(R.string.fields_address), address, divider = true)
-                InfoRow(stringResource(R.string.fields_surface_label), field.surface, divider = true)
+                // Translated, not printed raw: this screen showed the stored
+                // value to every language, which was Russian for everyone.
+                InfoRow(
+                    stringResource(R.string.fields_surface_label),
+                    surfaceLabel(field.surfaceKey ?: field.surface),
+                    divider = true,
+                )
                 InfoRow(stringResource(R.string.fields_capacity_label), stringResource(R.string.fields_capacity_value, field.capacity), divider = true)
                 InfoRow(stringResource(R.string.fields_games_played_label), field.gamesPlayed.toString(), divider = false)
             }

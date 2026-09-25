@@ -15,6 +15,13 @@ data class FieldCardDto(
     val nameTm: String? = null,
     val district: String,
     val surface: String,
+    /**
+     * The surface as a stable key (ARTIFICIAL / RUBBER / DIRT). Nullable with
+     * a default so this build still parses a response from a server that has
+     * not been deployed yet — and so that `surface`, the Russian label the
+     * column used to hold, remains the fallback until it is dropped.
+     */
+    val surfaceKey: String? = null,
     val capacity: Int,
     val photo: String? = null,
     val favorite: Boolean,

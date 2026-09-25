@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Surface } from "@prisma/client";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import {
   DELETE as removeAvatarRoute,
@@ -175,7 +175,7 @@ describe.skipIf(!dbAvailable)("uploads + profile stats (integration)", () => {
           name: "Olimp",
           district: "Berzengi",
           address: "Berzengi, 1",
-          surface: "artificial",
+          surface: Surface.ARTIFICIAL,
           capacity: 10,
           photos: ["https://example.test/a.jpg", "https://example.test/b.jpg"],
         },
@@ -208,7 +208,7 @@ describe.skipIf(!dbAvailable)("uploads + profile stats (integration)", () => {
           name: "Olimp",
           district: "Berzengi",
           address: "Berzengi, 1",
-          surface: "artificial",
+          surface: Surface.ARTIFICIAL,
           capacity: 10,
           photos: ["https://x/a.jpg"],
         },

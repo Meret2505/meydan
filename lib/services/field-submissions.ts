@@ -2,7 +2,9 @@ import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { normalizePhone } from "@/lib/phone";
-import { DISTRICTS, SURFACES } from "@/lib/data";
+import { DISTRICTS } from "@/lib/data";
+import { Surface } from "@prisma/client";
+import { toSurface } from "@/lib/surface";
 import { storage } from "@/lib/storage";
 import { extFor, validate, type UploadInput } from "@/lib/services/uploads";
 
@@ -38,7 +40,13 @@ export type CreateSubmissionResult =
 /** Trims and validates the create-submission form; see the field table in the feature plan. */
 function normalizeCreateInput(
   input: CreateSubmissionInput,
-): { name: string; address: string; phone: string | null; description: string | null } | null {
+): {
+  name: string;
+  address: string;
+  surface: Surface;
+  phone: string | null;
+  description: string | null;
+} | null {
   const name = input.name.trim();
   if (name.length < 2 || name.length > 80) return null;
 
@@ -46,7 +54,10 @@ function normalizeCreateInput(
   if (address.length < 4 || address.length > 200) return null;
 
   if (!(DISTRICTS as readonly string[]).includes(input.district)) return null;
-  if (!(SURFACES as readonly string[]).includes(input.surface)) return null;
+  // Either spelling: the enum key from a current client, or the Russian label
+  // an installed build still sends.
+  const surface = toSurface(input.surface);
+  if (surface === null) return null;
 
   if (
     !Number.isInteger(input.capacity) ||
@@ -65,7 +76,7 @@ function normalizeCreateInput(
   const description = input.description?.trim() || null;
   if (description && description.length > 500) return null;
 
-  return { name, address, phone, description };
+  return { name, address, surface, phone, description };
 }
 
 /** Submits a new field for review. Rate-limited and capped per user so the queue can't be flooded. */
@@ -93,7 +104,7 @@ export async function createFieldSubmission(
       name: normalized.name,
       address: normalized.address,
       district: input.district,
-      surface: input.surface,
+      surface: normalized.surface,
       capacity: input.capacity,
       phone: normalized.phone,
       description: normalized.description,

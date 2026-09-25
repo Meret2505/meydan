@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { Prisma, PrismaClient, Surface } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -420,7 +420,7 @@ async function main() {
       bodyTm: f.bodyTm,
       bodyRu: f.bodyRu,
       district: f.district,
-      surface: "Искусственная трава",
+      surface: Surface.ARTIFICIAL,
       capacity: 12,
       phone: firstPhone(f.contacts),
       image: photoUrl ?? f.image,

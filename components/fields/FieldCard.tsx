@@ -1,12 +1,8 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toProxyUrl } from "@/lib/storage-url";
-
-const SURFACE_KEY: Record<string, string> = {
-  "Искусственная трава": "fields.surface_turf",
-  "Резиновое": "fields.surface_rubber",
-  "Грунт": "fields.surface_dirt",
-};
+import { Surface } from "@prisma/client";
+import { SURFACE_MESSAGE_KEY } from "@/lib/surface";
 
 export interface FieldCardData {
   id: string;
@@ -17,7 +13,7 @@ export interface FieldCardData {
   addressTm?: string | null;
   addressRu?: string | null;
   district: string;
-  surface: string;
+  surface: Surface;
   capacity: number;
   photo: string | null;
 }
@@ -29,8 +25,7 @@ export function FieldCard({ field }: { field: FieldCardData }) {
     locale === "tm"
       ? field.nameTm ?? field.name
       : field.nameRu ?? field.name;
-  const surfaceKey = SURFACE_KEY[field.surface];
-  const surfaceLabel = surfaceKey ? t(surfaceKey as never) : field.surface;
+  const surfaceLabel = t(SURFACE_MESSAGE_KEY[field.surface] as never);
   return (
     <Link
       href={`/${locale}/fields/${field.id}`}

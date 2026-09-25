@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Surface } from "@prisma/client";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { GET as getFields } from "@/app/api/v1/fields/route";
 import { signAccessToken } from "@/lib/api/tokens";
@@ -46,7 +46,7 @@ describe.skipIf(!dbAvailable)("fields API (integration)", () => {
         name: "Meydan Arena",
         address: "просп. Махтумкули 16",
         district: "Berzengi",
-        surface: "Искусственная трава",
+        surface: Surface.ARTIFICIAL,
         capacity: 12,
         isActive: true,
         // Columns a card never shows: they must not come back in the payload.
@@ -83,7 +83,7 @@ describe.skipIf(!dbAvailable)("fields API (integration)", () => {
         name: "Second pitch",
         address: "ул. Тестовая 2",
         district: "Anev",
-        surface: "Грунт",
+        surface: Surface.DIRT,
         capacity: 8,
         isActive: true,
       },
@@ -99,7 +99,32 @@ describe.skipIf(!dbAvailable)("fields API (integration)", () => {
     const card = body.data.fields[0];
 
     expect(Object.keys(card).sort()).toEqual(
-      ["capacity", "district", "favorite", "id", "name", "nameRu", "nameTm", "photo", "surface"],
+      [
+        "capacity",
+        "district",
+        "favorite",
+        "id",
+        "name",
+        "nameRu",
+        "nameTm",
+        "photo",
+        "surface",
+        "surfaceKey",
+      ],
     );
+  });
+
+  it("still sends the Russian label alongside the key", async () => {
+    // The compatibility half of the Surface enum. Installed builds filter the
+    // catalogue client-side against this exact string; drop it and their
+    // surface chips quietly match nothing. It goes when those builds do — and
+    // this test is what makes that a decision rather than an accident.
+    const user = await seed();
+
+    const body = await (await getFields(await authed(user.id))).json();
+    const card = body.data.fields[0];
+
+    expect(card.surfaceKey).toBe(Surface.ARTIFICIAL);
+    expect(card.surface).toBe("Искусственная трава");
   });
 });

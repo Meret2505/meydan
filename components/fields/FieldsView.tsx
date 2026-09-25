@@ -6,12 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { toProxyUrl } from "@/lib/storage-url";
 import { toggleFieldFavorite } from "@/app/actions/fields";
 import { cn } from "@/lib/utils";
-
-const SURFACE_KEY: Record<string, string> = {
-  "Искусственная трава": "fields.surface_turf",
-  "Резиновое": "fields.surface_rubber",
-  "Грунт": "fields.surface_dirt",
-};
+import { Surface } from "@prisma/client";
+import { SURFACE_MESSAGE_KEY } from "@/lib/surface";
 
 export interface FieldItem {
   id: string;
@@ -19,7 +15,7 @@ export interface FieldItem {
   nameTm: string | null;
   nameRu: string | null;
   district: string;
-  surface: string;
+  surface: Surface;
   capacity: number;
   photo: string | null;
 }
@@ -301,9 +297,7 @@ function ListView({
   return (
     <div className="flex flex-col gap-2.5">
       {fields.map((f) => {
-        const surfaceLabel = SURFACE_KEY[f.surface]
-          ? t(SURFACE_KEY[f.surface])
-          : f.surface;
+        const surfaceLabel = t(SURFACE_MESSAGE_KEY[f.surface] as never);
         return (
           <div key={f.id} className="relative">
             <Link

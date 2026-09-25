@@ -123,8 +123,26 @@ class FieldsViewModel(
         map { if (it.id == id) it.copy(favorite = favorite) else it }
 
     companion object {
-        /** The three known surface values, matching the web's SURFACES list. */
-        val SURFACES = listOf("Искусственная трава", "Резиновое", "Грунт")
+        /**
+         * The three surfaces, as the stable keys the server now sends. They
+         * used to be the Russian display labels the column literally held, so
+         * copy-editing that wording server-side would silently have dropped
+         * every language back to raw Russian. See lib/surface.ts.
+         */
+        val SURFACES = listOf("ARTIFICIAL", "RUBBER", "DIRT")
+
+        /**
+         * A field's surface key, falling back to the legacy Russian label for
+         * a response from a server that predates the key.
+         */
+        fun surfaceKeyOf(field: FieldCardDto): String =
+            field.surfaceKey ?: LEGACY_SURFACE_LABELS[field.surface] ?: field.surface
+
+        private val LEGACY_SURFACE_LABELS = mapOf(
+            "Искусственная трава" to "ARTIFICIAL",
+            "Резиновое" to "RUBBER",
+            "Грунт" to "DIRT",
+        )
 
         /** Localized display name — Turkmen or Russian, falling back to base. */
         fun displayName(field: FieldCardDto, isTurkmen: Boolean): String =
@@ -154,7 +172,7 @@ class FieldsViewModel(
                         displayName(it, isTurkmen).lowercase().contains(q) ||
                         it.district.lowercase().contains(q)) &&
                         (district == null || it.district == district) &&
-                        (surface == null || it.surface == surface)
+                        (surface == null || surfaceKeyOf(it) == surface)
                 }
                 .sortedWith(
                     compareBy({ !it.favorite }, { displayName(it, isTurkmen).lowercase() }),
