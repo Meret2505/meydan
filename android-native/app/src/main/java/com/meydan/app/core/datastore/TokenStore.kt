@@ -47,7 +47,26 @@ class TokenStore(private val context: Context) : TokenProvider {
         return KeystoreCrypto.decrypt(wrapped)
     }
 
-    suspend fun hasSession(): Boolean = refreshToken() != null
+    /**
+     * Whether a refresh token is stored — *without* unwrapping it.
+     *
+     * This runs before the first frame: the root navigation cannot pick a start
+     * destination until it knows, and it used to call [refreshToken], which
+     * loads the Android Keystore, initialises a Cipher and does an AES-GCM
+     * decrypt to answer a boolean. Timed on its own on the emulator, that
+     * decrypt is 48 ms warm and 263 ms on a cold process — all of it before
+     * anything is drawn. Nothing here needs the plaintext; the Authenticator
+     * asks for that later, off the startup path.
+     *
+     * The one case this reads differently: a stored token whose Keystore key is
+     * gone (the user removed their device lock) now says "yes". The app opens
+     * at home, the first authenticated call 401s, the refresh finds no
+     * plaintext and the session-expired path returns to login — where the old
+     * behaviour went directly. A rare case pays a redirect so that every normal
+     * start saves the decrypt.
+     */
+    suspend fun hasSession(): Boolean =
+        context.dataStore.data.first()[Keys.REFRESH_ENCRYPTED] != null
 
     override suspend fun clear() {
         context.dataStore.edit { it.clear() }

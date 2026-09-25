@@ -3,6 +3,9 @@ package com.meydan.app
 import android.content.Intent
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.View
+import android.view.ViewTreeObserver
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -35,10 +38,15 @@ class MainActivity : AppCompatActivity() {
      */
     private val deepLinks = MutableStateFlow<DeepLink?>(null)
 
+    /** Set once the nav graph knows where to start; see [holdFirstFrameUntilRouteIsKnown]. */
+    @Volatile
+    private var routeResolved = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val container = (application as MeydanApplication).container
+        holdFirstFrameUntilRouteIsKnown()
         // Only on a fresh start: after a rotation the link was already
         // followed, and following it again would yank the user back out of
         // wherever they have since navigated.
@@ -85,6 +93,7 @@ class MainActivity : AppCompatActivity() {
                         container = container,
                         deepLinks = deepLinks,
                         onDeepLinkHandled = { deepLinks.value = null },
+                        onRouteResolved = { routeResolved = true },
                     )
                 }
             }
@@ -102,5 +111,40 @@ class MainActivity : AppCompatActivity() {
         // would replay the intent this instance was first started with.
         setIntent(intent)
         deepLinkOf(intent.dataString)?.let { deepLinks.value = it }
+    }
+
+    /**
+     * Keeps the system splash on screen until there is something real to draw.
+     *
+     * Deciding the start destination means reading two DataStore files, which
+     * on a cold process is long enough to see. The app used to draw an empty
+     * background over that window: the splash handed over to a blank screen and
+     * only then to the feed. Blocking the *draw* (composition carries on
+     * underneath) means the splash simply stays up until the first real frame.
+     *
+     * No androidx.core:core-splashscreen — this is the pre-draw listener that
+     * library wraps, and on API 31+ the platform provides the splash itself.
+     *
+     * [FIRST_FRAME_HOLD_MS] is a deadline, not a timeout to rely on: if the
+     * route never resolves the app must still show *something* rather than sit
+     * behind a splash forever.
+     */
+    private fun holdFirstFrameUntilRouteIsKnown() {
+        val content = findViewById<View>(android.R.id.content)
+        val deadline = SystemClock.elapsedRealtime() + FIRST_FRAME_HOLD_MS
+        content.viewTreeObserver.addOnPreDrawListener(
+            object : ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    if (!routeResolved && SystemClock.elapsedRealtime() < deadline) return false
+                    content.viewTreeObserver.removeOnPreDrawListener(this)
+                    return true
+                }
+            },
+        )
+    }
+
+    private companion object {
+        /** Longer than any measured route decision, short enough not to feel stuck. */
+        const val FIRST_FRAME_HOLD_MS = 2_000L
     }
 }

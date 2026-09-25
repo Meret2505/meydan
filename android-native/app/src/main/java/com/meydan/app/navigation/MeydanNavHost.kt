@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -81,6 +82,12 @@ fun MeydanApp(
      */
     deepLinks: StateFlow<DeepLink?> = MutableStateFlow(null),
     onDeepLinkHandled: () -> Unit = {},
+    /**
+     * Called once the start destination is known. The activity holds the first
+     * frame back until then, so the system splash stays up instead of handing
+     * over to an empty screen.
+     */
+    onRouteResolved: () -> Unit = {},
 ) {
     val navController = rememberNavController()
 
@@ -99,12 +106,17 @@ fun MeydanApp(
     var startDestination by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(container) {
         val repo = container.authRepository
+        // Two independent files. Read one after the other, the wait before
+        // anything can be drawn was the sum of both for no reason.
+        val hasSession = async { repo.hasSession() }
+        val cached = async { repo.cachedUser() }
         val start = when {
-            !repo.hasSession() -> Routes.LOGIN
-            repo.cachedUser()?.onboardingComplete != true -> Routes.ONBOARDING
+            !hasSession.await() -> Routes.LOGIN
+            cached.await()?.onboardingComplete != true -> Routes.ONBOARDING
             else -> Routes.HOME
         }
         startDestination = start
+        onRouteResolved()
 
         // The cache can lag the server (e.g. onboarding finished or reset on
         // another install). Refresh /me in the background — it also updates the
@@ -117,9 +129,10 @@ fun MeydanApp(
         }
     }
 
-    // A frame of plain background while DataStore answers — the visible splash
-    // is the launcher's. Without this gate the NavHost would flash the login
-    // screen for signed-in users on every cold start.
+    // Nothing to host until the route is known — without this gate the NavHost
+    // would flash the login screen for signed-in users on every cold start.
+    // The activity holds the first frame back over the same window, so this
+    // empty Box is composed but never drawn.
     val start = startDestination
     if (start == null) {
         Box(Modifier.fillMaxSize())
