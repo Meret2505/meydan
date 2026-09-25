@@ -7,6 +7,11 @@
 -- happen. Coercing unknown data to a default would quietly relabel somebody's
 -- pitch. Checked before writing this: production holds 21 fields and 5
 -- submissions, every one of them 'Искусственная трава'.
+--
+-- The enum spellings are listed too, because the code can ship before this
+-- runs: a submission created in that window is validated by toSurface and
+-- stored as 'ARTIFICIAL' in a column that is still text. Without those three
+-- branches that row would be NULL here and the migration would refuse to run.
 
 -- CreateEnum
 CREATE TYPE "Surface" AS ENUM ('ARTIFICIAL', 'RUBBER', 'DIRT');
@@ -19,6 +24,9 @@ ALTER TABLE "fields"
       WHEN 'Искусственная трава' THEN 'ARTIFICIAL'
       WHEN 'Резиновое' THEN 'RUBBER'
       WHEN 'Грунт' THEN 'DIRT'
+      WHEN 'ARTIFICIAL' THEN 'ARTIFICIAL'
+      WHEN 'RUBBER' THEN 'RUBBER'
+      WHEN 'DIRT' THEN 'DIRT'
     END
   )::"Surface";
 
@@ -30,5 +38,8 @@ ALTER TABLE "field_submissions"
       WHEN 'Искусственная трава' THEN 'ARTIFICIAL'
       WHEN 'Резиновое' THEN 'RUBBER'
       WHEN 'Грунт' THEN 'DIRT'
+      WHEN 'ARTIFICIAL' THEN 'ARTIFICIAL'
+      WHEN 'RUBBER' THEN 'RUBBER'
+      WHEN 'DIRT' THEN 'DIRT'
     END
   )::"Surface";
