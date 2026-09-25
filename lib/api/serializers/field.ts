@@ -42,7 +42,13 @@ export function toFieldCardDto(
     nameRu: field.nameRu,
     nameTm: field.nameTm,
     district: field.district,
-    surface: LEGACY_LABEL[field.surface],
+    // `?? field.surface` so the deploy order does not matter: between the
+    // migration and the code landing (in either order) this column may still
+    // hold the Russian label, and Prisma hands it over as a plain string. The
+    // fallback keeps both fields populated rather than emitting `undefined`,
+    // which JSON drops — and a missing `surface` is a hard deserialization
+    // failure on the client, reported there as "no connection".
+    surface: LEGACY_LABEL[field.surface] ?? field.surface,
     surfaceKey: field.surface,
     capacity: field.capacity,
     // Proxied + absolute so Coil can load it directly and Supabase-blocking
