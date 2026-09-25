@@ -9,28 +9,16 @@ import { BackButton } from "@/components/ui/BackButton";
 import { FieldMapLazy } from "@/components/fields/FieldMapLoader";
 import { FieldPhotoUploader } from "@/components/fields/FieldPhotoUploader";
 import { toProxyUrl } from "@/lib/storage-url";
+import {
+  DAY_KEYS as DAYS,
+  parseAttributes,
+  parseContacts,
+  parseHours,
+} from "@/lib/field-metadata";
 
 function waLink(phone: string) {
   return `https://wa.me/${phone.replace(/[^\d]/g, "")}`;
 }
-
-type Contact = { type: "phone" | "instagram" | "tiktok"; value: string };
-type Attribute = { code: number; tm: string; ru: string };
-type DayHours = { isOpen: boolean; start: string; end: string };
-type Hours = Record<
-  "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday",
-  DayHours
->;
-
-const DAYS: (keyof Hours)[] = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
-];
 
 export default async function FieldDetailPage(
   props: {
@@ -63,9 +51,11 @@ export default async function FieldDetailPage(
     : field.addressRu ?? field.address;
   const body = isTm ? field.bodyTm : field.bodyRu;
 
-  const contacts = (field.contacts as Contact[] | null) ?? [];
-  const attributes = (field.attributes as Attribute[] | null) ?? [];
-  const hours = field.hours as Hours | null;
+  // Hand-edited columns: validated, never cast. See lib/field-metadata.ts —
+  // an object typed where an array belongs used to reach `.filter` below.
+  const contacts = parseContacts(field.contacts);
+  const attributes = parseAttributes(field.attributes);
+  const hours = parseHours(field.hours);
 
   const phoneContacts = contacts.filter((c) => c.type === "phone");
   const socialContacts = contacts.filter((c) => c.type !== "phone");

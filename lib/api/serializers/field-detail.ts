@@ -1,20 +1,20 @@
 import type { Field } from "@prisma/client";
 import { absoluteImageUrl } from "@/lib/api/images";
+import {
+  DAY_KEYS,
+  parseAttributes,
+  parseContacts,
+  parseHours,
+  type Contact,
+} from "@/lib/field-metadata";
 
 /**
  * Full field detail for the mobile field page. The JSON columns (hours,
- * attributes, contacts) are parsed into typed shapes here so the client never
- * deals with raw JsonValue, and localized name/address/body are sent as pairs
+ * attributes, contacts) are validated into typed shapes here — they are
+ * hand-edited in the database, so a cast would not be enough; see
+ * lib/field-metadata.ts — and localized name/address/body are sent as pairs
  * for the client to resolve by locale.
  */
-
-type Contact = { type: "phone" | "instagram" | "tiktok"; value: string };
-type Attribute = { code: number; tm: string; ru: string };
-type DayHours = { isOpen: boolean; start: string; end: string };
-
-const DAY_KEYS = [
-  "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
-] as const;
 
 export interface FieldDetailDto {
   id: string;
@@ -39,18 +39,13 @@ export interface FieldDetailDto {
 type FieldWithCount = Field & { _count: { games: number } };
 
 export function toFieldDetailDto(field: FieldWithCount, origin: string): FieldDetailDto {
-  const rawHours = field.hours as Record<string, DayHours> | null;
-  const hours = rawHours
-    ? DAY_KEYS.map((day) => ({
-        day,
-        isOpen: rawHours[day]?.isOpen ?? false,
-        start: rawHours[day]?.start ?? "",
-        end: rawHours[day]?.end ?? "",
-      }))
+  const parsedHours = parseHours(field.hours);
+  const hours = parsedHours
+    ? DAY_KEYS.map((day) => ({ day, ...parsedHours[day] }))
     : null;
 
-  const attributes = (field.attributes as Attribute[] | null) ?? [];
-  const contacts = (field.contacts as Contact[] | null) ?? [];
+  const attributes = parseAttributes(field.attributes);
+  const contacts = parseContacts(field.contacts);
 
   return {
     id: field.id,
