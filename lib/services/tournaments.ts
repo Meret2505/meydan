@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isCaptainOf } from "@/lib/services/team-authz";
 
 /**
  * Tournament registration and result recording, extracted from
@@ -93,14 +94,6 @@ export type RegisterResult =
   | { ok: true; alreadyRegistered: boolean }
   | { ok: false; error: RegisterError };
 
-async function assertCaptain(teamId: string, userId: string): Promise<boolean> {
-  const member = await prisma.teamMember.findUnique({
-    where: { teamId_userId: { teamId, userId } },
-    select: { isCaptain: true },
-  });
-  return member?.isCaptain === true;
-}
-
 /** Enters a team into a tournament. Idempotent — re-entering is a no-op. */
 export async function registerTeam(
   tournamentId: string,
@@ -120,7 +113,7 @@ export async function registerTeam(
   });
   if (!team) return { ok: false, error: "team_not_found" };
 
-  if (!(await assertCaptain(teamId, userId))) {
+  if (!(await isCaptainOf(teamId, userId))) {
     return { ok: false, error: "not_captain" };
   }
 
@@ -154,7 +147,7 @@ export async function unregisterTeam(
   });
   if (!tournament) return { ok: false, error: "tournament_not_found" };
 
-  if (!(await assertCaptain(teamId, userId))) {
+  if (!(await isCaptainOf(teamId, userId))) {
     return { ok: false, error: "not_captain" };
   }
 

@@ -39,6 +39,9 @@ export default async function GameDetailPage(
     },
   });
   if (!game) notFound();
+  // The web does not render team matches yet; one reaching this page
+  // would be drawn as an ordinary game, Join button and all.
+  if (game.type !== "OPEN") notFound();
 
   const isOrganizer = game.organizerId === userId;
   const joined = game.participants.some((p) => p.userId === userId);

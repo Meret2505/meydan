@@ -7,6 +7,7 @@ import { StatusBar } from "@/components/ui/StatusBar";
 import { type GameCardData } from "@/components/games/GameCard";
 import { GamesBoard, type GamesData, type Tab, type Chip } from "@/components/games/GamesBoard";
 import { gameFormat } from "@/lib/game-format";
+import { OPEN_GAMES_ONLY } from "@/lib/services/game-queries";
 
 type UserMeta = { name: string; district: string | null } | null;
 
@@ -111,6 +112,7 @@ async function fetchGames(
 
   const now = new Date();
   const baseWhere = {
+    ...OPEN_GAMES_ONLY,
     scheduledAt: { gte: now },
     status: { in: ["OPEN" as const, "FULL" as const] },
   };

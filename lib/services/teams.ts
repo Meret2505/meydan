@@ -189,11 +189,19 @@ export async function disbandTeam(
       const refs = await tx.team.findUnique({
         where: { id: teamId },
         select: {
-          _count: { select: { games: true, homeMatches: true, awayMatches: true } },
+          _count: {
+            select: {
+              games: true,
+              awayGames: true,
+              homeMatches: true,
+              awayMatches: true,
+            },
+          },
         },
       });
       const total =
         (refs?._count.games ?? 0) +
+        (refs?._count.awayGames ?? 0) +
         (refs?._count.homeMatches ?? 0) +
         (refs?._count.awayMatches ?? 0);
       if (total > 0) return { ok: false as const, error: "team_in_use" as const };

@@ -34,6 +34,9 @@ export default async function ResultPage(
     },
   });
   if (!game) notFound();
+  // The web does not render team matches yet; one reaching this page
+  // would be drawn as an ordinary game, Join button and all.
+  if (game.type !== "OPEN") notFound();
   if (game.organizerId !== session!.user.id) redirect(`/${locale}/games/${id}`);
 
   const { time, day } = formatGameDateTime(game.scheduledAt, locale);

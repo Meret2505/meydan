@@ -7,19 +7,14 @@
 // and a missing secret fails closed rather than running unauthenticated.
 
 import { NextRequest, NextResponse } from "next/server";
+import { cronUnauthorized } from "@/lib/api/cron-auth";
 import { purgeExpiredRows } from "@/lib/services/maintenance";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) {
-    console.error("purge: CRON_SECRET is not set; refusing to run");
-    return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
-  }
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-  }
+  const denied = cronUnauthorized(request, "purge");
+  if (denied) return denied;
 
   try {
     const purged = await purgeExpiredRows();

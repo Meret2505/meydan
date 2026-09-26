@@ -130,6 +130,16 @@ export async function joinGame(gameId: string, userId: string): Promise<JoinResu
       include: { _count: { select: { participants: true } } },
     });
     if (!game) return { ok: false as const, error: "not_found" as const };
+    // A team match is not an individual game. Nothing in the app offers this
+    // action on one, but a notification's gameId in an older build deep-links
+    // straight to the detail screen, which would render a match as an
+    // ordinary game and put a Join button on it. Joining would insert a
+    // participant and — with a small enough totalSpots — flip the row to
+    // FULL, which the state model reads as "agreed". Silent corruption, so
+    // the refusal lives here rather than in a screen.
+    if (game.type !== "OPEN") {
+      return { ok: false as const, error: "not_joinable" as const };
+    }
     if (game.status !== "OPEN" && game.status !== "FULL") {
       return { ok: false as const, error: "not_joinable" as const };
     }
@@ -235,6 +245,11 @@ export async function leaveGame(gameId: string, userId: string): Promise<LeaveRe
     // Leaving a finished game would delete the participation row and with it
     // the recorded attendance, silently rewriting history. The web UI hides
     // the button in this state; the API has to enforce it.
+    // Membership of a team is what puts someone in a match; there is no
+    // individual place to give up. Same reachability story as joinGame.
+    if (game.type !== "OPEN") {
+      return { ok: false as const, error: "game_over" as const };
+    }
     if (game.status === "COMPLETED" || game.status === "CANCELLED") {
       return { ok: false as const, error: "game_over" as const };
     }

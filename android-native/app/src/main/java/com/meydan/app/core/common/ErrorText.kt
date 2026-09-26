@@ -36,7 +36,10 @@ fun errorTextRes(code: String): Int = when (code) {
 
     // Games.
     "game_full" -> R.string.error_game_full
-    "not_joinable" -> R.string.error_not_joinable
+    // Both spellings: the join route sends "game_not_joinable", the
+    // generic one is what the services return. They fell through to the
+    // catch-all message until a team-match test compared the two lists.
+    "not_joinable", "game_not_joinable" -> R.string.error_not_joinable
     "game_over" -> R.string.error_game_over
     "organizer_cannot_leave" -> R.string.error_organizer_cannot_leave
 
@@ -57,7 +60,7 @@ fun errorTextRes(code: String): Int = when (code) {
     "forbidden", "not_organizer", "not_captain", "not_creator", "not_member" ->
         R.string.error_forbidden
     "not_found", "game_not_found", "team_not_found", "tournament_not_found",
-    "field_not_found", "photo_not_found",
+    "field_not_found", "photo_not_found", "submission_not_found", "user_not_found",
     -> R.string.error_not_found
 
     // Anything unmapped, including the server's own "internal"/"failed".

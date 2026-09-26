@@ -19,19 +19,14 @@
 // secret fails closed rather than running unauthenticated.
 
 import { NextRequest, NextResponse } from "next/server";
+import { cronUnauthorized } from "@/lib/api/cron-auth";
 import { closePastGames } from "@/lib/services/game-lifecycle";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) {
-    console.error("close-past-games: CRON_SECRET is not set; refusing to run");
-    return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
-  }
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-  }
+  const denied = cronUnauthorized(request, "close-past-games");
+  if (denied) return denied;
 
   try {
     const { closed, gameIds } = await closePastGames();

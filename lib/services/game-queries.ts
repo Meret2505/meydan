@@ -10,10 +10,21 @@ import { getPlayerStats } from "@/lib/stats";
  */
 
 /** Matches the web feed: only upcoming games that can still be joined. */
-const upcomingAndJoinable = () => ({
+export const upcomingAndJoinable = () => ({
   scheduledAt: { gte: new Date() },
   status: { in: ["OPEN" as const, "FULL" as const] },
 });
+
+/**
+ * Ordinary games only — no team matches.
+ *
+ * Named and exported so `grep OPEN_GAMES_ONLY` enumerates every place that
+ * must not see a match. The web renders games through three separate inline
+ * queries of its own, none of which share this module, and a match reaching
+ * one of them would be drawn as a normal game with a Join button on it. A
+ * query that omits this now looks different from its neighbours.
+ */
+export const OPEN_GAMES_ONLY = { type: "OPEN" as const };
 
 const feedInclude = {
   // A card shows the venue name and its district; the rest of the row —

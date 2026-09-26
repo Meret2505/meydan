@@ -43,6 +43,11 @@ enum NotificationType {
   TEAM_INVITE
   FIELD_APPROVED
   FIELD_REJECTED
+  MATCH_CHALLENGE
+  MATCH_ACCEPTED
+  MATCH_DECLINED
+  MATCH_RESULT_REPORTED
+  MATCH_RESULT_CONFIRMED
 }
 
 /// Pitch surface. Was a free String holding the Russian display label
@@ -220,26 +225,52 @@ model FieldSubmission {
 }
 
 model Game {
-  id              String     @id @default(cuid())
-  type            GameType   @default(OPEN)
-  status          GameStatus @default(OPEN)
-  scheduledAt     DateTime
-  fieldId         String?
-  fieldName       String?
-  totalSpots      Int
-  pricePerPlayer  Int?
-  neededPositions Position[]
-  notes           String?
-  scoreHome       Int?
-  scoreAway       Int?
-  organizerId     String
-  teamId          String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id                    String     @id @default(cuid())
+  type                  GameType   @default(OPEN)
+  status                GameStatus @default(OPEN)
+  scheduledAt           DateTime
+  fieldId               String?
+  fieldName             String?
+  totalSpots            Int
+  pricePerPlayer        Int?
+  neededPositions       Position[]
+  notes                 String?
+  scoreHome             Int?
+  scoreAway             Int?
+  organizerId           String
+  /// Home side of a TEAM_MATCH. Null on an ordinary game.
+  teamId                String?
+  /// Away side. Null while a TEAM_MATCH is an open "looking for opponent"
+  /// call that nobody has taken yet.
+  awayTeamId            String?
+  /// When the away captain accepted. Null while the challenge is pending.
+  agreedAt              DateTime?
+  /// When the away captain declined. Separate from a cancellation on
+  /// purpose: an agreed match the home captain later calls off must read as
+  /// cancelled, not declined, and one timestamp collapses the two.
+  declinedAt            DateTime?
+  /// Which side entered the score, so the *other* captain is the one asked
+  /// to confirm. A plain column, not a relation — it is always teamId or
+  /// awayTeamId, both already foreign keys, and a third Team relation would
+  /// mean a third count in disbandTeam.
+  scoreReportedByTeamId String?
+  /// Starts the three-day clock. Not `updatedAt`, which moves on every
+  /// write, so it cannot date a score submission.
+  scoreReportedAt       DateTime?
+  /// Set once the score counts toward team statistics. Readers do not depend
+  /// on this being materialised — see isScoreCounted — the nightly pass only
+  /// makes the read cheap and sends the notification.
+  scoreConfirmedAt      DateTime?
+  /// Who confirmed. Null against a non-null scoreConfirmedAt means the three
+  /// days ran out and nobody objected.
+  scoreConfirmedById    String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
 
   field        Field?            @relation(fields: [fieldId], references: [id])
   organizer    User              @relation("Organizer", fields: [organizerId], references: [id])
-  team         Team?             @relation(fields: [teamId], references: [id])
+  team         Team?             @relation("HomeGameTeam", fields: [teamId], references: [id])
+  awayTeam     Team?             @relation("AwayGameTeam", fields: [awayTeamId], references: [id], onDelete: SetNull)
   participants GameParticipant[]
   invites      GameInvite[]
 
@@ -251,6 +282,7 @@ model Game {
   @@index([organizerId])
   @@index([fieldId])
   @@index([teamId])
+  @@index([awayTeamId])
   @@map("games")
 }
 
@@ -258,11 +290,16 @@ model GameParticipant {
   id       String   @id @default(cuid())
   gameId   String
   userId   String
+  /// Which side this person played for in a TEAM_MATCH. Null on an ordinary
+  /// game, where there are no sides. Stored rather than derived from current
+  /// membership: someone who leaves a team afterwards still played for it.
+  teamId   String?
   attended Boolean?
   joinedAt DateTime @default(now())
 
-  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game  @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team? @relation(fields: [teamId], references: [id])
 
   @@unique([gameId, userId])
   @@index([userId, attended])
@@ -278,10 +315,12 @@ model Team {
   createdAt DateTime @default(now())
 
   members         TeamMember[]
-  games           Game[]
+  games           Game[]            @relation("HomeGameTeam")
+  awayGames       Game[]            @relation("AwayGameTeam")
   homeMatches     TournamentMatch[] @relation("HomeTeam")
   awayMatches     TournamentMatch[] @relation("AwayTeam")
   tournamentTeams TournamentTeam[]
+  lineups         GameParticipant[]
 
   @@map("teams")
 }

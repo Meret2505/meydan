@@ -88,6 +88,12 @@ export async function recordGameResult(
       include: { participants: { select: { id: true, userId: true } } },
     });
     if (!game) return { ok: false as const, error: "not_found" as const };
+    // A match's score is reported by a captain and confirmed by the other
+    // one; it has no organizer path and must not acquire one here. See
+    // lib/services/match-state.ts.
+    if (game.type !== "OPEN") {
+      return { ok: false as const, error: "not_organizer" as const };
+    }
     if (game.organizerId !== organizerId) {
       return { ok: false as const, error: "not_organizer" as const };
     }
