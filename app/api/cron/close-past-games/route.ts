@@ -21,6 +21,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cronUnauthorized } from "@/lib/api/cron-auth";
 import { closePastGames } from "@/lib/services/game-lifecycle";
+import { sweepMatches } from "@/lib/services/match-lifecycle";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +31,18 @@ export async function GET(request: NextRequest) {
 
   try {
     const { closed, gameIds } = await closePastGames();
+    // Matches ride the same nightly slot: Hobby allows only daily schedules
+    // and three are already spoken for. Both of its passes are optimisations
+    // — isScoreCounted answers the three-day question by reading the row —
+    // so a missed run costs a notification, never a wrong statistic.
+    const { confirmed, declined } = await sweepMatches();
     // Logged because this is the only trace a scheduled run leaves; a sudden
     // large batch is worth noticing.
     if (closed > 0) console.info(`close-past-games: closed ${closed}`, gameIds);
-    return NextResponse.json({ ok: true, closed });
+    if (confirmed > 0 || declined > 0) {
+      console.info(`close-past-games: confirmed ${confirmed}, declined ${declined}`);
+    }
+    return NextResponse.json({ ok: true, closed, confirmed, declined });
   } catch (error) {
     console.error("close-past-games failed:", error);
     return NextResponse.json({ ok: false, error: "failed" }, { status: 500 });

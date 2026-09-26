@@ -45,7 +45,7 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
       status: { in: ["OPEN", "FULL"] },
       scheduledAt: { lte: cutoff },
     },
-    select: { id: true, organizerId: true },
+    select: { id: true, organizerId: true, type: true, teamId: true, awayTeamId: true },
     // A bounded batch: a day's worth of games is far under this, and if a
     // backlog ever builds up (this shipped long after the first games were
     // played) it drains over successive nights instead of timing out.
@@ -69,9 +69,13 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
   // which rows it touched), but a nightly job that finishes in milliseconds
   // does not overlap, and the worst case is a duplicate nudge rather than a
   // wrong one.
-  if (count > 0) {
+  // A match's write-up belongs to its captains, and `organizerId` on a match
+  // is only whoever happened to arrange it — they may not captain anything by
+  // now. Matches get their nudge from the score sweep below instead.
+  const ordinary = played.filter((game) => game.type === "OPEN");
+  if (count > 0 && ordinary.length > 0) {
     await prisma.notification.createMany({
-      data: played.map((game) => ({
+      data: ordinary.map((game) => ({
         userId: game.organizerId,
         type: "RESULT_NEEDED" as const,
         title: "Игра прошла",
@@ -79,7 +83,7 @@ export async function closePastGames(now: Date = new Date()): Promise<ClosePastG
         data: { gameId: game.id },
       })),
     });
-    await pushResultReminders(played);
+    await pushResultReminders(ordinary);
   }
 
   return { closed: count, gameIds };

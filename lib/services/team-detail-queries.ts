@@ -1,6 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { getPlayerStatsFor } from "@/lib/stats";
 import type { TeamDetailDto } from "@/lib/api/serializers/team-detail";
+import { isScoreCounted } from "@/lib/services/match-state";
+
+/** What a win/loss tally needs off a game row. */
+const SCORE_COLUMNS = {
+  scoreHome: true,
+  scoreAway: true,
+  scoreReportedAt: true,
+  scoreConfirmedAt: true,
+} as const;
 
 /**
  * Full team detail: the roster (captain first) with each member's attendance,
@@ -21,22 +30,42 @@ export async function fetchTeamDetail(
         include: { user: { select: { id: true, name: true, position: true } } },
         orderBy: [{ isCaptain: "desc" }, { joinedAt: "asc" }],
       },
+      // Both sides. Until now only `games` was read — the home relation —
+      // through a column nothing ever wrote, which is why every team's
+      // record has read 0-0-0 since the app shipped.
       games: {
         where: { status: "COMPLETED" },
-        select: { scoreHome: true, scoreAway: true },
+        select: SCORE_COLUMNS,
+      },
+      awayGames: {
+        where: { status: "COMPLETED" },
+        select: SCORE_COLUMNS,
       },
     },
   });
   if (!team) return null;
 
+  // A score counts once both captains agree, or once three days pass with
+  // no objection — asked of the row rather than of a materialised flag, so
+  // the answer is right even if the nightly pass has never run. That
+  // dependency is exactly what left these numbers at zero before.
+  const now = new Date();
   let wins = 0;
   let losses = 0;
   let draws = 0;
-  for (const g of team.games) {
-    if (g.scoreHome === null || g.scoreAway === null) continue;
-    if (g.scoreHome > g.scoreAway) wins++;
-    else if (g.scoreHome < g.scoreAway) losses++;
+  const tally = (ours: number, theirs: number) => {
+    if (ours > theirs) wins++;
+    else if (ours < theirs) losses++;
     else draws++;
+  };
+  for (const g of team.games) {
+    if (!isScoreCounted(g, now)) continue;
+    tally(g.scoreHome!, g.scoreAway!);
+  }
+  for (const g of team.awayGames) {
+    // The same columns read from the other end of the pitch.
+    if (!isScoreCounted(g, now)) continue;
+    tally(g.scoreAway!, g.scoreHome!);
   }
 
   // One grouped query for the whole roster. This was a getPlayerStats call per
