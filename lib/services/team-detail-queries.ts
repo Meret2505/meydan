@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getPlayerStatsFor } from "@/lib/stats";
 import type { TeamDetailDto } from "@/lib/api/serializers/team-detail";
 import { isScoreCounted } from "@/lib/services/match-state";
+import { MIN_ROSTER_TO_ARRANGE_MATCH } from "@/lib/services/team-authz";
 
 /** What a win/loss tally needs off a game row. */
 const SCORE_COLUMNS = {
@@ -86,6 +87,22 @@ export async function fetchTeamDetail(
     ? team.members.find((m) => m.userId === viewerId)
     : undefined;
 
+  // Teams the viewer captains that are eligible to challenge this one. The
+  // roster floor is re-checked when the challenge is actually sent — a team
+  // can shrink — but offering a button that always fails would be worse.
+  const challengeableBy = viewerId
+    ? (
+        await prisma.teamMember.findMany({
+          where: { userId: viewerId, isCaptain: true, teamId: { not: id } },
+          select: {
+            team: { select: { id: true, name: true, _count: { select: { members: true } } } },
+          },
+        })
+      )
+        .filter((m) => m.team._count.members >= MIN_ROSTER_TO_ARRANGE_MATCH)
+        .map((m) => ({ id: m.team.id, name: m.team.name }))
+    : [];
+
   return {
     id: team.id,
     name: team.name,
@@ -98,5 +115,6 @@ export async function fetchTeamDetail(
     members,
     isMember: !!viewerMembership,
     isCaptain: viewerMembership?.isCaptain ?? false,
+    challengeableBy,
   };
 }

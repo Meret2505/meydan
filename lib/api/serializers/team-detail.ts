@@ -25,4 +25,14 @@ export interface TeamDetailDto {
   isMember: boolean;
   /** Captains cannot leave; their exit is disbanding the team. */
   isCaptain: boolean;
+  /**
+   * Teams the *viewer* captains that could challenge this one — big enough
+   * to play, and not this team.
+   *
+   * Sent rather than derived on the client: `isCaptain` above is about the
+   * team being looked at, and a client concluding it may act because it
+   * captains some other team is the shape of bug this avoids. Empty means
+   * the challenge action does not belong to this viewer.
+   */
+  challengeableBy: { id: string; name: string }[];
 }
