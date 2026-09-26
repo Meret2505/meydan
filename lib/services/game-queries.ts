@@ -36,6 +36,10 @@ const feedInclude = {
   participants: {
     include: { user: { select: { id: true, name: true } } },
   },
+  // Both sides of a team match. Null on an ordinary game, and a card draws
+  // crests instead of an avatar stack when they are set.
+  team: { select: { id: true, name: true, color: true } },
+  awayTeam: { select: { id: true, name: true, color: true } },
 } as const;
 
 export type FeedGame = Awaited<ReturnType<typeof fetchOpenGames>>[number];
@@ -44,11 +48,30 @@ async function fetchOpenGames(userId: string, district: string | null) {
   return prisma.game.findMany({
     where: {
       ...upcomingAndJoinable(),
-      participants: { none: { userId } },
-      organizerId: { not: userId },
       // Games at a field in the user's district, plus custom-venue games which
       // have no field to filter on.
       ...(district ? { OR: [{ field: { district } }, { field: null }] } : {}),
+      AND: [
+        {
+          OR: [
+            {
+              ...OPEN_GAMES_ONLY,
+              participants: { none: { userId } },
+              organizerId: { not: userId },
+            },
+            // An open call looking for an opponent. Shown to everyone, not
+            // only captains: hiding it would make the feature invisible to
+            // exactly the players who might form a team to answer it. The
+            // card explains who may act.
+            {
+              type: "TEAM_MATCH" as const,
+              awayTeamId: null,
+              declinedAt: null,
+              team: { members: { none: { userId } } },
+            },
+          ],
+        },
+      ],
     },
     include: feedInclude,
     orderBy: { scheduledAt: "asc" },
@@ -77,7 +100,29 @@ export async function fetchGamesFeed(userId: string): Promise<{
     prisma.game.findMany({
       where: {
         ...upcomingAndJoinable(),
-        OR: [{ organizerId: userId }, { participants: { some: { userId } } }],
+        OR: [
+          { organizerId: userId },
+          { participants: { some: { userId } } },
+          // The home team sees its own match from the moment it is arranged,
+          // open call included.
+          { type: "TEAM_MATCH" as const, team: { members: { some: { userId } } } },
+          // The away side only once it is agreed — a squad member cannot act
+          // on a pending challenge, and showing "you have a match" that then
+          // evaporates on a decline is worse than silence.
+          {
+            type: "TEAM_MATCH" as const,
+            agreedAt: { not: null },
+            awayTeam: { members: { some: { userId } } },
+          },
+          // Except the captain being asked, who is the one person who has to
+          // see it before it is agreed.
+          {
+            type: "TEAM_MATCH" as const,
+            agreedAt: null,
+            declinedAt: null,
+            awayTeam: { members: { some: { userId, isCaptain: true } } },
+          },
+        ],
       },
       include: feedInclude,
       orderBy: { scheduledAt: "asc" },
@@ -100,6 +145,8 @@ export async function getGameDetail(gameId: string, userId: string) {
       // read four columns. The serializers never leaked them, but the pooler
       // carried them on every game open.
       organizer: { select: { id: true, name: true, avatar: true, phone: true } },
+      team: { select: { id: true, name: true, color: true } },
+      awayTeam: { select: { id: true, name: true, color: true } },
       participants: {
         include: {
           user: { select: { id: true, name: true, avatar: true, position: true } },
@@ -112,10 +159,26 @@ export async function getGameDetail(gameId: string, userId: string) {
 
   const organizerStats = await getPlayerStats(game.organizerId);
 
+  // Which side the viewer is on, and whether they speak for it. Computed
+  // here rather than by the client: TeamDetailDto.isCaptain is about *that*
+  // team, and the whole class of bug is a client deciding it may act because
+  // it captains a different one.
+  const sides = [game.teamId, game.awayTeamId].filter((id): id is string => id !== null);
+  const memberships = sides.length
+    ? await prisma.teamMember.findMany({
+        where: { userId, teamId: { in: sides } },
+        select: { teamId: true, isCaptain: true },
+      })
+    : [];
+  const home = memberships.find((m) => m.teamId === game.teamId);
+  const away = memberships.find((m) => m.teamId === game.awayTeamId);
+
   return {
     game,
     organizerStats,
     isOrganizer: game.organizerId === userId,
     joined: game.participants.some((p) => p.userId === userId),
+    viewerSide: home ? ("HOME" as const) : away ? ("AWAY" as const) : null,
+    viewerIsCaptain: (home?.isCaptain ?? false) || (away?.isCaptain ?? false),
   };
 }

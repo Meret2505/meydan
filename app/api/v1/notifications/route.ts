@@ -1,5 +1,6 @@
 import { requireOnboarded } from "@/lib/api/auth";
 import { handler, ok } from "@/lib/api/response";
+import { supportsTeamMatches } from "@/lib/api/client-features";
 import {
   countUnreadNotifications,
   listNotifications,
@@ -28,8 +29,16 @@ export const GET = handler(async (request: Request) => {
     countUnreadNotifications(userId),
   ]);
 
+  // Match notifications deep-link into a screen an older build renders
+  // wrongly; the third and least obvious of the three places a match can
+  // reach a client that cannot handle it.
+  const teamMatches = supportsTeamMatches(request);
+  const visible = teamMatches
+    ? items
+    : items.filter((n) => !n.type.startsWith("MATCH_"));
+
   return ok({
-    notifications: items.map((n) => ({
+    notifications: visible.map((n) => ({
       id: n.id,
       type: n.type,
       title: n.title,

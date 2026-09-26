@@ -10,6 +10,7 @@ import { parseJson } from "@/lib/api/validate";
 import { fetchGamesFeed, getGameDetail } from "@/lib/services/game-queries";
 import { countUnreadNotifications } from "@/lib/services/notifications";
 import { createGame } from "@/lib/services/games";
+import { supportsTeamMatches } from "@/lib/api/client-features";
 
 /**
  * The games feed, in the two buckets the UI renders: `open` (joinable games
@@ -32,9 +33,17 @@ export const GET = handler(async (request: Request) => {
     countUnreadNotifications(userId),
   ]);
 
+  // A build that has never heard of a team match draws one as an ordinary
+  // game: "0/0 players", an empty avatar stack, and a Join button that
+  // answers 409. Filtered after the query rather than inside it so the two
+  // clients read the same rows — an older one just sees fewer.
+  const teamMatches = supportsTeamMatches(request);
+  const visible = (games: typeof open) =>
+    teamMatches ? games : games.filter((g) => g.type === "OPEN");
+
   return ok({
-    open: open.map((game) => toGameCardDto(game, origin, userId)),
-    mine: mine.map((game) => toGameCardDto(game, origin, userId)),
+    open: visible(open).map((game) => toGameCardDto(game, origin, userId)),
+    mine: visible(mine).map((game) => toGameCardDto(game, origin, userId)),
     unread,
   });
 });

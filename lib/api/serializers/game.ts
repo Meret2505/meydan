@@ -1,10 +1,16 @@
 import type { Position } from "@prisma/client";
 import { gameFormat } from "@/lib/game-format";
 import type { FeedGame, GameDetail } from "@/lib/services/game-queries";
+import { matchStateOf, type MatchState } from "@/lib/services/match-state";
 import { absoluteImageUrl } from "../images";
+
+/** Enough of a team to draw a crest and a name on a card. */
+export type TeamBadgeDto = { id: string; name: string; color: string | null };
 
 export type GameCardDto = {
   id: string;
+  /** "OPEN" for an ordinary game, "TEAM_MATCH" for two teams. */
+  type: string;
   scheduledAt: string;
   venue: string;
   district: string | null;
@@ -21,6 +27,11 @@ export type GameCardDto = {
   participants: { id: string; name: string }[];
   /** True when the viewer organizes this game (not merely joined it). */
   mine: boolean;
+  /** Both null on an ordinary game; `awayTeam` null on an open call. */
+  homeTeam: TeamBadgeDto | null;
+  awayTeam: TeamBadgeDto | null;
+  /** Null on an ordinary game. See lib/services/match-state.ts. */
+  matchState: MatchState | null;
 };
 
 /**
@@ -35,6 +46,7 @@ export function toGameCardDto(
 ): GameCardDto {
   return {
     id: game.id,
+    type: game.type,
     scheduledAt: game.scheduledAt.toISOString(),
     venue: game.field?.name ?? game.fieldName ?? "—",
     district: game.field?.district ?? null,
@@ -48,11 +60,16 @@ export function toGameCardDto(
       name: p.user.name,
     })),
     mine: game.organizerId === viewerId,
+    homeTeam: game.team,
+    awayTeam: game.awayTeam,
+    matchState: game.type === "TEAM_MATCH" ? matchStateOf(game) : null,
   };
 }
 
 export type GameDetailDto = {
   id: string;
+  /** "OPEN" for an ordinary game, "TEAM_MATCH" for two teams. */
+  type: string;
   scheduledAt: string;
   status: string;
   venue: string;
@@ -86,15 +103,28 @@ export type GameDetailDto = {
     avatar: string | null;
     position: Position | null;
     attended: boolean | null;
+    /** Which side they played for; null on an ordinary game. */
+    teamId: string | null;
   }[];
+  homeTeam: TeamBadgeDto | null;
+  awayTeam: TeamBadgeDto | null;
+  matchState: MatchState | null;
+  /**
+   * Which side the viewer is on, and whether they speak for it. Decided
+   * server-side: a client knowing it captains *some* team is exactly the
+   * wrong basis for offering it an action on *this* one.
+   */
+  viewerSide: "HOME" | "AWAY" | null;
+  viewerIsCaptain: boolean;
 };
 
 export function toGameDetailDto(detail: GameDetail, origin: string): GameDetailDto {
-  const { game, organizerStats, isOrganizer, joined } = detail;
+  const { game, organizerStats, isOrganizer, joined, viewerSide, viewerIsCaptain } = detail;
   const joinedCount = game.participants.length;
 
   return {
     id: game.id,
+    type: game.type,
     scheduledAt: game.scheduledAt.toISOString(),
     status: game.status,
     venue: game.field?.name ?? game.fieldName ?? "—",
@@ -131,6 +161,12 @@ export function toGameDetailDto(detail: GameDetail, origin: string): GameDetailD
       avatar: absoluteImageUrl(p.user.avatar, origin),
       position: p.user.position,
       attended: p.attended,
+      teamId: p.teamId,
     })),
+    homeTeam: game.team,
+    awayTeam: game.awayTeam,
+    matchState: game.type === "TEAM_MATCH" ? matchStateOf(game) : null,
+    viewerSide,
+    viewerIsCaptain,
   };
 }

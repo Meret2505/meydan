@@ -9,6 +9,7 @@ import { cancelGame } from "@/lib/services/games";
 import { cancelMatch } from "@/lib/services/matches";
 import { matchApiError } from "@/lib/api/match-errors";
 import { prisma } from "@/lib/prisma";
+import { supportsTeamMatches } from "@/lib/api/client-features";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -18,6 +19,12 @@ export const GET = handler(async (request: Request, context: Context) => {
 
   const detail = await getGameDetail(id, userId);
   if (!detail) throw notFound("game_not_found");
+  // Reachable by deep link from a notification that landed in an older
+  // build's inbox regardless of its version, which is the tap that would
+  // otherwise render a match as an ordinary game with a Join button.
+  if (detail.game.type === "TEAM_MATCH" && !supportsTeamMatches(request)) {
+    throw notFound("game_not_found");
+  }
 
   return ok(toGameDetailDto(detail, originOf(request)));
 });
