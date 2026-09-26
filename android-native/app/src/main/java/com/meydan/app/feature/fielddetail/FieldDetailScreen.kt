@@ -192,7 +192,7 @@ private fun Content(field: FieldDetailDto, onBack: () -> Unit, onStartGame: () -
                         field.amenities.forEach { a ->
                             Text(
                                 text = if (isTm) a.tm else a.ru,
-                                fontSize = 12.5.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = colors.onSurface,
                                 modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(colors.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 12.dp, vertical = 6.dp),
@@ -268,7 +268,7 @@ private fun InfoRow(label: String, value: String, divider: Boolean) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, fontSize = 14.5.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.padding(start = 16.dp))
+        Text(value, fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.padding(start = 16.dp))
     }
     if (divider) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 }
@@ -285,10 +285,10 @@ private fun HoursRow(h: FieldHoursDto) {
         else -> R.string.day_sunday
     }
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(stringResource(dayRes), fontSize = 13.5.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(dayRes), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
             text = if (h.isOpen) "${h.start} – ${h.end}" else stringResource(R.string.fields_closed),
-            fontSize = 13.5.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
         )
     }

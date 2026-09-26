@@ -311,7 +311,7 @@ private fun MembershipCta(
                 text = stringResource(
                     if (member) R.string.teams_leave_cta else R.string.teams_join_cta,
                 ),
-                fontSize = 14.5.sp,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -325,7 +325,7 @@ private fun Stat(value: String, label: String, valueColor: Color, modifier: Modi
         modifier = modifier.clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(vertical = 12.dp),
     ) {
         Text(value, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = valueColor)
-        Text(label, fontSize = 11.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
+        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
@@ -349,7 +349,7 @@ private fun MemberRow(
         }
         Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(m.name, fontSize = 14.5.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(m.name, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (m.isCaptain) {
                     Text(
                         text = stringResource(R.string.teams_captain_badge),
@@ -364,7 +364,7 @@ private fun MemberRow(
         }
         Text(
             text = m.attendanceRate?.let { "$it%" } ?: "—",
-            fontSize = 12.5.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.ExtraBold,
             color = attendanceColor(m.attendanceRate),
         )

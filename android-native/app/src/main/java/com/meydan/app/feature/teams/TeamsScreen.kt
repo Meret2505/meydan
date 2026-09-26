@@ -134,7 +134,7 @@ fun TeamsScreen(
                         item {
                             Text(
                                 text = stringResource(R.string.teams_matches_hint),
-                                fontSize = 11.5.sp,
+                                fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -170,7 +170,7 @@ private fun NotInTeamCard() {
     ) {
         Text(
             text = stringResource(R.string.teams_not_in_team),
-            fontSize = 13.5.sp,
+            fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -221,7 +221,7 @@ private fun MyTeamCard(team: TeamCardDto, rank: Int, onClick: () -> Unit) {
                         append(captainShort(it))
                     }
                 },
-                fontSize = 12.5.sp,
+                fontSize = 13.sp,
                 color = colors.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -270,7 +270,7 @@ private fun CityTeamsList(teams: List<TeamCardDto>, onTeamClick: (String) -> Uni
                 )
                 Text(
                     text = team.name,
-                    fontSize = 14.5.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

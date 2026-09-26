@@ -218,7 +218,7 @@ fun ProfileScreen(
                         append(" · ")
                         append(user?.district ?: "—")
                     },
-                    fontSize = 13.5.sp,
+                    fontSize = 14.sp,
                     color = colors.onSurfaceVariant,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(top = 4.dp),
@@ -283,7 +283,7 @@ fun ProfileScreen(
                 text = stringResource(
                     if (open) R.string.profile_open_invites else R.string.profile_closed_invites,
                 ),
-                fontSize = 13.5.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (open) colors.primary else colors.onSurfaceVariant,
                 modifier = Modifier.padding(start = 10.dp),
@@ -659,7 +659,7 @@ private fun StatsBlock(stats: ProfileStatsDto) {
                     stats.gamesPlayed,
                     stats.totalJoined,
                 ),
-                fontSize = 11.5.sp,
+                fontSize = 12.sp,
                 color = colors.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
             )
@@ -700,7 +700,7 @@ private fun Counter(value: String, label: String) {
         Text(value, fontSize = 22.sp, fontWeight = FontWeight.Black, color = colors.onBackground)
         Text(
             text = label,
-            fontSize = 11.5.sp,
+            fontSize = 12.sp,
             color = colors.onSurfaceVariant,
             modifier = Modifier.padding(top = 2.dp),
         )
@@ -767,7 +767,7 @@ private fun SettingsRow(
         Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
         Text(
             text = label,
-            fontSize = 14.5.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             color = if (destructive) colors.error else colors.onBackground,
             modifier = Modifier
@@ -795,7 +795,7 @@ private fun SettingsRow(
             }
         }
         if (trailing != null) {
-            Text(text = trailing, fontSize = 13.5.sp, color = colors.onSurfaceVariant)
+            Text(text = trailing, fontSize = 14.sp, color = colors.onSurfaceVariant)
         }
     }
 }

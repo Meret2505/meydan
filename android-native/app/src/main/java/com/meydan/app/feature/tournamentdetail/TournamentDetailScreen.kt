@@ -219,7 +219,7 @@ private fun TeamPicker(
             val active = selected == team.id
             Text(
                 text = team.name,
-                fontSize = 12.5.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (active) colors.primary else colors.onBackground,
                 modifier = Modifier
@@ -303,7 +303,7 @@ private fun Content(
                         tr.teams.forEach { t ->
                             Text(
                                 text = "${t.name} · ${t.memberCount}",
-                                fontSize = 12.5.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.onSurface,
                                 modifier = Modifier.clip(RoundedCornerShape(999.dp)).background(colors.surfaceVariant.copy(alpha = 0.5f)).clickable { onTeamClick(t.id) }.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -430,7 +430,7 @@ private fun Content(
 @Composable
 private fun Section(title: String, content: @Composable () -> Unit) {
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface).padding(16.dp)) {
-        Text(title, fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 12.dp))
+        Text(title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 12.dp))
         content()
     }
 }

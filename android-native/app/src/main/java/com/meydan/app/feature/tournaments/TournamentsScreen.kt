@@ -197,7 +197,7 @@ private fun TournamentCard(t: TournamentCardDto, onClick: () -> Unit) {
             )
             Text(
                 text = dateAndCounts(t, locale),
-                fontSize = 12.5.sp,
+                fontSize = 13.sp,
                 color = colors.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -219,7 +219,7 @@ private fun StatusBadge(status: String) {
     }
     Text(
         text = stringResource(labelRes).uppercase(),
-        fontSize = 10.5.sp,
+        fontSize = 11.sp,
         fontWeight = FontWeight.ExtraBold,
         color = fg,
         modifier = Modifier

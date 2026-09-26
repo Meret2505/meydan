@@ -333,7 +333,7 @@ private fun JoinedBanner(text: String) {
         ) {
             Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = colors.onPrimary, modifier = Modifier.size(18.dp))
         }
-        Text(text, fontSize = 13.5.sp, color = colors.onSurface, modifier = Modifier.padding(start = 12.dp))
+        Text(text, fontSize = 14.sp, color = colors.onSurface, modifier = Modifier.padding(start = 12.dp))
     }
 }
 
@@ -417,7 +417,7 @@ private fun NeededNote(position: String) {
         }
         Text(
             text = stringResource(R.string.games_needed_note, posName(position).lowercase()),
-            fontSize = 13.5.sp,
+            fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(start = 12.dp),
         )
@@ -435,7 +435,7 @@ private fun OrganizerRow(game: GameDetailDto) {
             Text(game.organizer.name.trim().take(1).uppercase(), color = colors.primary, fontWeight = FontWeight.Bold)
         }
         Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
-            Text(game.organizer.name, fontSize = 14.5.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(game.organizer.name, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
                 text = buildString {
                     append(stringResource(R.string.games_organizer))
@@ -446,7 +446,7 @@ private fun OrganizerRow(game: GameDetailDto) {
                         game.organizer.gamesPlayed,
                     ))
                 },
-                fontSize = 12.5.sp,
+                fontSize = 13.sp,
                 color = colors.onSurfaceVariant,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
