@@ -6,6 +6,9 @@ import { handler, ok } from "@/lib/api/response";
 import { toGameDetailDto } from "@/lib/api/serializers/game";
 import { getGameDetail } from "@/lib/services/game-queries";
 import { cancelGame } from "@/lib/services/games";
+import { cancelMatch } from "@/lib/services/matches";
+import { matchApiError } from "@/lib/api/match-errors";
+import { prisma } from "@/lib/prisma";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -29,11 +32,25 @@ export const DELETE = handler(async (request: Request, context: Context) => {
   await enforceRateLimit("cancel-game", userId, 20, PER_HOUR);
   const { id } = await context.params;
 
-  const result = await cancelGame(id, userId);
-  if (!result.ok) {
-    if (result.error === "not_found") throw notFound("game_not_found");
-    if (result.error === "not_organizer") throw forbidden("not_organizer");
-    throw conflict("game_over");
+  // A team match is called off by its home captain, who may no longer be the
+  // row's organizer — and the opponent has to be told. Same URL, because from
+  // the outside both are "call this off".
+  const existing = await prisma.game.findUnique({
+    where: { id },
+    select: { type: true },
+  });
+  if (!existing) throw notFound("game_not_found");
+
+  if (existing.type === "TEAM_MATCH") {
+    const cancelled = await cancelMatch(id, userId);
+    if (!cancelled.ok) throw matchApiError(cancelled.error);
+  } else {
+    const result = await cancelGame(id, userId);
+    if (!result.ok) {
+      if (result.error === "not_found") throw notFound("game_not_found");
+      if (result.error === "not_organizer") throw forbidden("not_organizer");
+      throw conflict("game_over");
+    }
   }
 
   const detail = await getGameDetail(id, userId);
