@@ -72,6 +72,10 @@ class NetworkModule(
     private val apiClient = OkHttpClient.Builder()
         .withTimeouts()
         .cache(httpCache)
+        // Before the auth interceptor: what this build can draw is a property
+        // of the build, not of being signed in. Deliberately not on authClient,
+        // which is kept bare so a failed refresh cannot recurse.
+        .addInterceptor(FeatureInterceptor())
         .addInterceptor(AuthInterceptor(tokenStore))
         .authenticator(TokenAuthenticator(tokenStore, authApi, onRefreshFailed))
         .build()

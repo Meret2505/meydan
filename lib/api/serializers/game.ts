@@ -116,7 +116,28 @@ export type GameDetailDto = {
    */
   viewerSide: "HOME" | "AWAY" | null;
   viewerIsCaptain: boolean;
+  /**
+   * What this viewer may do with this match, decided here.
+   *
+   * The server enforces every one of these rules anyway; re-deriving them in
+   * two clients is how the two drift apart and start offering buttons that
+   * 403. The client decides layout, not permission.
+   */
+  viewerActions: MatchAction[];
+  /**
+   * Teams the viewer could answer an open call with. Empty unless the match
+   * is an open call they are eligible for; more than one means ask.
+   */
+  acceptableBy: { id: string; name: string }[];
 };
+
+export type MatchAction =
+  | "ACCEPT"
+  | "DECLINE"
+  | "CANCEL"
+  | "REPORT_SCORE"
+  | "CONFIRM_SCORE"
+  | "REJECT_SCORE";
 
 export function toGameDetailDto(detail: GameDetail, origin: string): GameDetailDto {
   const { game, organizerStats, isOrganizer, joined, viewerSide, viewerIsCaptain } = detail;
@@ -168,5 +189,7 @@ export function toGameDetailDto(detail: GameDetail, origin: string): GameDetailD
     matchState: game.type === "TEAM_MATCH" ? matchStateOf(game) : null,
     viewerSide,
     viewerIsCaptain,
+    viewerActions: detail.viewerActions,
+    acceptableBy: detail.acceptableBy,
   };
 }

@@ -72,6 +72,12 @@ data class TeamDetailDto(
     val isMember: Boolean = false,
     /** Captains cannot leave; their exit is disbanding the team. */
     val isCaptain: Boolean = false,
+    /**
+     * Teams the viewer captains that could challenge this one, already
+     * filtered to those with enough players. Empty means the challenge
+     * action does not belong to this viewer.
+     */
+    val challengeableBy: List<ChallengerTeamDto> = emptyList(),
 )
 
 /** Body of POST /teams. */
@@ -160,3 +166,6 @@ data class MatchResultRequest(
     val scoreAway: Int,
     val round: String? = null,
 )
+
+@Serializable
+data class ChallengerTeamDto(val id: String, val name: String)

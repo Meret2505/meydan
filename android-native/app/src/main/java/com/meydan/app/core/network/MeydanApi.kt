@@ -6,6 +6,9 @@ import com.meydan.app.core.network.dto.ProfileStatsDto
 import com.meydan.app.core.network.dto.RecordResultRequest
 import okhttp3.MultipartBody
 import com.meydan.app.core.network.dto.CreateGameRequest
+import com.meydan.app.core.network.dto.ReportMatchScoreRequest
+import com.meydan.app.core.network.dto.CreateMatchRequest
+import com.meydan.app.core.network.dto.AcceptMatchRequest
 import com.meydan.app.core.network.dto.CreateTeamRequest
 import com.meydan.app.core.network.dto.CreateTournamentRequest
 import com.meydan.app.core.network.dto.ApproveSubmissionResponse
@@ -104,6 +107,39 @@ interface MeydanApi {
 
     @GET("api/v1/games/{id}")
     suspend fun getGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
+
+    /**
+     * Arranges a match: a challenge to a named team, or — with no opponent —
+     * an open call the first captain to answer takes. Same idempotency story
+     * as createGame.
+     */
+    @POST("api/v1/matches")
+    suspend fun createMatch(
+        @Header("Idempotency-Key") idempotencyKey: String,
+        @Body body: CreateMatchRequest,
+    ): Response<ApiResponse<GameDetailDto>>
+
+    @POST("api/v1/games/{id}/accept")
+    suspend fun acceptMatch(
+        @Path("id") id: String,
+        @Body body: AcceptMatchRequest,
+    ): Response<ApiResponse<GameDetailDto>>
+
+    @POST("api/v1/games/{id}/decline")
+    suspend fun declineMatch(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
+
+    /** One captain enters the score; the other confirms or rejects it. */
+    @POST("api/v1/games/{id}/score")
+    suspend fun reportMatchScore(
+        @Path("id") id: String,
+        @Body body: ReportMatchScoreRequest,
+    ): Response<ApiResponse<GameDetailDto>>
+
+    @POST("api/v1/games/{id}/score/confirm")
+    suspend fun confirmMatchScore(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
+
+    @POST("api/v1/games/{id}/score/reject")
+    suspend fun rejectMatchScore(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>
 
     @POST("api/v1/games/{id}/join")
     suspend fun joinGame(@Path("id") id: String): Response<ApiResponse<GameDetailDto>>

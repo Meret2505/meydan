@@ -16,6 +16,13 @@ data class GameCardDto(
     val neededPositions: List<String>,
     val participants: List<ParticipantDto>,
     val mine: Boolean,
+    /** "OPEN" for an ordinary game, "TEAM_MATCH" for two teams. */
+    val type: String = "OPEN",
+    /** Both null on an ordinary game; [awayTeam] null on an open call. */
+    val homeTeam: TeamBadgeDto? = null,
+    val awayTeam: TeamBadgeDto? = null,
+    /** open_call / pending / agreed / … — null on an ordinary game. */
+    val matchState: String? = null,
 )
 
 /** The two buckets GET /games returns. */
@@ -38,6 +45,8 @@ data class ParticipantDto(
     val avatar: String? = null,
     val position: String? = null,
     val attended: Boolean? = null,
+    /** Which side they played for; null on an ordinary game. */
+    val teamId: String? = null,
 )
 
 /** Full game detail, mirroring GameDetailDto. */
@@ -64,6 +73,19 @@ data class GameDetailDto(
     val isPast: Boolean,
     val organizer: OrganizerDto,
     val participants: List<ParticipantDto>,
+    /** "OPEN" for an ordinary game, "TEAM_MATCH" for two teams. */
+    val type: String = "OPEN",
+    /** Both null on an ordinary game; [awayTeam] null on an open call. */
+    val homeTeam: TeamBadgeDto? = null,
+    val awayTeam: TeamBadgeDto? = null,
+    /** open_call / pending / agreed / … — null on an ordinary game. */
+    val matchState: String? = null,
+    /**
+     * Which side the viewer is on, and whether they speak for it. Decided by
+     * the server: knowing you captain *some* team says nothing about this one.
+     */
+    val viewerSide: String? = null,
+    val viewerIsCaptain: Boolean = false,
 )
 
 @Serializable
@@ -106,5 +128,44 @@ data class FcmTokenRequest(val token: String)
 data class RecordResultRequest(
     val scoreHome: Int? = null,
     val scoreAway: Int? = null,
+    val attended: Map<String, Boolean> = emptyMap(),
+)
+
+/** Enough of a team to draw a crest and a name on a card. */
+@Serializable
+data class TeamBadgeDto(
+    val id: String,
+    val name: String,
+    val color: String? = null,
+)
+
+/** Body of POST /api/v1/matches. Omit [opponentTeamId] for an open call. */
+@Serializable
+data class CreateMatchRequest(
+    val homeTeamId: String,
+    val opponentTeamId: String? = null,
+    val scheduledAt: String,
+    val fieldId: String? = null,
+    val fieldName: String? = null,
+    /** Players per side; the server defaults to 5. */
+    val format: Int? = null,
+    val notes: String? = null,
+)
+
+/** Body of POST /api/v1/games/{id}/accept — which of my teams is playing. */
+@Serializable
+data class AcceptMatchRequest(val teamId: String)
+
+/**
+ * Body of POST /api/v1/games/{id}/score.
+ *
+ * Scores are home-relative whoever enters them, so the screen labels the two
+ * boxes with team names rather than "home" and "away". [attended] is accepted
+ * only for the reporter's own side.
+ */
+@Serializable
+data class ReportMatchScoreRequest(
+    val scoreHome: Int,
+    val scoreAway: Int,
     val attended: Map<String, Boolean> = emptyMap(),
 )

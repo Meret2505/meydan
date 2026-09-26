@@ -201,6 +201,41 @@ describe.skipIf(!dbAvailable)("team matches (integration)", () => {
     expect(matchStateOf(match)).toBe("cancelled");
   });
 
+  it("once agreed, the other captain can call it off too", async () => {
+    // Before that the challenge is the sender's to withdraw; after both have
+    // committed, either is equally entitled to pull out — and the permission
+    // table the clients read says the same, so the button cannot 403.
+    const id = await createdMatchId();
+    await acceptRoute(
+      await authed(`${BASE}/games/${id}/accept`, awayCaptain, {
+        method: "POST",
+        body: JSON.stringify({ teamId: awayTeam }),
+      }),
+      ctx(id),
+    );
+
+    const response = await cancelRoute(
+      await authed(`${BASE}/games/${id}`, awayCaptain, { method: "DELETE" }),
+      ctx(id),
+    );
+
+    expect(response.status).toBe(200);
+    const match = await prisma.game.findUniqueOrThrow({ where: { id } });
+    expect(matchStateOf(match)).toBe("cancelled");
+  });
+
+  it("an unanswered challenge cannot be withdrawn by the side that was asked", async () => {
+    // They decline it; withdrawing is not theirs to do.
+    const id = await createdMatchId();
+
+    const response = await cancelRoute(
+      await authed(`${BASE}/games/${id}`, awayCaptain, { method: "DELETE" }),
+      ctx(id),
+    );
+
+    expect(response.status).toBe(403);
+  });
+
   it("an open call is taken by whoever answers", async () => {
     const id = await createdMatchId(homeCaptain, { opponentTeamId: null });
 

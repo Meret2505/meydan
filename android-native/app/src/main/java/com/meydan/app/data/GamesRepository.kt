@@ -6,6 +6,9 @@ import com.meydan.app.core.datastore.Cached
 import com.meydan.app.core.datastore.JsonCache
 import com.meydan.app.core.network.MeydanApi
 import com.meydan.app.core.network.dto.CreateGameRequest
+import com.meydan.app.core.network.dto.AcceptMatchRequest
+import com.meydan.app.core.network.dto.CreateMatchRequest
+import com.meydan.app.core.network.dto.ReportMatchScoreRequest
 import com.meydan.app.core.network.dto.GameDetailDto
 import com.meydan.app.core.network.dto.GamesFeedDto
 import com.meydan.app.core.network.dto.RecordResultRequest
@@ -42,6 +45,36 @@ class GamesRepository(
         req: CreateGameRequest,
         idempotencyKey: String,
     ): ApiResult<GameDetailDto> = apiCall { api.createGame(idempotencyKey, req) }
+
+    /**
+     * Arranges a match. Every one of these returns the match's full detail,
+     * so a screen replaces its state from the response rather than guessing
+     * what changed.
+     */
+    suspend fun createMatch(
+        req: CreateMatchRequest,
+        idempotencyKey: String,
+    ): ApiResult<GameDetailDto> = apiCall { api.createMatch(idempotencyKey, req) }
+
+    suspend fun acceptMatch(gameId: String, teamId: String): ApiResult<GameDetailDto> =
+        apiCall { api.acceptMatch(gameId, AcceptMatchRequest(teamId)) }
+
+    suspend fun declineMatch(gameId: String): ApiResult<GameDetailDto> =
+        apiCall { api.declineMatch(gameId) }
+
+    suspend fun reportMatchScore(
+        gameId: String,
+        home: Int,
+        away: Int,
+        attended: Map<String, Boolean>,
+    ): ApiResult<GameDetailDto> =
+        apiCall { api.reportMatchScore(gameId, ReportMatchScoreRequest(home, away, attended)) }
+
+    suspend fun confirmMatchScore(gameId: String): ApiResult<GameDetailDto> =
+        apiCall { api.confirmMatchScore(gameId) }
+
+    suspend fun rejectMatchScore(gameId: String): ApiResult<GameDetailDto> =
+        apiCall { api.rejectMatchScore(gameId) }
 
     /** Join returns the updated detail (roster, counts, joined flag). */
     suspend fun joinGame(id: String): ApiResult<GameDetailDto> =

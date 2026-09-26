@@ -283,20 +283,28 @@ export async function cancelMatch(
     if (state !== "open_call" && state !== "pending" && state !== "agreed") {
       return { ok: false as const, error: "already_answered" as const };
     }
-    if (!(await isCaptainOf(game.teamId, userId, tx))) {
-      return { ok: false as const, error: "not_captain" as const };
-    }
+    // Before it is agreed, the challenge belongs to whoever sent it. Once
+    // both sides have committed, either may pull out — and the other is the
+    // one who needs telling.
+    const home = await isCaptainOf(game.teamId, userId, tx);
+    const away =
+      state === "agreed" &&
+      game.awayTeamId !== null &&
+      (await isCaptainOf(game.awayTeamId, userId, tx));
+    if (!home && !away) return { ok: false as const, error: "not_captain" as const };
 
     await tx.game.update({ where: { id: gameId }, data: { status: "CANCELLED" } });
-    return { ok: true as const, awayTeamId: state === "agreed" ? game.awayTeamId : null };
+    if (state !== "agreed") return { ok: true as const, notify: null };
+    // Tell the side that did not press it.
+    return { ok: true as const, notify: home ? game.awayTeamId : game.teamId };
   });
 
   if (!outcome.ok) return outcome;
 
-  // Only an *agreed* match is worth telling the opponent about; a pending
+  // Only an *agreed* match is worth telling the other side about; a pending
   // challenge withdrawn before an answer is nobody else's news.
-  if (outcome.awayTeamId) {
-    await notifyCaptains(outcome.awayTeamId, {
+  if (outcome.notify) {
+    await notifyCaptains(outcome.notify, {
       type: "MATCH_DECLINED",
       title: "Матч отменён",
       body: "Соперник отменил матч.",

@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getPlayerStats } from "@/lib/stats";
+import { matchActionsFor } from "@/lib/services/match-actions";
+import { MIN_ROSTER_TO_ARRANGE_MATCH } from "@/lib/services/team-authz";
 
 /**
  * Read paths for the games feed and detail screens.
@@ -173,6 +175,26 @@ export async function getGameDetail(gameId: string, userId: string) {
   const home = memberships.find((m) => m.teamId === game.teamId);
   const away = memberships.find((m) => m.teamId === game.awayTeamId);
 
+  // Teams the viewer could answer an open call with: ones they captain, big
+  // enough to play, and not the side that called it.
+  const acceptableBy =
+    game.type === "TEAM_MATCH" && game.awayTeamId === null && !home
+      ? (
+          await prisma.teamMember.findMany({
+            where: {
+              userId,
+              isCaptain: true,
+              ...(game.teamId ? { teamId: { not: game.teamId } } : {}),
+            },
+            select: {
+              team: { select: { id: true, name: true, _count: { select: { members: true } } } },
+            },
+          })
+        )
+          .filter((m) => m.team._count.members >= MIN_ROSTER_TO_ARRANGE_MATCH)
+          .map((m) => ({ id: m.team.id, name: m.team.name }))
+      : [];
+
   return {
     game,
     organizerStats,
@@ -180,5 +202,14 @@ export async function getGameDetail(gameId: string, userId: string) {
     joined: game.participants.some((p) => p.userId === userId),
     viewerSide: home ? ("HOME" as const) : away ? ("AWAY" as const) : null,
     viewerIsCaptain: (home?.isCaptain ?? false) || (away?.isCaptain ?? false),
+    acceptableBy,
+    viewerActions:
+      game.type === "TEAM_MATCH"
+        ? matchActionsFor(game, {
+            captainsHome: home?.isCaptain ?? false,
+            captainsAway: away?.isCaptain ?? false,
+            canAnswerOpenCall: acceptableBy.length > 0,
+          })
+        : [],
   };
 }
