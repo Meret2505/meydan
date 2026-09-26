@@ -2,6 +2,7 @@ package com.meydan.app.feature.gamedetail
 
 import android.content.Intent
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -230,10 +231,13 @@ private fun GameDetailContent(
             CtaButton(
                 game = game,
                 acting = acting,
-                isOver = isOver,
-                onToggleJoin = onToggleJoin,
-                onCancelGame = onCancelGame,
-                onRecordResult = onRecordResult,
+                onAction = { action ->
+                    when (action) {
+                        CtaAction.TOGGLE_JOIN -> onToggleJoin()
+                        CtaAction.CANCEL_GAME -> onCancelGame()
+                        CtaAction.RECORD_RESULT -> onRecordResult()
+                    }
+                },
             )
         }
     }
@@ -520,108 +524,79 @@ private fun CancelGameDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 private fun CtaButton(
     game: GameDetailDto,
     acting: Boolean,
-    isOver: Boolean,
-    onToggleJoin: () -> Unit,
-    onCancelGame: () -> Unit,
-    onRecordResult: () -> Unit,
+    onAction: (CtaAction) -> Unit,
+) {
+    // The decision lives in GameCtaRules, where a truth table can reach it;
+    // this only draws whatever it returns.
+    when (val cta = GameCtaRules.ctaFor(game)) {
+        is GameCta.Status -> CtaStatusChip(cta.label)
+        is GameCta.Single -> CtaBar(cta.button, acting, onAction)
+    }
+}
+
+/** An inert chip for a game with nothing left to do. */
+@Composable
+private fun CtaStatusChip(@StringRes label: Int) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 58.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(colors.surfaceVariant.copy(alpha = 0.5f))
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+    ) {
+        Text(
+            text = stringResource(label),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = colors.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * One full-width action. The spinner replaces the label while a request is in
+ * flight, in whichever colour the button already wears.
+ */
+@Composable
+private fun CtaBar(
+    spec: CtaButtonSpec,
+    acting: Boolean,
+    onAction: (CtaAction) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-
-    // The organizer of a game that has not happened yet gets the cancel action
-    // here. The "your game" badge already sits in the header, so the bottom bar
-    // is free for it rather than repeating the label.
-    if (game.isOrganizer && !isOver && !game.isPast) {
-        Button(
-            onClick = onCancelGame,
-            enabled = !acting,
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colors.error.copy(alpha = 0.12f),
-                contentColor = colors.error,
-            ),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
-        ) {
-            if (acting) {
-                CircularProgressIndicator(
-                    strokeWidth = 2.5.dp,
-                    modifier = Modifier.size(22.dp),
-                    color = colors.error,
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.games_cancel_cta),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        }
-        return
+    val container = when (spec.tone) {
+        CtaTone.PRIMARY -> colors.primary
+        CtaTone.NEUTRAL -> colors.surfaceVariant
+        CtaTone.DESTRUCTIVE -> colors.error.copy(alpha = 0.12f)
+    }
+    val content = when (spec.tone) {
+        CtaTone.PRIMARY -> colors.onPrimary
+        CtaTone.NEUTRAL -> colors.onSurface
+        CtaTone.DESTRUCTIVE -> colors.error
     }
 
-    // The organizer of a game that has been played gets the write-up action.
-    // This is the only route to it in the app — the feeds drop a game at
-    // kickoff, so the RESULT_NEEDED notification is what brings them here.
-    // Recording is optional: a game left unwritten keeps its "completed" label,
-    // and the action stays available afterwards so a wrong tick can be fixed.
-    if (game.isOrganizer && game.isPast && game.status != "CANCELLED") {
-        Button(
-            onClick = onRecordResult,
-            enabled = !acting,
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.games_result_cta),
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-        return
-    }
-
-    // Finished / past games have no action; show status text.
-    if (game.isOrganizer || isOver || game.isPast) {
-        val label = when {
-            game.status == "CANCELLED" -> stringResource(R.string.games_cancelled_full)
-            isOver -> stringResource(R.string.games_completed)
-            game.isOrganizer -> stringResource(R.string.games_banner_yours)
-            else -> stringResource(R.string.games_is_past)
-        }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 58.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(colors.surfaceVariant.copy(alpha = 0.5f))
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-        ) {
-            Text(label, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = colors.onSurfaceVariant)
-        }
-        return
-    }
-
-    val joined = game.joined
-    val disabled = game.isFull && !joined
     Button(
-        onClick = onToggleJoin,
-        enabled = !acting && !disabled,
+        onClick = { onAction(spec.action) },
+        enabled = !acting && spec.enabled,
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (joined) colors.surfaceVariant else colors.primary,
-            contentColor = if (joined) colors.onSurface else colors.onPrimary,
+            containerColor = container,
+            contentColor = content,
         ),
         modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
     ) {
         if (acting) {
-            CircularProgressIndicator(strokeWidth = 2.5.dp, modifier = Modifier.size(22.dp), color = colors.onPrimary)
+            CircularProgressIndicator(
+                strokeWidth = 2.5.dp,
+                modifier = Modifier.size(22.dp),
+                color = content,
+            )
         } else {
             Text(
-                text = when {
-                    game.isFull && !joined -> stringResource(R.string.games_full)
-                    joined -> stringResource(R.string.games_joined_cta)
-                    else -> stringResource(R.string.games_join_cta)
-                },
+                text = stringResource(spec.label),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
             )
